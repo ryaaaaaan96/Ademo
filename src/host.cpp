@@ -1,6 +1,8 @@
 #include "debugger/host.h"
+#include "trace_codec.h"
 #include <QDir>
 #include <QTimer>
+#include <QUuid>
 #include <QCoreApplication>
 #include <QSemaphore>
 #include <QThreadPool>
@@ -89,6 +91,7 @@ DebugSession::DebugSession(std::shared_ptr<PluginCatalog> catalog, QObject *pare
     : QObject(parent), catalog_(std::move(catalog)), endpointFactory_(std::move(factory)), clock_(std::move(clock)),
       preparationExecutor_(std::move(executor))
 {
+    sessionId_ = QUuid::createUuid().toString(QUuid::WithoutBraces);
     elapsed_.start();
     pollTimer_.setTimerType(Qt::PreciseTimer);
     pollTimer_.setInterval(1);
@@ -107,6 +110,7 @@ void DebugSession::retire()
         if (!operation.finished) {
             operation.finished = true;
             operation.update = {operation.request.id, "cancelled", QStringLiteral("会话已停止，操作已取消"), {}};
+            recordOperation(operation);
         }
     }
     if (protocol_ && !preparing_) protocol_->stop();
@@ -131,6 +135,7 @@ void DebugSession::fail(const QString &reason)
     for (auto &operation : operations_) if (!operation.finished) {
         operation.finished = true;
         operation.update = {operation.request.id, "transport-error", reason, {}};
+        recordOperation(operation);
     }
     retire();
     state_ = SessionState::Error;
@@ -267,11 +272,12 @@ void DebugSession::poll() {
     protocol_->tick();
 }
 quint64 DebugSession::appendTrace(const QString &kind, const QByteArray &bytes, quint64 operationId,
-                                  const QString &detail, qint64 observedUs)
+                                  const QString &detail, qint64 observedUs, QJsonObject metadata,
+                                  std::optional<qint64> idleBeforeUs)
 {
     const auto id = nextTraceId_++;
     traces_.append({id, generation_, operationId, observedUs < 0 ? nowUs() : observedUs,
-                    QDateTime::currentDateTimeUtc(), kind, bytes, detail});
+                    QDateTime::currentDateTimeUtc(), kind, bytes, detail, idleBeforeUs, std::move(metadata)});
     if (traces_.size() > traceLimits_.records) { traces_.removeFirst(); ++expiredTraces_; }
     for (auto &operation : operations_) {
         if ((!operation.finished && (kind == "rx" || operation.request.id == operationId))
@@ -283,6 +289,7 @@ quint64 DebugSession::appendTrace(const QString &kind, const QByteArray &bytes, 
             }
         }
     }
+    recordTrace(traces_.last());
     if (!notificationTimer_.isActive()) notificationTimer_.start();
     return id;
 }
@@ -291,9 +298,7 @@ void DebugSession::received(quint64 run, ReceiveChunk input, qint64 observedUs)
     if (run != generation_ || !protocol_ || (state_ != SessionState::Running && state_ != SessionState::Starting)) return;
     for (qsizetype offset = 0; offset < input.bytes.size(); offset += 4096) {
         const auto chunk = input.bytes.mid(offset, 4096);
-        const auto id = appendTrace("rx", chunk, 0, {}, observedUs);
-        traces_.last().idleBeforeUs = offset == 0 ? input.idleBeforeUs : std::nullopt;
-        traces_.last().metadata = input.metadata;
+        const auto id = appendTrace("rx", chunk, 0, {}, observedUs, input.metadata, offset == 0 ? input.idleBeforeUs : std::nullopt);
         protocol_->onInput(*trace(id)); // 原始记录分配稳定身份后，才进入协议。
     }
 }
@@ -306,15 +311,13 @@ bool DebugSession::send(quint64 run, quint64 id, const QByteArray &bytes)
     attempt.completed = false;
     const auto token = attempt.token;
     const QJsonObject metadata{{"attempt", attempt.attempt}, {"sendId", QString::number(token)}};
-    appendTrace("send-request", bytes, id, QStringLiteral("请求本地发送，尚未证明发送完成或设备应答"));
-    traces_.last().metadata = metadata;
+    appendTrace("send-request", bytes, id, QStringLiteral("请求本地发送，尚未证明发送完成或设备应答"), -1, metadata);
     const bool accepted = endpoint_->send(token, bytes);
     for (auto &operation : operations_) if (operation.request.id == id) {
         operation.sendAccepted = accepted;
         operation.localSent = false;
     }
-    appendTrace(accepted ? "send-accepted" : "send-rejected", {}, id);
-    traces_.last().metadata = metadata;
+    appendTrace(accepted ? "send-accepted" : "send-rejected", {}, id, {}, -1, metadata);
     return accepted;
 }
 quint64 DebugSession::sendPassive(quint64 run, const QByteArray &bytes)
@@ -350,8 +353,8 @@ void DebugSession::sent(quint64 run, quint64 id, bool ok, const QString &reason,
     const auto operation = this->operation(operationId);
     if (!operation.sendAccepted || current->completed || operation.finished) return;
     current->completed = true;
-    appendTrace(ok ? "local-sent" : "local-send-failed", {}, operationId, reason, observedUs);
-    traces_.last().metadata = {{"attempt", current->attempt}, {"sendId", QString::number(id)}};
+    appendTrace(ok ? "local-sent" : "local-send-failed", {}, operationId, reason, observedUs,
+                {{"attempt", current->attempt}, {"sendId", QString::number(id)}});
     for (auto &entry : operations_) if (entry.request.id == operationId) entry.localSent = ok;
     protocol_->onSent(operationId, ok, reason, observedUs);
 }
@@ -360,6 +363,7 @@ void DebugSession::publish(OperationUpdate update)
     for (auto &operation : operations_) if (operation.request.id == update.id && !operation.finished) {
         operation.finished = update.state != "queued" && update.state != "submitted" && update.state != "sent" && update.state != "retry-wait";
         operation.update = std::move(update);
+        recordOperation(operation);
         break;
     }
     if (!notificationTimer_.isActive()) notificationTimer_.start();
@@ -378,6 +382,7 @@ void DebugSession::publishMessage(Message message)
     for (const auto &range : message.sourceRanges)
         if (!message.sources.contains(range.recordId)) message.sources.append(range.recordId);
     messages_.append(std::move(message));
+    if (recorder_) recorder_->append(tracecodec::encode(messages_.last()));
     if (messages_.size() > traceLimits_.messages) { messages_.removeFirst(); ++expiredMessages_; }
     if (!notificationTimer_.isActive()) notificationTimer_.start();
 }
@@ -394,6 +399,7 @@ quint64 DebugSession::submit(const QString &action, const QJsonObject &parameter
     // 未完成操作不能被淘汰；满时拒绝且不增加常驻条目。
     if (operations_.size() >= traceLimits_.operations) return 0;
     operations_.append({request, {id, "queued", QStringLiteral("操作已提交，等待协议校验"), {}}, false, false, false, {}});
+    recordOperation(operations_.last());
     if (state_ != SessionState::Running || !protocol_) publish({id, "invalid", QStringLiteral("请先启动会话"), {}});
     else protocol_->submit(request);
     return id;

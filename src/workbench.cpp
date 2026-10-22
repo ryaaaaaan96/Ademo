@@ -80,6 +80,7 @@ Workbench::Workbench(std::shared_ptr<PluginCatalog> catalog, QWidget *parent,
     layout->addWidget(diagnostics);
     updateProtocol();
     layout->addWidget(new TracePanel(session_, this));
+    layout->addWidget(new RecordingPanel(session_, this));
     auto refresh = [this, formWidget, endpointWidget, protocol, transport, start, stop, status] {
         const bool active = session_.state() == SessionState::Starting || session_.state() == SessionState::Running;
         formWidget->setEnabled(!active);

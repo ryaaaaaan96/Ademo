@@ -11,7 +11,8 @@ target_link_libraries(debugger_sdk INTERFACE Qt6::Widgets)
 # 配套交付指纹：SDK、产品、Qt、编译器与配置必须一致。
 target_compile_definitions(debugger_sdk INTERFACE
   DEBUGGER_BUILD_KEY="sdk5-product0.2-qt${Qt6_VERSION}-${CMAKE_CXX_COMPILER_ID}${CMAKE_CXX_COMPILER_VERSION}-${CMAKE_SYSTEM_PROCESSOR}-$<CONFIG>")
-add_library(debugger_host STATIC src/host.cpp src/workbench.cpp src/trace_query.cpp src/trace_panel.cpp include/debugger/host.h)
+add_library(debugger_host STATIC src/host.cpp src/workbench.cpp src/trace_query.cpp src/trace_panel.cpp
+  src/trace_codec.cpp src/recording.cpp src/archive_query.cpp src/archive_format.cpp src/recording_panel.cpp include/debugger/host.h)
 target_link_libraries(debugger_host PUBLIC debugger_sdk)
 foreach(plugin IN ITEMS modbus serial)
   add_library(${plugin}_plugin MODULE plugins/${plugin}.cpp)
@@ -73,3 +74,8 @@ add_custom_command(TARGET trace_tests POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:serial_plugin> "${CMAKE_BINARY_DIR}/bin/trace-fixtures/")
 add_test(NAME trace_query_export COMMAND trace_tests -o trace-results.txt,txt)
 set_tests_properties(trace_query_export PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=windows" TIMEOUT 30)
+add_executable(recording_tests tests/recording_tests.cpp)
+target_link_libraries(recording_tests PRIVATE debugger_host Qt6::Test)
+add_dependencies(recording_tests trace_tests)
+add_test(NAME bounded_disk_recording COMMAND recording_tests -o recording-results.txt,txt)
+set_tests_properties(bounded_disk_recording PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=windows" TIMEOUT 60)

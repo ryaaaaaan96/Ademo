@@ -1,4 +1,5 @@
 #include "debugger/host.h"
+#include "trace_codec.h"
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QSaveFile>
@@ -33,10 +34,21 @@ bool DebugSession::configureTrace(TraceLimits limits, QString *error)
 }
 TraceSnapshot DebugSession::queryTrace(const TraceFilter &filter) const
 {
-    TraceSnapshot result;
-    result.expiredRecords = expiredTraces_;
-    result.expiredMessages = expiredMessages_;
-    result.expiredOperations = expiredOperations_;
+    TraceSnapshot all;
+    all.sessionId = sessionId_; all.records = traces_; all.messages = messages_; all.operations = operations_;
+    all.expiredRecords = expiredTraces_; all.expiredMessages = expiredMessages_; all.expiredOperations = expiredOperations_;
+    return filterSnapshot(all, filter);
+}
+TraceSnapshot filterSnapshot(const TraceSnapshot &all, const TraceFilter &filter)
+{
+    TraceSnapshot result = all;
+    result.records.clear(); result.messages.clear(); result.operations.clear(); result.sources.clear(); result.omittedObservedRefs = 0;
+    const auto &traces_ = all.records; const auto &messages_ = all.messages; const auto &operations_ = all.operations;
+    auto operation = [&operations_](quint64 id) {
+        for (const auto &operation : operations_) if (operation.request.id == id) return operation;
+        return OperationSnapshot{};
+    };
+    quint64 largestId = 0; for (const auto &record : traces_) largestId = qMax(largestId, record.id);
     const auto inTime = [&filter](QDateTime time) {
         return (!filter.fromUtc.isValid() || time >= filter.fromUtc)
             && (!filter.toUtc.isValid() || time <= filter.toUtc);
@@ -106,7 +118,7 @@ TraceSnapshot DebugSession::queryTrace(const TraceFilter &filter) const
     for (const auto &range : ranges) {
         ResolvedSource source{range, {}, {}};
         const auto record = recordsById.constFind(range.recordId);
-        if (record == recordsById.cend()) source.availability = range.recordId && range.recordId < nextTraceId_ ? "expired" : "unavailable";
+        if (record == recordsById.cend()) source.availability = range.recordId && range.recordId <= largestId && all.expiredRecords ? "expired" : "unavailable";
         else if (range.offset < 0 || range.length < 0 || range.offset > record->bytes.size()
                  || range.length > record->bytes.size() - range.offset) source.availability = "invalid-range";
         else { source.availability = "available"; source.bytes = record->bytes.mid(range.offset, range.length); }
@@ -123,12 +135,6 @@ QString idString(quint64 id) { return QString::number(id); }
 QJsonArray ids(const QList<quint64> &values) {
     QJsonArray result;
     for (auto id : values) result.append(idString(id));
-    return result;
-}
-QJsonArray ranges(const QList<TraceRange> &values) {
-    QJsonArray result;
-    for (const auto &range : values) result.append(QJsonObject{{"recordId", idString(range.recordId)},
-        {"offset", range.offset}, {"length", range.length}});
     return result;
 }
 QString csv(QString value) { value.replace('"', "\"\""); return '"' + value + '"'; }
@@ -153,6 +159,7 @@ ExportResult writeSnapshot(const TraceSnapshot &snapshot, const QString &path, c
     };
     if (format == "csv") row({"type", "id", "operationId", "utc", "state", "detail", "sourceRefs", "availability"});
     QJsonObject summary{{"type", "manifest"}, {"schemaVersion", 1}, {"snapshot", true},
+        {"sessionId", snapshot.sessionId}, {"retention", snapshot.retention},
         {"expiredRecords", idString(snapshot.expiredRecords)}, {"expiredMessages", idString(snapshot.expiredMessages)},
         {"expiredOperations", idString(snapshot.expiredOperations)}, {"omittedObservedRefs", idString(snapshot.omittedObservedRefs)},
         {"requestedOperationMissing", snapshot.requestedOperationMissing}, {"requestedMessageMissing", snapshot.requestedMessageMissing}};
@@ -160,29 +167,17 @@ ExportResult writeSnapshot(const TraceSnapshot &snapshot, const QString &path, c
     else row({"manifest", {}, {}, {}, {}, QString::fromUtf8(QJsonDocument(summary).toJson(QJsonDocument::Compact)), {}, {}});
     for (const auto &record : snapshot.records) {
         if (format == "jsonl") {
-            QJsonObject object{{"type", "trace"}, {"id", idString(record.id)}, {"generation", idString(record.generation)},
-                {"operationId", idString(record.operationId)}, {"monotonicUs", QString::number(record.monotonicUs)},
-                {"observedUtc", record.observedUtc.toString(Qt::ISODateWithMs)}, {"kind", record.kind},
-                {"bytesHex", QString::fromLatin1(record.bytes.toHex())}, {"detail", record.detail}, {"metadata", record.metadata}};
-            if (record.idleBeforeUs) object["idleBeforeUs"] = QString::number(*record.idleBeforeUs);
-            json(object);
+            json(tracecodec::encode(record));
         } else row({"trace", idString(record.id), idString(record.operationId), record.observedUtc.toString(Qt::ISODateWithMs),
                     record.kind, record.detail, {}, "available"});
     }
     for (const auto &message : snapshot.messages) {
-        if (format == "jsonl") json({{"type", "message"}, {"id", idString(message.id)}, {"operationId", idString(message.operationId)},
-            {"observedUtc", message.observedUtc.toString(Qt::ISODateWithMs)}, {"monotonicUs", QString::number(message.monotonicUs)},
-            {"status", message.status}, {"detail", message.detail}, {"fields", message.fields},
-            {"sources", ids(message.sources)}, {"sourceRanges", ranges(message.sourceRanges)}});
+        if (format == "jsonl") json(tracecodec::encode(message));
         else row({"message", idString(message.id), idString(message.operationId), message.observedUtc.toString(Qt::ISODateWithMs),
             message.status, message.detail, QString::fromUtf8(QJsonDocument(ids(message.sources)).toJson(QJsonDocument::Compact)), {}});
     }
     for (const auto &operation : snapshot.operations) {
-        if (format == "jsonl") json({{"type", "operation"}, {"id", idString(operation.request.id)},
-            {"action", operation.request.action}, {"parameters", operation.request.parameters}, {"state", operation.update.state},
-            {"detail", operation.update.detail}, {"result", operation.update.result}, {"sendAccepted", operation.sendAccepted},
-            {"localSent", operation.localSent}, {"finished", operation.finished}, {"observedRefs", ids(operation.observedRefs)},
-            {"omittedObservedRefCount", idString(operation.omittedObservedRefCount)}});
+        if (format == "jsonl") json(tracecodec::encode(operation));
         else row({"operation", idString(operation.request.id), idString(operation.request.id), {}, operation.update.state,
             operation.update.detail, QString::fromUtf8(QJsonDocument(ids(operation.observedRefs)).toJson(QJsonDocument::Compact)), {}});
     }

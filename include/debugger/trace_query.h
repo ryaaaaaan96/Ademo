@@ -21,6 +21,8 @@ struct ResolvedSource {
     QByteArray bytes;
 };
 struct TraceSnapshot {
+    QString sessionId;
+    QJsonObject retention; // 归档丢失/轮换及查询完整性；进程内查询为空。
     QList<TraceRecord> records;
     QList<Message> messages;
     QList<OperationSnapshot> operations;
@@ -40,6 +42,7 @@ struct ExportResult {
 };
 // 仅后台文件写入；所有输入均为脱离会话生命周期的有界值快照。
 std::shared_future<ExportResult> exportSnapshot(std::function<TraceSnapshot()> snapshot, QString path, QString format);
+TraceSnapshot filterSnapshot(const TraceSnapshot &, const TraceFilter &);
 class DebugSession;
 class TracePanel : public QWidget {
 public:

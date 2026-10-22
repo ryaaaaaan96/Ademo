@@ -1,6 +1,7 @@
 #pragma once
 #include "sdk.h"
 #include "trace_query.h"
+#include "recording.h"
 #include <QObject>
 #include <QPointer>
 #include <QPluginLoader>
@@ -60,6 +61,10 @@ public:
     TraceLimits traceLimits() const { return traceLimits_; }
     TraceSnapshot queryTrace(const TraceFilter & = {}) const;
     std::shared_future<ExportResult> exportTrace(const TraceFilter &, const QString &path, const QString &format) const;
+    QString sessionId() const { return sessionId_; }
+    bool startRecording(RecordingOptions, QString *error = nullptr, std::function<void()> beforeBatch = {});
+    RecordingStats recordingStats() const;
+    std::shared_future<RecordingStats> stopRecording();
     SessionAccess access();
     void poll(); // 可控时钟测试入口；产品由精确 Qt 定时器驱动。
 signals:
@@ -71,7 +76,8 @@ private:
     void retire();
     qint64 nowUs() const;
     quint64 appendTrace(const QString &, const QByteArray & = {}, quint64 operationId = 0,
-                        const QString &detail = {}, qint64 observedUs = -1);
+                        const QString &detail = {}, qint64 observedUs = -1, QJsonObject metadata = {},
+                        std::optional<qint64> idleBeforeUs = {});
     void received(quint64 run, ReceiveChunk, qint64 observedUs);
     void sent(quint64 run, quint64 id, bool ok, const QString &, qint64 observedUs);
     bool send(quint64 run, quint64 id, const QByteArray &);
@@ -79,6 +85,8 @@ private:
     quint64 allocateSendToken() { return (quint64(1) << 63) | nextSendToken_++; }
     void publish(OperationUpdate);
     void publishMessage(Message);
+    void recordTrace(const TraceRecord &);
+    void recordOperation(const OperationSnapshot &);
     std::shared_ptr<PluginCatalog> catalog_;
     std::shared_ptr<ProtocolSession> protocol_;
     std::unique_ptr<Endpoint> endpoint_;
@@ -109,6 +117,8 @@ private:
     struct SendAttempt { quint64 token = 0; int attempt = 0; bool completed = false; };
     QMap<quint64, SendAttempt> sendAttempts_;
     quint64 nextSendToken_ = 1;
+    QString sessionId_;
+    std::unique_ptr<DiskRecorder> recorder_;
 };
 class Workbench : public QWidget {
 public:
