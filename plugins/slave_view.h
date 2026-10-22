@@ -1,3 +1,7 @@
 #pragma once
 #include "debugger/sdk.h"
-namespace debugger { QWidget *createSlaveView(SessionAccess access, QWidget *parent); }
+#include <QVBoxLayout>
+namespace debugger {
+QWidget *createSlaveView(SessionAccess access, QWidget *parent);
+void addSlaveEditor(SessionAccess access, QWidget *view, QVBoxLayout *layout);
+}

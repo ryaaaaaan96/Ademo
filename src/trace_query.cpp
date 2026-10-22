@@ -181,7 +181,7 @@ ExportResult writeSnapshot(const TraceSnapshot &snapshot, const QString &path, c
         if (format == "jsonl") json({{"type", "operation"}, {"id", idString(operation.request.id)},
             {"action", operation.request.action}, {"parameters", operation.request.parameters}, {"state", operation.update.state},
             {"detail", operation.update.detail}, {"result", operation.update.result}, {"sendAccepted", operation.sendAccepted},
-            {"localSent", operation.localSent}, {"finished", operation.finished}, {"observedRefs", ids(operation.observedRefs)},
+            {"localSent", operation.localSent}, {"finished", operation.finished}, {"localOnly", operation.localOnly}, {"observedRefs", ids(operation.observedRefs)},
             {"omittedObservedRefCount", idString(operation.omittedObservedRefCount)}});
         else row({"operation", idString(operation.request.id), idString(operation.request.id), {}, operation.update.state,
             operation.update.detail, QString::fromUtf8(QJsonDocument(ids(operation.observedRefs)).toJson(QJsonDocument::Compact)), {}});

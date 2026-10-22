@@ -78,6 +78,13 @@ struct OperationSnapshot {
     bool finished = false;
     QList<quint64> observedRefs; // 操作观察窗口中的流量，不冒充已确认的响应归属。
     quint64 omittedObservedRefCount = 0;
+    bool localOnly = false;
+};
+struct LocalState {
+    bool retainAfterStop = false;
+    bool dirty = false;
+    bool busy = false;
+    QStringList actions;
 };
 struct ProtocolServices {
     std::function<qint64()> nowUs;
@@ -87,6 +94,8 @@ struct ProtocolServices {
     std::function<quint64(QString, QJsonObject)> submit; // 协议调度仍由宿主分配逻辑操作 ID。
     std::function<void(QJsonObject)> publishConfiguration; // 更新可保存配置，不由宿主解释协议字段。
     std::function<quint64(QByteArray)> sendPassive;
+    // 后台任务仅处理值；完成回到会话上下文，并保留协议/DLL租约。
+    std::function<bool(std::function<QJsonObject()>, std::function<void(QJsonObject)>)> background;
 };
 struct SessionAccess {
     std::function<quint64(QString, QJsonObject)> submit;
@@ -97,6 +106,7 @@ struct SessionAccess {
     std::function<SessionConfig()> config;
     std::function<bool(QJsonObject)> configure;
     std::function<QJsonObject()> snapshot;
+    std::function<void(std::function<bool()>)> setDiscardGuard;
 };
 struct ReceiveChunk {
     QByteArray bytes;
@@ -125,6 +135,7 @@ public:
     // 后台准备只能读取配置/文件，不得调用 ProtocolServices 或并发访问宿主。
     virtual bool prepareInBackground(const SessionConfig &) const { return false; }
     virtual QJsonObject snapshot() const { return {}; }
+    virtual LocalState localState() const { return {}; }
     virtual void activate() = 0;
     virtual void stop() = 0;
     virtual void submit(const OperationRequest &) = 0;
@@ -148,7 +159,7 @@ public:
     virtual std::unique_ptr<Endpoint> createEndpoint(const QJsonObject &, EndpointEvents) = 0;
 };
 }
-#define DebuggerProtocolIid "org.ademo.debugger.Protocol/5.0"
-#define DebuggerTransportIid "org.ademo.debugger.Transport/5.0"
+#define DebuggerProtocolIid "org.ademo.debugger.Protocol/6.0"
+#define DebuggerTransportIid "org.ademo.debugger.Transport/6.0"
 Q_DECLARE_INTERFACE(debugger::ProtocolPlugin, DebuggerProtocolIid)
 Q_DECLARE_INTERFACE(debugger::TransportPlugin, DebuggerTransportIid)

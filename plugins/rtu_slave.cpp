@@ -102,8 +102,10 @@ QString RtuSlave::prepare(const SessionConfig &config)
         const auto error = validateSlaveDocument(document.object());
         if (!error.isEmpty()) return prefix + error;
         loaded.insert(unit, {unit, info.absoluteFilePath(), document.object(), false});
+        loaded[unit].savedDocument = document.object();
     }
     devices_ = std::move(loaded);
+    configuration_ = config.protocol;
     return {};
 }
 QJsonObject RtuSlave::snapshot() const
@@ -115,10 +117,6 @@ QJsonObject RtuSlave::snapshot() const
 }
 void RtuSlave::activate() { active_ = true; lastActivity_ = services_.nowUs(); }
 void RtuSlave::stop() { active_ = false; buffer_.clear(); sources_.clear(); sourceRanges_.clear(); response_.clear(); pendingSend_ = 0; responseSources_.clear(); sentSources_.clear(); }
-void RtuSlave::submit(const OperationRequest &request)
-{
-    services_.publish({request.id, "invalid", QStringLiteral("从站运行数据只读；本项不提供设备写入或编辑入口"), {}});
-}
 void RtuSlave::onInput(const TraceRecord &record)
 {
     if (!active_ || record.bytes.isEmpty()) return;

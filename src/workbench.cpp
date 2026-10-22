@@ -1,5 +1,6 @@
 #include "debugger/host.h"
 #include <QComboBox>
+#include <QCloseEvent>
 #include <QFormLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -109,5 +110,10 @@ Workbench::~Workbench()
     // 在会话与 DLL 租约释放前销毁插件视图。
     delete view_;
     session_.stop();
+}
+void Workbench::closeEvent(QCloseEvent *event)
+{
+    if (session_.resolveUnsaved()) QWidget::closeEvent(event);
+    else event->ignore();
 }
 }
