@@ -69,7 +69,8 @@ void RtuSlave::publishBindings() {
     if (!services_.publishConfiguration) return;
     QJsonArray bindings;
     for (const auto &device : devices_) bindings.append(QJsonObject{{"unit", device.unit}, {"path", device.path}});
-    services_.publishConfiguration({{"devices", bindings}});
+    configuration_["devices"] = bindings;
+    services_.publishConfiguration(configuration_);
 }
 void RtuSlave::submit(const OperationRequest &request) {
     const auto unit = request.parameters.value("unit").toInt(-1);

@@ -10,6 +10,7 @@ public:
     QString prepare(const SessionConfig &) override;
     bool prepareInBackground(const SessionConfig &config) const override { return config.role == "slave"; }
     QJsonObject snapshot() const override { return slave_ ? slave_->snapshot() : QJsonObject{{"role", "master"}}; }
+    LocalState localState() const override { return slave_ ? slave_->localState() : LocalState{}; }
     void activate() override;
     void stop() override;
     void submit(const OperationRequest &) override;

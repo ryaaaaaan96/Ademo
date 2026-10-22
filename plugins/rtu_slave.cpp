@@ -87,6 +87,7 @@ QString RtuSlave::prepare(const SessionConfig &config)
         loaded[unit].savedDocument = document.object();
     }
     devices_ = std::move(loaded);
+    configuration_ = config.protocol;
     return {};
 }
 QJsonObject RtuSlave::snapshot() const

@@ -32,6 +32,7 @@ private:
     bool validReplacement(int unit, const QJsonObject &, QString &error) const;
     ProtocolServices services_;
     QMap<int, SlaveDevice> devices_;
+    QJsonObject configuration_;
     QSet<int> fileJobs_;
     QMap<int, QString> fileTargets_;
     QByteArray buffer_;

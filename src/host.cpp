@@ -8,10 +8,16 @@
 namespace debugger {
 namespace {
 QSemaphore preparationSlots(4);
+QSemaphore localJobSlots(4);
 struct PreparationJob {
     std::shared_ptr<PluginCatalog> catalog;
     std::shared_ptr<ProtocolSession> protocol;
     ~PreparationJob() { preparationSlots.release(); }
+};
+struct LocalJob {
+    std::shared_ptr<PluginCatalog> catalog;
+    std::shared_ptr<ProtocolSession> protocol;
+    ~LocalJob() { localJobSlots.release(); }
 };
 }
 PluginCatalog::~PluginCatalog()
@@ -98,13 +104,14 @@ DebugSession::DebugSession(std::shared_ptr<PluginCatalog> catalog, QObject *pare
     connect(&notificationTimer_, &QTimer::timeout, this, &DebugSession::changed);
 }
 DebugSession::~DebugSession() { retire(); }
-void DebugSession::retire()
+void DebugSession::retire(bool retainLocal)
 {
+    const bool keep = retainLocal && protocol_ && !preparing_ && protocol_->localState().retainAfterStop;
     ++generation_;
     pollTimer_.stop();
     sendAttempts_.clear();
     for (auto &operation : operations_) {
-        if (!operation.finished) {
+        if (!operation.finished && !(keep && operation.localOnly)) {
             operation.finished = true;
             operation.update = {operation.request.id, "cancelled", QStringLiteral("会话已停止，操作已取消"), {}};
         }
@@ -115,24 +122,24 @@ void DebugSession::retire()
     passiveDeadlines_.clear();
     if (endpoint_) endpoint_->close();
     endpoint_.reset();
-    protocol_.reset();
+    if (!keep) protocol_.reset();
     if (!key_.isEmpty()) catalog_->release(key_);
     key_.clear();
 }
 void DebugSession::stop()
 {
-    retire();
+    retire(true);
     state_ = SessionState::Stopped;
     diagnostic_ = QStringLiteral("会话已停止，端点已释放");
     emit changed();
 }
 void DebugSession::fail(const QString &reason)
 {
-    for (auto &operation : operations_) if (!operation.finished) {
+    for (auto &operation : operations_) if (!operation.finished && !operation.localOnly) {
         operation.finished = true;
         operation.update = {operation.request.id, "transport-error", reason, {}};
     }
-    retire();
+    retire(true);
     state_ = SessionState::Error;
     diagnostic_ = reason;
     emit changed();
@@ -140,6 +147,7 @@ void DebugSession::fail(const QString &reason)
 bool DebugSession::start(const SessionConfig &config)
 {
     if (state_ == SessionState::Starting || state_ == SessionState::Running) return false;
+    if (!resolveUnsaved()) return false;
     retire();
     config_ = config;
     auto *p = catalog_->protocol(config.protocolId);
@@ -161,18 +169,22 @@ bool DebugSession::start(const SessionConfig &config)
         return self && self->send(run, id, bytes);
     };
     services.publish = [self, run](OperationUpdate update) {
-        if (self && self->generation_ == run) self->publish(std::move(update));
+        if (self && self->ownsProtocol(run)) self->publish(std::move(update));
     };
     services.publishMessage = [self, run](Message message) {
-        if (self && self->generation_ == run) self->publishMessage(std::move(message));
+        if (self && self->ownsProtocol(run)) self->publishMessage(std::move(message));
     };
     services.submit = [self, run](QString action, QJsonObject parameters) {
         return self && self->generation_ == run ? self->submit(action, parameters) : quint64(0);
     };
     services.publishConfiguration = [self, run](QJsonObject configuration) {
-        if (self && self->generation_ == run) self->config_.protocol = std::move(configuration);
+        if (self && self->ownsProtocol(run)) self->config_.protocol = std::move(configuration);
     };
     services.sendPassive = [self, run](QByteArray bytes) { return self ? self->sendPassive(run, bytes) : 0; };
+    services.background = [self, run](std::function<QJsonObject()> task, std::function<void(QJsonObject)> completion) {
+        return self && self->background(run, std::move(task), std::move(completion));
+    };
+    protocolRun_ = run;
     protocol_ = p->createSession(std::move(services));
     if (!protocol_) { fail(QStringLiteral("协议会话创建失败")); return false; }
     if (protocol_->prepareInBackground(config)) {
@@ -358,7 +370,7 @@ void DebugSession::sent(quint64 run, quint64 id, bool ok, const QString &reason,
 void DebugSession::publish(OperationUpdate update)
 {
     for (auto &operation : operations_) if (operation.request.id == update.id && !operation.finished) {
-        operation.finished = update.state != "queued" && update.state != "submitted" && update.state != "sent" && update.state != "retry-wait";
+        operation.finished = update.state != "queued" && update.state != "submitted" && update.state != "sent" && update.state != "retry-wait" && update.state != "working";
         operation.update = std::move(update);
         break;
     }
@@ -394,7 +406,9 @@ quint64 DebugSession::submit(const QString &action, const QJsonObject &parameter
     // 未完成操作不能被淘汰；满时拒绝且不增加常驻条目。
     if (operations_.size() >= traceLimits_.operations) return 0;
     operations_.append({request, {id, "queued", QStringLiteral("操作已提交，等待协议校验"), {}}, false, false, false, {}});
-    if (state_ != SessionState::Running || !protocol_) publish({id, "invalid", QStringLiteral("请先启动会话"), {}});
+    const bool local = protocol_ && !preparing_ && protocol_->localState().actions.contains(action);
+    operations_.last().localOnly = local;
+    if (!protocol_ || (state_ != SessionState::Running && !local)) publish({id, "invalid", QStringLiteral("请先启动会话"), {}});
     else protocol_->submit(request);
     return id;
 }
@@ -438,11 +452,14 @@ SessionAccess DebugSession::access()
             [self] { return self && self->state() == SessionState::Running; },
             [self] { return self ? self->config() : SessionConfig{}; },
             [self](QJsonObject config) { return self && self->configure(std::move(config)); },
-            [self] { return self ? self->snapshot() : QJsonObject{}; }};
+            [self] { return self ? self->snapshot() : QJsonObject{}; },
+            [self](std::function<bool()> guard) { if (self) self->discardGuard_ = std::move(guard); }};
 }
 bool DebugSession::configure(QJsonObject protocol)
 {
     if (state_ == SessionState::Starting || state_ == SessionState::Running) return false;
+    if (protocol_ && protocol_->localState().busy) return false;
+    if (!resolveUnsaved()) return false;
     config_.protocol = std::move(protocol);
     emit changed();
     return true;
@@ -450,5 +467,32 @@ bool DebugSession::configure(QJsonObject protocol)
 QJsonObject DebugSession::snapshot() const
 {
     return protocol_ && !preparing_ ? protocol_->snapshot() : QJsonObject{};
+}
+bool DebugSession::ownsProtocol(quint64 run) const { return protocol_ && protocolRun_ == run; }
+bool DebugSession::resolveUnsaved()
+{
+    if (!protocol_ || preparing_) return true;
+    if (protocol_->localState().busy) {
+        diagnostic_ = QStringLiteral("后台文件操作尚未结束，请等待后再重新加载或关闭"); emit changed(); return false;
+    }
+    if (!protocol_->localState().dirty) return true;
+    if (discardGuard_ && discardGuard_() && !protocol_->localState().dirty && !protocol_->localState().busy) return true;
+    diagnostic_ = QStringLiteral("保留未保存修改；请保存、放弃或取消后再重新加载或关闭"); emit changed(); return false;
+}
+bool DebugSession::background(quint64 run, std::function<QJsonObject()> task, std::function<void(QJsonObject)> completion)
+{
+    if (!ownsProtocol(run) || preparing_ || !localJobSlots.tryAcquire()) return false;
+    auto job = std::make_shared<LocalJob>(); job->catalog = catalog_; job->protocol = protocol_;
+    QPointer<DebugSession> self(this);
+    auto work = [job, self, run, task = std::move(task), completion = std::move(completion)] {
+        QJsonObject result;
+        try { result = task(); } catch (const std::exception &error) { result = {{"error", QString::fromUtf8(error.what())}}; }
+        QMetaObject::invokeMethod(QCoreApplication::instance(), [job, self, run, completion, result] {
+            if (self && self->ownsProtocol(run)) completion(result);
+        }, Qt::QueuedConnection);
+    };
+    if (preparationExecutor_) preparationExecutor_(std::move(work));
+    else QThreadPool::globalInstance()->start(std::move(work));
+    return true;
 }
 }

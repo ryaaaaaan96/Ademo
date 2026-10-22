@@ -1,5 +1,6 @@
 #include "slave_test_support.h"
 #include <QApplication>
+#include <QAbstractButton>
 #include <QDir>
 #include <QLineEdit>
 #include <QLabel>
@@ -96,7 +97,11 @@ private slots:
         QVERIFY(!session.operation(id).finished); edit(session, 99); jobs.takeFirst()(); QCoreApplication::processEvents();
         QCOMPARE(session.operation(id).update.state, "success"); QCOMPARE(holding(session), 99); QVERIFY(device(session).value("dirty").toBool());
         QCOMPARE(readFile(path).value("areas").toObject().value("holding").toObject().value("values").toArray().first().toInt(), 42);
-        const auto next = session.submit("slave-save", {{"unit", 17}}); session.stop(); QVERIFY(!session.operation(next).finished);
+        const auto next = session.submit("slave-save", {{"unit", 17}});
+        wire.events.received(QByteArray::fromHex("1103006b00037687")); QCoreApplication::processEvents();
+        QTest::qWait(10); session.poll(); QVERIFY(!wire.writes.isEmpty());
+        QCOMPARE(wire.writes.last().second.first(9).toHex(), "110306006300000064");
+        session.stop(); QVERIFY(!session.operation(next).finished);
         jobs.takeFirst()(); QCoreApplication::processEvents(); QCOMPARE(session.operation(next).update.state, "success");
         QVERIFY(!device(session).value("dirty").toBool()); QCOMPARE(holding(session), 99);
     }
@@ -121,8 +126,8 @@ private slots:
         edit(h.session, 77); h.session.stop();
         QTimer::singleShot(0, [] { if (auto *box = qobject_cast<QMessageBox *>(QApplication::activeModalWidget())) box->done(QMessageBox::Cancel); });
         QVERIFY(!h.session.start(h.session.config())); QCOMPARE(holding(h.session), 77);
-        QTimer::singleShot(0, [] { if (auto *box = qobject_cast<QMessageBox *>(QApplication::activeModalWidget())) box->done(QMessageBox::Save); });
-        QVERIFY(h.session.start(h.session.config())); QTRY_COMPARE(h.session.state(), SessionState::Running); QCOMPARE(holding(h.session), 77);
+        QTimer::singleShot(0, [] { if (auto *box = qobject_cast<QMessageBox *>(QApplication::activeModalWidget())) QTest::mouseClick(box->button(QMessageBox::Save), Qt::LeftButton); });
+        QVERIFY2(h.session.start(h.session.config()), qPrintable(h.session.diagnostic())); QTRY_COMPARE(h.session.state(), SessionState::Running); QCOMPARE(holding(h.session), 77);
         const auto evidence = qEnvironmentVariable("DEBUGGER_EVIDENCE_DIR");
         if (!evidence.isEmpty()) { QDir().mkpath(evidence); QVERIFY(view->findChild<QWidget *>("slaveView")->grab().save(evidence + "/slave-edit-save-controlled.png")); }
     }

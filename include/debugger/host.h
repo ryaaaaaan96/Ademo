@@ -50,6 +50,7 @@ public:
     SessionConfig config() const { return config_; }
     bool configure(QJsonObject protocol);
     QJsonObject snapshot() const;
+    bool resolveUnsaved();
     quint64 submit(const QString &action, const QJsonObject &parameters);
     OperationSnapshot operation(quint64) const;
     QList<TraceRecord> traces(quint64 operationId = 0) const;
@@ -68,7 +69,9 @@ private:
     bool prepared(quint64 run, const QString &error);
     void opened(quint64, bool, const QString &);
     void fail(const QString &);
-    void retire();
+    void retire(bool retainLocal = false);
+    bool ownsProtocol(quint64 run) const;
+    bool background(quint64 run, std::function<QJsonObject()>, std::function<void(QJsonObject)>);
     qint64 nowUs() const;
     quint64 appendTrace(const QString &, const QByteArray & = {}, quint64 operationId = 0,
                         const QString &detail = {}, qint64 observedUs = -1);
@@ -87,6 +90,8 @@ private:
     QString diagnostic_;
     QString key_;
     quint64 generation_ = 0;
+    quint64 protocolRun_ = 0;
+    std::function<bool()> discardGuard_;
     EndpointFactory endpointFactory_;
     std::function<qint64()> clock_;
     QElapsedTimer elapsed_;
@@ -115,6 +120,8 @@ public:
     explicit Workbench(std::shared_ptr<PluginCatalog>, QWidget *parent = nullptr,
                        DebugSession::EndpointFactory endpointFactory = {}, std::function<qint64()> clock = {});
     ~Workbench() override;
+protected:
+    void closeEvent(QCloseEvent *) override;
 private:
     std::shared_ptr<PluginCatalog> catalog_;
     DebugSession session_;
