@@ -38,6 +38,14 @@ Qt/LLVM-MinGW、Debug/Release 与 LLDB 验证已完成，见 [环境证据](tool
 
 ## 依赖与状态规则
 
+## 本轮完成记录
+
+| 任务 | 实施提交 | 验收证据 | 集成验证 |
+| --- | --- | --- | --- |
+| 03 | `dccb047` | [03 验收](evidence/03/acceptance.md)，Debug/Release 各 56 项通过 | 集成 Debug 构建与 CTest 2/2 通过 |
+
+以下分诊与依赖规则继续适用。
+
 - Status 沿用默认五种分诊标签。ready-for-agent 表示任务描述完备；只有其所有 Blocked by 任务有验收完成证据、外部条件满足时才可开始。
 - 13 等待独立对端、实际串口与拓扑等联调信息；14/15 等待 UPP 规范、样例及 CAN 硬件/交互条件；19 等待清洁 Windows 交付验证环境。当前这四项为 needs-info，信息确认后可更新状态，但仍需遵守任务依赖。
 - 以各任务验收勾选与 Comments 中的代码、测试和实际环境证据认定完成，不把 ready-for-agent 当作完成状态，不使用 open/claimed/resolved 等 Wayfinder 状态代替普通实施标签。
