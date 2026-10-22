@@ -93,6 +93,7 @@ Workbench::Workbench(std::shared_ptr<PluginCatalog> catalog, QWidget *parent,
         config.protocolId = protocol->currentData().toString();
         config.transportId = transport->currentData().toString();
         config.role = role->currentData().toString();
+        config.protocol = session_.config().protocol;
         for (auto it = editors->cbegin(); it != editors->cend(); ++it) {
             if (auto *line = qobject_cast<QLineEdit *>(it.value())) config.endpoint[it.key()] = line->text();
             else if (auto *combo = qobject_cast<QComboBox *>(it.value())) config.endpoint[it.key()] = combo->currentText();

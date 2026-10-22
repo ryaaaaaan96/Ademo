@@ -1,8 +1,19 @@
 #include "debugger/host.h"
 #include <QDir>
 #include <QTimer>
+#include <QCoreApplication>
+#include <QSemaphore>
+#include <QThreadPool>
 
 namespace debugger {
+namespace {
+QSemaphore preparationSlots(4);
+struct PreparationJob {
+    std::shared_ptr<PluginCatalog> catalog;
+    std::shared_ptr<ProtocolSession> protocol;
+    ~PreparationJob() { preparationSlots.release(); }
+};
+}
 PluginCatalog::~PluginCatalog()
 {
     protocols_.clear();
@@ -74,8 +85,9 @@ QString stateText(SessionState state)
     return {};
 }
 DebugSession::DebugSession(std::shared_ptr<PluginCatalog> catalog, QObject *parent,
-                           EndpointFactory factory, std::function<qint64()> clock)
-    : QObject(parent), catalog_(std::move(catalog)), endpointFactory_(std::move(factory)), clock_(std::move(clock))
+                           EndpointFactory factory, std::function<qint64()> clock, BackgroundExecutor executor)
+    : QObject(parent), catalog_(std::move(catalog)), endpointFactory_(std::move(factory)), clock_(std::move(clock)),
+      preparationExecutor_(std::move(executor))
 {
     elapsed_.start();
     pollTimer_.setTimerType(Qt::PreciseTimer);
@@ -96,7 +108,9 @@ void DebugSession::retire()
             operation.update = {operation.request.id, "cancelled", QStringLiteral("会话已停止，操作已取消"), {}};
         }
     }
-    if (protocol_) protocol_->stop();
+    if (protocol_ && !preparing_) protocol_->stop();
+    preparing_ = false;
+    passiveSends_.clear();
     if (endpoint_) endpoint_->close();
     endpoint_.reset();
     protocol_.reset();
@@ -150,10 +164,39 @@ bool DebugSession::start(const SessionConfig &config)
     services.publishMessage = [self, run](Message message) {
         if (self && self->generation_ == run) self->publishMessage(std::move(message));
     };
+    services.sendPassive = [self, run](QByteArray bytes) { return self ? self->sendPassive(run, bytes) : 0; };
     protocol_ = p->createSession(std::move(services));
     if (!protocol_) { fail(QStringLiteral("协议会话创建失败")); return false; }
+    if (protocol_->prepareInBackground(config)) {
+        if (!preparationSlots.tryAcquire()) { fail(QStringLiteral("后台准备繁忙（最多 4 个任务），请稍后重试")); return false; }
+        auto job = std::make_shared<PreparationJob>();
+        job->catalog = catalog_;
+        job->protocol = protocol_;
+        preparing_ = true;
+        state_ = SessionState::Starting;
+        diagnostic_ = QStringLiteral("正在后台读取并校验全部启动数据文件");
+        auto work = [job, config, self, run] {
+            const auto error = job->protocol->prepare(config);
+            QMetaObject::invokeMethod(QCoreApplication::instance(), [job, self, run, error] {
+                if (self && self->generation_ == run && self->preparing_) self->prepared(run, error);
+            }, Qt::QueuedConnection);
+        };
+        if (preparationExecutor_) preparationExecutor_(std::move(work));
+        else QThreadPool::globalInstance()->start(std::move(work));
+        emit changed();
+        return true;
+    }
     const auto preparation = protocol_->prepare(config);
-    if (!preparation.isEmpty()) { fail(preparation); return false; }
+    return prepared(run, preparation);
+}
+bool DebugSession::prepared(quint64 run, const QString &error)
+{
+    if (run != generation_) return false;
+    preparing_ = false;
+    if (!error.isEmpty()) { fail(error); return false; }
+    const auto config = config_;
+    auto *t = catalog_->transport(config.transportId);
+    QPointer<DebugSession> self(this);
     const auto key = t->endpointKey(config.endpoint);
     if (key.isEmpty() || !catalog_->acquire(key)) {
         fail(QStringLiteral("端点已被其他会话占用：") + key); return false;
@@ -248,9 +291,25 @@ bool DebugSession::send(quint64 run, quint64 id, const QByteArray &bytes)
     appendTrace(accepted ? "send-accepted" : "send-rejected", {}, id);
     return accepted;
 }
+quint64 DebugSession::sendPassive(quint64 run, const QByteArray &bytes)
+{
+    if (run != generation_ || state_ != SessionState::Running || !endpoint_ || bytes.isEmpty()
+        || bytes.size() > 256 || passiveSends_.size() >= 1) return 0;
+    const auto id = nextPassiveId_++;
+    appendTrace("send-request", bytes, 0, QStringLiteral("被动应答，本地发送 ID %1").arg(id));
+    const bool accepted = endpoint_->send(id, bytes);
+    appendTrace(accepted ? "send-accepted" : "send-rejected", {}, 0, QStringLiteral("本地发送 ID %1").arg(id));
+    if (accepted) { passiveSends_.insert(id); return id; }
+    return 0;
+}
 void DebugSession::sent(quint64 run, quint64 id, bool ok, const QString &reason, qint64 observedUs)
 {
     if (run != generation_ || state_ != SessionState::Running || !protocol_) return;
+    if (passiveSends_.remove(id)) {
+        appendTrace(ok ? "local-sent" : "local-send-failed", {}, 0, QStringLiteral("本地发送 ID %1：%2").arg(id).arg(reason), observedUs);
+        protocol_->onSent(id, ok, reason, observedUs);
+        return;
+    }
     const auto operation = this->operation(id);
     if (!operation.sendAccepted || operation.localSent || operation.finished) return;
     appendTrace(ok ? "local-sent" : "local-send-failed", {}, id, reason, observedUs);
@@ -324,6 +383,20 @@ SessionAccess DebugSession::access()
             [self](quint64 id) { return self ? self->operation(id) : OperationSnapshot{}; },
             [self](quint64 id) { return self ? self->traces(id) : QList<TraceRecord>{}; },
             [self](quint64 id) { return self ? self->messages(id) : QList<Message>{}; },
-            [self] { return self && self->state() == SessionState::Running; }};
+            [self] { return self && self->state() == SessionState::Running; },
+            [self] { return self ? self->config() : SessionConfig{}; },
+            [self](QJsonObject config) { return self && self->configure(std::move(config)); },
+            [self] { return self ? self->snapshot() : QJsonObject{}; }};
+}
+bool DebugSession::configure(QJsonObject protocol)
+{
+    if (state_ == SessionState::Starting || state_ == SessionState::Running) return false;
+    config_.protocol = std::move(protocol);
+    emit changed();
+    return true;
+}
+QJsonObject DebugSession::snapshot() const
+{
+    return protocol_ && !preparing_ ? protocol_->snapshot() : QJsonObject{};
 }
 }
