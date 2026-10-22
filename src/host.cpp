@@ -102,6 +102,7 @@ void DebugSession::retire()
 {
     ++generation_;
     pollTimer_.stop();
+    sendAttempts_.clear();
     for (auto &operation : operations_) {
         if (!operation.finished) {
             operation.finished = true;
@@ -164,6 +165,12 @@ bool DebugSession::start(const SessionConfig &config)
     };
     services.publishMessage = [self, run](Message message) {
         if (self && self->generation_ == run) self->publishMessage(std::move(message));
+    };
+    services.submit = [self, run](QString action, QJsonObject parameters) {
+        return self && self->generation_ == run ? self->submit(action, parameters) : quint64(0);
+    };
+    services.publishConfiguration = [self, run](QJsonObject configuration) {
+        if (self && self->generation_ == run) self->config_.protocol = std::move(configuration);
     };
     services.sendPassive = [self, run](QByteArray bytes) { return self ? self->sendPassive(run, bytes) : 0; };
     protocol_ = p->createSession(std::move(services));
@@ -293,17 +300,28 @@ void DebugSession::received(quint64 run, ReceiveChunk input, qint64 observedUs)
 bool DebugSession::send(quint64 run, quint64 id, const QByteArray &bytes)
 {
     if (run != generation_ || state_ != SessionState::Running || !endpoint_ || bytes.size() > 256) return false;
+    auto &attempt = sendAttempts_[id];
+    ++attempt.attempt;
+    attempt.token = attempt.attempt == 1 ? id : allocateSendToken();
+    attempt.completed = false;
+    const auto token = attempt.token;
+    const QJsonObject metadata{{"attempt", attempt.attempt}, {"sendId", QString::number(token)}};
     appendTrace("send-request", bytes, id, QStringLiteral("请求本地发送，尚未证明发送完成或设备应答"));
-    const bool accepted = endpoint_->send(id, bytes);
-    for (auto &operation : operations_) if (operation.request.id == id) operation.sendAccepted = accepted;
+    traces_.last().metadata = metadata;
+    const bool accepted = endpoint_->send(token, bytes);
+    for (auto &operation : operations_) if (operation.request.id == id) {
+        operation.sendAccepted = accepted;
+        operation.localSent = false;
+    }
     appendTrace(accepted ? "send-accepted" : "send-rejected", {}, id);
+    traces_.last().metadata = metadata;
     return accepted;
 }
 quint64 DebugSession::sendPassive(quint64 run, const QByteArray &bytes)
 {
     if (run != generation_ || state_ != SessionState::Running || !endpoint_ || bytes.isEmpty()
         || bytes.size() > 256 || passiveSends_.size() >= 1) return 0;
-    const auto id = nextPassiveId_++;
+    const auto id = allocateSendToken();
     appendTrace("send-request", bytes, 0, QStringLiteral("被动应答，本地发送 ID %1").arg(id));
     const bool accepted = endpoint_->send(id, bytes);
     appendTrace(accepted ? "send-accepted" : "send-rejected", {}, 0, QStringLiteral("本地发送 ID %1").arg(id));
@@ -314,21 +332,33 @@ void DebugSession::sent(quint64 run, quint64 id, bool ok, const QString &reason,
 {
     if (run != generation_ || state_ != SessionState::Running || !protocol_) return;
     if (passiveSends_.remove(id)) {
+        const bool late = observedUs >= passiveDeadlines_.value(id);
         passiveDeadlines_.remove(id);
-        appendTrace(ok ? "local-sent" : "local-send-failed", {}, 0, QStringLiteral("本地发送 ID %1：%2").arg(id).arg(reason), observedUs);
-        protocol_->onSent(id, ok, reason, observedUs);
+        const auto detail = late ? QStringLiteral("被动应答本地发送超时，迟到完成不延长期限") : reason;
+        appendTrace(ok && !late ? "local-sent" : "local-send-failed", {}, 0, QStringLiteral("本地发送 ID %1：%2").arg(id).arg(detail), observedUs);
+        protocol_->onSent(id, ok && !late, detail, observedUs);
         return;
     }
-    const auto operation = this->operation(id);
-    if (!operation.sendAccepted || operation.localSent || operation.finished) return;
-    appendTrace(ok ? "local-sent" : "local-send-failed", {}, id, reason, observedUs);
-    for (auto &entry : operations_) if (entry.request.id == id) entry.localSent = ok;
-    protocol_->onSent(id, ok, reason, observedUs);
+    auto current = sendAttempts_.end();
+    for (auto it = sendAttempts_.begin(); it != sendAttempts_.end(); ++it)
+        if (it->token == id) { current = it; break; }
+    if (current == sendAttempts_.end()) {
+        appendTrace("stale-send-result", {}, 0, QStringLiteral("旧发送令牌 %1 的回调已忽略").arg(id), observedUs);
+        return;
+    }
+    const auto operationId = current.key();
+    const auto operation = this->operation(operationId);
+    if (!operation.sendAccepted || current->completed || operation.finished) return;
+    current->completed = true;
+    appendTrace(ok ? "local-sent" : "local-send-failed", {}, operationId, reason, observedUs);
+    traces_.last().metadata = {{"attempt", current->attempt}, {"sendId", QString::number(id)}};
+    for (auto &entry : operations_) if (entry.request.id == operationId) entry.localSent = ok;
+    protocol_->onSent(operationId, ok, reason, observedUs);
 }
 void DebugSession::publish(OperationUpdate update)
 {
     for (auto &operation : operations_) if (operation.request.id == update.id && !operation.finished) {
-        operation.finished = update.state != "queued" && update.state != "submitted" && update.state != "sent";
+        operation.finished = update.state != "queued" && update.state != "submitted" && update.state != "sent" && update.state != "retry-wait";
         operation.update = std::move(update);
         break;
     }
@@ -357,6 +387,7 @@ quint64 DebugSession::submit(const QString &action, const QJsonObject &parameter
     const OperationRequest request{id, action, parameters};
     if (operations_.size() >= traceLimits_.operations) {
         for (qsizetype i = 0; i < operations_.size(); ++i) if (operations_[i].finished) {
+            sendAttempts_.remove(operations_[i].request.id);
             operations_.removeAt(i); ++expiredOperations_; break;
         }
     }

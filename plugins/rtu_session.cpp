@@ -38,6 +38,39 @@ QString RtuSession::prepare(const SessionConfig &config)
         ? config.protocol.value("responseTimeoutMs").toInt(-1) : 1000;
     if (timeout < 1 || timeout > 60000) return QStringLiteral("应答超时必须为 1..60000 ms");
     timeoutUs_ = qint64(timeout) * 1000;
+    return configureSettings(config.protocol);
+}
+QString RtuSession::configureSettings(const QJsonObject &settings)
+{
+    const int retries = settings.value("extraReadRetries").toInt(2);
+    const int timeout = settings.value("responseTimeoutMs").toInt(1000);
+    const int interval = settings.value("retryIntervalMs").toInt(100);
+    if ((settings.contains("extraReadRetries") && settings.value("extraReadRetries").toInt(-1) < 0)
+        || retries > 10 || timeout < 1 || timeout > 60000 || interval < 0 || interval > 60000
+        || (settings.contains("retryIntervalMs") && settings.value("retryIntervalMs").toInt(-1) < 0)
+        || (settings.contains("responseTimeoutMs") && settings.value("responseTimeoutMs").toInt(-1) < 1))
+        return QStringLiteral("额外读取重试必须为 0..10，应答超时为 1..60000 ms，重试间隔为 0..60000 ms");
+    if (settings.contains("polls") && !settings.value("polls").isArray()) return QStringLiteral("轮询配置必须是数组");
+    const auto tasks = settings.value("polls").toArray();
+    if (tasks.size() > 64) return QStringLiteral("一个会话最多配置 64 个轮询任务");
+    const QStringList actions{"read-coils", "read-discrete", "read-holding", "read-input"};
+    QList<PollTask> polls;
+    for (const auto &value : tasks) {
+        const auto task = value.toObject();
+        const auto action = task.value("action").toString();
+        const int function = actions.indexOf(action) + 1;
+        const int unit = task.value("unit").toInt(-1), start = task.value("start").toInt(-1);
+        const int count = task.value("count").toInt(-1), cycle = task.value("intervalMs").toInt(-1);
+        if (!function || unit < 1 || unit > 247 || start < 0 || start > 65535 || count < 1
+            || count > (function <= 2 ? 2000 : 125) || start + count > 65536 || cycle < 10 || cycle > 3600000)
+            return QStringLiteral("轮询只能读取四区：设备/地址/数量须有效，周期为 10..3600000 ms；不允许设备写入");
+        polls.append({action, {{"unit", unit}, {"start", start}, {"count", count}}, qint64(cycle) * 1000});
+    }
+    extraRetries_ = retries;
+    timeoutUs_ = qint64(timeout) * 1000;
+    retryIntervalUs_ = qint64(interval) * 1000;
+    polls_ = std::move(polls);
+    nextPoll_ = 0;
     return {};
 }
 void RtuSession::activate()
@@ -50,6 +83,10 @@ void RtuSession::stop()
 {
     if (slave_) { slave_->stop(); return; }
     active_ = false;
+    for (const auto &request : pending_) services_.publish({request.id, "cancelled", QStringLiteral("会话停止，排队操作已取消"), {}});
+    pending_.clear();
+    polls_.clear();
+    pollOperations_.clear();
     if (request_.id) finish("cancelled", QStringLiteral("会话停止，操作已取消"));
     buffer_.clear();
     sources_.clear();
@@ -58,6 +95,14 @@ void RtuSession::stop()
 void RtuSession::submit(const OperationRequest &request)
 {
     if (slave_) { slave_->submit(request); return; }
+    if (request.action == "configure-polling") {
+        const auto error = !active_ ? QStringLiteral("会话尚未启动") : request_.id || !pending_.isEmpty()
+            ? QStringLiteral("请等待在途与排队操作结束后调整会话配置") : configureSettings(request.parameters);
+        services_.publish({request.id, error.isEmpty() ? "success" : "invalid",
+            error.isEmpty() ? QStringLiteral("已更新会话读取重试和轮询配置") : error, request.parameters});
+        if (error.isEmpty() && services_.publishConfiguration) services_.publishConfiguration(request.parameters);
+        return;
+    }
     const int unit = request.parameters.value("unit").toInt(-1);
     const int start = request.parameters.value("start").toInt(-1);
     const int count = request.parameters.value("count").toInt(-1);
@@ -69,7 +114,6 @@ void RtuSession::submit(const OperationRequest &request)
     WritePdu write;
     QString error;
     if (!active_) error = QStringLiteral("会话尚未启动");
-    else if (request_.id) error = QStringLiteral("总线已有在途操作，请等待结束");
     else if (uncertain_) error = QStringLiteral("上次交互未确认，无法可靠区分迟到响应；请停止并重启会话");
     else if (!function && !writing) error = QStringLiteral("不支持的 Modbus 操作");
     else if (unit < 1 || unit > 247) error = QStringLiteral("从站地址必须为 1..247；当前交互需要设备应答，不支持广播");
@@ -77,26 +121,91 @@ void RtuSession::submit(const OperationRequest &request)
     else if (start < 0 || start > 65535 || count < 1 || count > maximum || start + count > 65536)
         error = QStringLiteral("PDU 起始地址为 0..65535，数量为 1..%1，范围不得越界").arg(maximum);
     if (!error.isEmpty()) { services_.publish({request.id, "invalid", error, {}}); return; }
+    if (request_.id || phase_ == Phase::Quarantine || !pending_.isEmpty()) {
+        if (pending_.size() >= 64) {
+            services_.publish({request.id, "invalid", QStringLiteral("总线排队已满（64 项），本次操作未发送"), {}});
+        } else {
+            pending_.append(request);
+            services_.publish({request.id, "queued", QStringLiteral("已进入统一总线队列，等待前一操作完成"), {}});
+        }
+        return;
+    }
+    begin(request);
+}
+void RtuSession::begin(const OperationRequest &request)
+{
+    const QStringList actions{"read-coils", "read-discrete", "read-holding", "read-input"};
+    const QStringList areas{"coils", "discrete", "holding", "input"};
+    const int function = actions.indexOf(request.action) + 1;
+    WritePdu write;
+    if (isWriteAction(request.action)) encodeWritePdu(request.action, request.parameters, write);
     request_ = request;
-    unit_ = unit;
-    start_ = start;
-    count_ = count;
+    unit_ = request.parameters.value("unit").toInt();
+    start_ = request.parameters.value("start").toInt();
+    count_ = request.parameters.value("count").toInt();
     function_ = function;
     area_ = function ? areas[function - 1] : QString{};
     write_ = std::move(write);
     writeSubmitted_ = false;
+    attempt_ = 1;
+    freshnessUncertain_ = !write_.function && (allReadsUncertain_ || uncertainReads_.contains(responseShape()));
     phase_ = Phase::WaitingIdle;
     deadlineUs_ = services_.nowUs() + qMax(timeoutUs_, 1000000LL);
     services_.publish({request.id, "queued", QStringLiteral("操作已接受，等待 RTU 帧间静默；写入不会自动重试"), {}});
 }
+QString RtuSession::responseShape() const
+{
+    return QStringLiteral("%1/%2/%3").arg(unit_).arg(function_).arg(count_);
+}
 void RtuSession::finish(const QString &state, const QString &detail, QJsonObject result)
 {
     const auto id = request_.id;
+    const auto poll = pollOperations_.contains(id) ? pollOperations_.take(id) : qsizetype(-1);
+    result["attempts"] = attempt_;
+    if (!write_.function && state != "success" && state != "exception") {
+        auto fields = result;
+        fields["unit"] = unit_;
+        fields["area"] = area_;
+        fields["start"] = start_;
+        fields["state"] = state;
+        fields["poll"] = poll >= 0;
+        fields["operationResult"] = true;
+        Message message;
+        message.operationId = id;
+        message.status = state;
+        message.detail = detail;
+        message.fields = fields;
+        services_.publishMessage(message);
+    }
+    if (poll >= 0 && poll < polls_.size()) polls_[poll].dueUs = services_.nowUs() + polls_[poll].intervalUs;
     request_ = {};
     phase_ = Phase::Idle;
     const bool unconfirmedWrite = write_.function && writeSubmitted_ && state != "success" && state != "exception";
     if (unconfirmedWrite) result["uncertain"] = true;
     services_.publish({id, state, unconfirmedWrite ? detail + QStringLiteral("；设备写入结果不确定，不自动重试，请核对设备后决定是否再次执行") : detail, std::move(result)});
+}
+void RtuSession::readTimeout()
+{
+    Message diagnostic;
+    diagnostic.operationId = request_.id;
+    diagnostic.status = "attempt-timeout";
+    diagnostic.detail = QStringLiteral("读取尝试 %1 超时；迟到响应不能证明属于后续尝试").arg(attempt_);
+    diagnostic.fields = {{"attempt", attempt_}, {"unit", unit_}};
+    services_.publishMessage(diagnostic);
+    if (attempt_ <= extraRetries_) {
+        ++attempt_;
+        phase_ = Phase::RetryWait;
+        retryReadyUs_ = services_.nowUs() + retryIntervalUs_;
+        deadlineUs_ = retryReadyUs_ + qMax(timeoutUs_, 1000000LL);
+        services_.publish({request_.id, "retry-wait", QStringLiteral("等待读取重试间隔；下一次为尝试 %1/%2")
+            .arg(attempt_).arg(extraRetries_ + 1), {{"attempt", attempt_}, {"extraReadRetries", extraRetries_}}});
+    } else {
+        if (uncertainReads_.size() >= 64 && !uncertainReads_.contains(responseShape())) allReadsUncertain_ = true;
+        else uncertainReads_[responseShape()] = request_.id;
+        finish("timeout", QStringLiteral("所有读取尝试均未获得有效应答，进入有界隔离等待后继续总线调度"));
+        phase_ = Phase::Quarantine;
+        retryReadyUs_ = services_.nowUs() + timeoutUs_ + retryIntervalUs_;
+    }
 }
 void RtuSession::onInput(const TraceRecord &record)
 {
@@ -138,19 +247,26 @@ void RtuSession::finishFrame()
         message.fields = {{"unit", unit}, {"function", function}};
         if (!request_.id || phase_ != Phase::AwaitingResponse || unit != unit_
             || (function != expected && function != (expected | 0x80))) {
-            message.status = "unmatched";
-            message.detail = QStringLiteral("未确认归属的响应：地址/功能码不匹配或当前没有等待应答的操作");
+            message.status = phase_ == Phase::RetryWait || phase_ == Phase::Quarantine ? "late" : "unmatched";
+            message.detail = QStringLiteral("未确认归属的响应：地址/功能码不匹配或当前没有等待应答的操作；不归入新的尝试");
         } else if (lastInputUs_ > deadlineUs_) {
             message.status = "late";
             message.detail = QStringLiteral("响应晚于本次应答期限，不作为设备确认");
         } else if (function == (expected | 0x80) && buffer_.size() == 5 && quint8(buffer_[2]) != 0) {
-            message.operationId = request_.id;
+            message.operationId = !write_.function && freshnessUncertain_ ? 0 : request_.id;
             message.status = "exception";
             const int code = quint8(buffer_[2]);
             message.fields["exceptionCode"] = code;
+            message.fields["freshnessUncertain"] = !write_.function && freshnessUncertain_;
+            if (!write_.function && freshnessUncertain_) message.fields["candidateOperationId"] = QString::number(request_.id);
+            message.fields["operationResult"] = true;
+            message.fields["state"] = "exception";
+            message.fields["area"] = area_;
+            message.fields["start"] = start_;
             message.detail = QStringLiteral("Modbus 异常响应，异常码 0x%1").arg(code, 2, 16, QChar('0'));
+            if (!write_.function && freshnessUncertain_) message.detail += QStringLiteral("；先前同形读取曾超时，不能证明属于当前操作");
             services_.publishMessage(message);
-            finish("exception", message.detail, {{"exceptionCode", code}});
+            finish("exception", message.detail, {{"exceptionCode", code}, {"freshnessUncertain", !write_.function && freshnessUncertain_}});
             published = true;
         } else if (write_.function && function == write_.function && buffer_.size() == 8
                    && buffer_.mid(1, 5) == write_.acknowledgement) {
@@ -174,15 +290,31 @@ void RtuSession::finishFrame()
                 if (function_ <= 2) values.append(bool(quint8(buffer_[3 + i / 8]) & (1 << (i % 8))));
                 else values.append((quint8(buffer_[3 + 2 * i]) << 8) | quint8(buffer_[4 + 2 * i]));
             }
-            message.operationId = request_.id;
+            message.operationId = freshnessUncertain_ ? 0 : request_.id;
             message.status = "success";
             message.detail = QStringLiteral("已验证功能码 %1 的设备应答").arg(function_, 2, 16, QChar('0'));
             message.fields["values"] = values;
             message.fields["area"] = area_;
             message.fields["start"] = start_;
+            message.fields["operationResult"] = true;
+            message.fields["state"] = "success";
+            message.fields["attempt"] = attempt_ == 1 ? 1 : 0;
+            message.fields["freshnessUncertain"] = freshnessUncertain_;
+            if (freshnessUncertain_) message.fields["candidateOperationId"] = QString::number(request_.id);
+            if (freshnessUncertain_) {
+                message.fields["possiblePreviousOperation"] = QString::number(uncertainReads_.value(responseShape()));
+                message.detail += QStringLiteral("；先前同形读取曾超时，有限隔离不能证明当前归属或新采样，候选值仅供核对");
+            }
+            if (attempt_ > 1) {
+                QJsonArray possible;
+                for (int i = 1; i <= attempt_; ++i) possible.append(i);
+                message.fields["possibleAttempts"] = possible;
+                message.detail += QStringLiteral("；RTU 无事务号，不能区分此操作的多次尝试来源");
+            }
             services_.publishMessage(message);
             finish("success", message.detail, {{"unit", unit_}, {"start", start_}, {"area", area_},
-                                               {"function", function_}, {"values", values}});
+                {"function", function_}, {"values", values}, {"attemptAttributionUncertain", attempt_ > 1},
+                {"freshnessUncertain", freshnessUncertain_}});
             published = true;
         } else message.detail = QStringLiteral("响应长度、字节计数或异常格式不符合当前操作");
     }
@@ -227,7 +359,35 @@ void RtuSession::tick()
     const auto now = services_.nowUs();
     // 观测块时间无法证明物理字节间隙：没有可信静默元数据时保留不完整候选帧。
     if (haveInput_ && phase_ != Phase::Sending && now - lastInputUs_ >= interFrameUs_
-        && (phase_ == Phase::WaitingIdle || phase_ == Phase::Idle || trustedTiming_ || candidateComplete())) finishFrame();
+        && (phase_ == Phase::WaitingIdle || phase_ == Phase::Idle || phase_ == Phase::RetryWait
+            || phase_ == Phase::Quarantine || trustedTiming_ || candidateComplete())) finishFrame();
+    if (phase_ == Phase::Quarantine && now >= retryReadyUs_) phase_ = Phase::Idle;
+    if (phase_ == Phase::Idle && !request_.id) {
+        if (!pending_.isEmpty()) begin(pending_.takeFirst());
+        else if (!polls_.isEmpty() && services_.submit) {
+            for (qsizetype i = 0; i < polls_.size(); ++i) {
+                const auto index = (nextPoll_ + i) % polls_.size();
+                auto &task = polls_[index];
+                if (now < task.dueUs) continue;
+                auto parameters = task.parameters;
+                task.dueUs = now + task.intervalUs;
+                nextPoll_ = (index + 1) % polls_.size();
+                const auto id = services_.submit(task.action, parameters);
+                if (id && request_.id == id) pollOperations_[id] = index;
+                break;
+            }
+        }
+    }
+    if (phase_ == Phase::RetryWait) {
+        if (now >= deadlineUs_) {
+            finish("timeout", QStringLiteral("等待重试总线空闲超时，未继续发送"));
+            phase_ = Phase::Quarantine;
+            retryReadyUs_ = now + timeoutUs_ + retryIntervalUs_;
+        } else if (now >= retryReadyUs_ && !haveInput_ && now - lastActivityUs_ >= interFrameUs_) {
+            phase_ = Phase::WaitingIdle;
+            deadlineUs_ = now + qMax(timeoutUs_, 1000000LL);
+        }
+    }
     if (phase_ == Phase::WaitingIdle && now >= deadlineUs_) {
         finish("timeout", QStringLiteral("等待总线空闲超时，本次操作未发送"));
         return;
@@ -248,7 +408,8 @@ void RtuSession::tick()
         deadlineUs_ = now + timeoutUs_;
         if (services_.send(request_.id, request)) {
             writeSubmitted_ = write_.function != 0;
-            services_.publish({request_.id, "submitted", QStringLiteral("通道已接受发送，等待本地发送完成"), {}});
+            services_.publish({request_.id, "submitted", QStringLiteral("通道已接受发送，等待本地发送完成（尝试 %1）").arg(attempt_),
+                {{"attempt", attempt_}}});
         } else finish("transport-error", QStringLiteral("统一通道拒绝发送，本次操作未提交"));
     }
     if (request_.id && (phase_ == Phase::Sending || phase_ == Phase::AwaitingResponse) && now >= deadlineUs_) {
@@ -257,9 +418,12 @@ void RtuSession::tick()
             && now < lastInputUs_ + interFrameUs_) return;
         if (haveInput_) finishFrame();
         if (!request_.id) return;
-        uncertain_ = true;
-        if (phase_ == Phase::Sending) finish("transport-error", QStringLiteral("本地发送超时，未获得后端完成确认"));
-        else finish("timeout", QStringLiteral("等待设备应答超时；请停止并重启会话后再次操作"));
+        if (phase_ == Phase::AwaitingResponse && !write_.function) readTimeout();
+        else {
+            uncertain_ = true;
+            finish(phase_ == Phase::Sending ? "transport-error" : "timeout", phase_ == Phase::Sending
+                ? QStringLiteral("本地发送超时，未获得后端完成确认") : QStringLiteral("等待设备应答超时；请停止并重启会话后再次操作"));
+        }
     }
 }
 }

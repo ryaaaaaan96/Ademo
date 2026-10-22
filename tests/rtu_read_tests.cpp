@@ -15,7 +15,7 @@ namespace {
 SessionConfig serialConfig(const QString &baud = "9600")
 {
     return {"modbus.rtu", "serial", "master", {{"port", "COM9999"}, {"baud", baud},
-            {"dataBits", "8"}, {"parity", "even"}, {"stopBits", "1"}}, {}};
+            {"dataBits", "8"}, {"parity", "even"}, {"stopBits", "1"}}, {{"extraReadRetries", 0}}};
 }
 const QJsonObject twoRegisters{{"unit", 1}, {"start", 0}, {"count", 2}};
 struct Wire {
@@ -90,7 +90,7 @@ private slots:
         const auto id = h.session.submit("read-holding", twoRegisters);
         QCOMPARE(h.session.operation(id).update.state, "queued");
         const auto busy = h.session.submit("read-holding", twoRegisters);
-        QCOMPARE(h.session.operation(busy).update.state, "invalid");
+        QCOMPARE(h.session.operation(busy).update.state, "queued");
         h.advance(4010);
         QVERIFY(h.wire.writes.isEmpty());
         h.advance(1);
@@ -282,8 +282,8 @@ private slots:
         QCOMPARE(h.session.operation(id).update.state, "timeout");
         QCOMPARE(h.wire.writes.size(), 1); // 不实现 05 的读取重试。
         const auto retry = h.session.submit("read-holding", twoRegisters);
-        QCOMPARE(h.session.operation(retry).update.state, "invalid");
-        QVERIFY(h.session.operation(retry).update.detail.contains(QStringLiteral("迟到")));
+        QCOMPARE(h.session.operation(retry).update.state, "queued");
+        QCOMPARE(h.wire.writes.size(), 1); // 前一次读取耗尽后先隔离，不能立即再次发送。
     }
     void exceptionIsNotTimeout() {
         Harness h(catalog);
@@ -526,6 +526,12 @@ private slots:
         QFETCH(QString, outcome);
         Wire wire;
         Workbench window(catalog, nullptr, wire.factory());
+        QTest::mouseClick(window.findChild<QPushButton *>("pollSettings"), Qt::LeftButton);
+        auto *settings = window.findChild<QWidget *>("pollSettingsDialog");
+        QVERIFY(settings);
+        settings->findChild<QSpinBox *>("extraReadRetries")->setValue(0);
+        QTest::mouseClick(settings->findChild<QPushButton *>("applyPollSettings"), Qt::LeftButton);
+        settings->close();
         wire.onWrite = [&](quint64 id) {
             wire.events.sent(id, true, {});
             if (outcome != "timeout") QTimer::singleShot(10, &window, [&] {
