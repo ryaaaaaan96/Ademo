@@ -32,7 +32,7 @@ Status: ready-for-agent
 
 ## 第一项可执行工作
 
-2026-10-22，[01：启动与停止 RTU 串口会话](issues/01-rtu-session-lifecycle.md) 和 [02：完成一次 RTU 保持寄存器读取](issues/02-rtu-first-register-read.md) 已完成验收勾选，分别见 [01 证据](evidence/01/acceptance.md)、[02 证据](evidence/02/acceptance.md)。分诊标签保持不变，不用它代表完成状态。本次仅实施 02；03、04、11 的直接前置现已满足，尚未开始这些任务。
+2026-10-22，[01：启动与停止 RTU 串口会话](issues/01-rtu-session-lifecycle.md) 和 [02：完成一次 RTU 保持寄存器读取](issues/02-rtu-first-register-read.md) 已完成验收勾选，分别见 [01 证据](evidence/01/acceptance.md)、[02 证据](evidence/02/acceptance.md)，对应提交 `f5b962d`、`1fc90db` 已核验。分诊标签保持不变，不用它代表完成状态。本轮实施范围为 03–12；13 等待真实硬件联调条件，14–19 不启动。
 
 Qt/LLVM-MinGW、Debug/Release 与 LLDB 验证已完成，见 [环境证据](toolchain-environment.md)，不重复选型。原工具链 issue 的 Modbus 实现路径选择已由 [02](issues/02-rtu-first-register-read.md) 完成核验，见 [路径决定](modbus-implementation-path.md)；其余功能码和主从实现仍按任务依赖推进。
 
@@ -50,6 +50,15 @@ Qt/LLVM-MinGW、Debug/Release 与 LLDB 验证已完成，见 [环境证据](tool
 [旧版 12 项索引](implementation-plan-legacy-2026-10-22.md) 和 [旧 issue 原文](legacy-issues/README.md) 已保留。父规格中的旧 12 项说明是发布前上下文，当前执行以本表为准；其旧链接仍可到达原文和后继任务。
 
 ## Comments
+
+### 2026-10-22：RTU 03–12 并行实施启动
+
+用户要求先提交现有规格、设计、任务和工具配置；共享基线为 `fb14cb8`，构建目录继续忽略。集成分支为 `codex/rtu-03-12-integration`。应用 worktree 工具因 Git 所有权检查失败，改用命令级 safe.directory 创建仓库内独立 worktree，不改全局信任配置。
+
+- 首批：03、04、11 各在独立 worktree 和分支实施。
+- 后续：03 验收后启动 05、06；04+06 后启动 07，06 后启动 08；05+07 后启动 09；08+09 后启动 10；05+11 后启动 12。
+- 每项先完成对应会话入口测试、必要界面证据与任务回写，提交并逐项验证后合入；最终以共享基线执行 Standards / Spec 整体审查。
+- 根代理统一更新本索引，实施者更新各自 issue 和 evidence，避免用标签误报完成。01/02 只回归，不重复实施；硬件条件未确认时不把受控传输结果计为 13 完成。
 
 ### 2026-10-22：发布确认后的 19 项任务
 
