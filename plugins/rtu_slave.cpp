@@ -1,4 +1,5 @@
 #include "rtu_slave.h"
+#include "write_pdu.h"
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -23,6 +24,23 @@ quint16 crc16(const QByteArray &bytes) {
 }
 int word(const QByteArray &bytes, int offset) { return (quint8(bytes[offset]) << 8) | quint8(bytes[offset + 1]); }
 void appendWord(QByteArray &bytes, int value) { bytes.append(char(value >> 8)); bytes.append(char(value)); }
+int updateDevice(SlaveDevice &device, const WritePdu &write, const QJsonArray &written)
+{
+    const auto name = write.function == 5 || write.function == 15 ? "coils" : "holding";
+    auto areas = device.document.value("areas").toObject();
+    auto area = areas.value(name).toObject();
+    auto values = area.value("values").toArray();
+    const int offset = write.start - area.value("start").toInt();
+    if (offset < 0 || offset + write.count > values.size()) return 2;
+    // 先在值快照上完成全部修改，再一次替换目标设备文档。
+    for (int i = 0; i < write.count; ++i) values[offset + i] = written[i];
+    area["values"] = values; areas[name] = area;
+    auto next = device.document; next["areas"] = areas;
+    device.document = std::move(next);
+    device.dirty = true;
+    ++device.revision;
+    return 0;
+}
 }
 QString validateSlaveDocument(const QJsonObject &document)
 {
@@ -126,10 +144,37 @@ void RtuSlave::finishFrame()
         message.fields = {{"unit", unit}, {"function", function}};
         message.status = "unmatched";
         message.detail = QStringLiteral("未知设备或广播读取，不应答");
-        if (unit && devices_.contains(unit)) {
+        const bool writing = function == 5 || function == 6 || function == 15 || function == 16;
+        if ((unit && devices_.contains(unit)) || (!unit && writing)) {
             int exception = 0;
             QByteArray response;
-            if (function < 1 || function > 4) exception = 1;
+            const bool busy = !response_.isEmpty() || pendingSend_;
+            if (busy) {
+                message.status = "rejected";
+                message.detail = QStringLiteral("上次从站应答尚未完成，本请求未执行");
+            } else if (writing) {
+                WritePdu write;
+                QJsonArray values;
+                exception = decodeWritePdu(buffer_.mid(1, buffer_.size() - 3), write, values);
+                if (!unit) {
+                    QJsonArray updated, rejected;
+                    if (!exception) for (auto &device : devices_) {
+                        if (updateDevice(device, write, values)) rejected.append(device.unit);
+                        else updated.append(device.unit);
+                    }
+                    message.status = exception ? "invalid" : "broadcast-written";
+                    message.detail = QStringLiteral("广播设备写入不应答；各设备独立校验并完整提交，文件不会自动保存");
+                    message.fields["updatedUnits"] = updated; message.fields["rejectedUnits"] = rejected;
+                    if (exception) message.fields["exceptionCode"] = exception;
+                } else {
+                    if (!exception) exception = updateDevice(devices_[unit], write, values);
+                    if (!exception) {
+                        response.append(char(unit)); response.append(write.acknowledgement);
+                        message.fields["start"] = write.start; message.fields["count"] = write.count;
+                        message.fields["revision"] = QString::number(devices_[unit].revision);
+                    }
+                }
+            } else if (function < 1 || function > 4) exception = 1;
             else if (buffer_.size() != 8) exception = 3;
             else {
                 const int start = word(buffer_, 2), count = word(buffer_, 4);
@@ -152,16 +197,14 @@ void RtuSlave::finishFrame()
                     }
                 }
             }
-            if (exception) { response.append(char(unit)); response.append(char(function | 0x80)); response.append(char(exception)); message.fields["exceptionCode"] = exception; }
-            const auto crc = crc16(response); response.append(char(crc)); response.append(char(crc >> 8));
-            if (!response_.isEmpty() || pendingSend_) {
-                message.status = "rejected";
-                message.detail = QStringLiteral("上次从站应答尚未完成，本请求不排入无限队列");
-            } else {
+            if (unit && !busy) {
+                if (exception) { response.append(char(unit)); response.append(char(function | 0x80)); response.append(char(exception)); message.fields["exceptionCode"] = exception; }
+                const auto crc = crc16(response); response.append(char(crc)); response.append(char(crc >> 8));
                 response_ = response;
                 responseSources_ = sourceRanges_;
                 message.status = exception ? "exception" : "response-ready";
-                message.detail = QStringLiteral("请求已验证，应答等待帧间静默及统一通道发送");
+                message.detail = writing && !exception ? QStringLiteral("设备写入已完整生效，未保存到文件；应答等待统一通道发送")
+                    : QStringLiteral("请求已验证，应答等待帧间静默及统一通道发送");
             }
         }
     }
@@ -185,8 +228,12 @@ void RtuSlave::tick()
 {
     if (!active_) return;
     const auto now = services_.nowUs();
+    bool complete = buffer_.size() >= 8;
+    if (buffer_.size() >= 2 && (quint8(buffer_[1]) == 15 || quint8(buffer_[1]) == 16))
+        complete = oversized_ || (buffer_.size() >= 7 && buffer_.size() >= 9 + quint8(buffer_[6]));
     if (!buffer_.isEmpty() && now - lastInput_ >= t35_
-        && (buffer_.size() >= 8 || (buffer_.size() >= 4 && (quint8(buffer_[1]) < 1 || quint8(buffer_[1]) > 4)))) finishFrame();
+        && (complete || (buffer_.size() >= 4 && quint8(buffer_[1]) != 15 && quint8(buffer_[1]) != 16
+            && (quint8(buffer_[1]) < 1 || quint8(buffer_[1]) > 6)))) finishFrame();
     if (!response_.isEmpty() && !pendingSend_ && now - lastActivity_ >= t35_) {
         const auto bytes = std::exchange(response_, {});
         sentSources_ = std::exchange(responseSources_, {});
