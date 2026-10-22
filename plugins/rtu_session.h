@@ -37,5 +37,7 @@ private:
     int unit_ = 0;
     int start_ = 0;
     int count_ = 0;
+    int function_ = 3;
+    QString area_ = "holding";
 };
 }

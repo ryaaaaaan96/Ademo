@@ -1,11 +1,13 @@
 #include "debugger/host.h"
 #include <QApplication>
+#include <QComboBox>
 #include <QDir>
 #include <QJsonArray>
 #include <QLabel>
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QSpinBox>
+#include <QTableWidget>
 #include <QTest>
 
 using namespace debugger;
@@ -136,6 +138,98 @@ private slots:
         h.advance(5000);
         QCOMPARE(h.session.operation(id).update.result.value("values").toArray(), QJsonArray({555, 0, 100}));
         QCOMPARE(h.session.operation(id).update.result.value("start").toInt(), 107);
+    }
+    void fourAreaSpecificationVectors_data() {
+        QTest::addColumn<QString>("action");
+        QTest::addColumn<QString>("area");
+        QTest::addColumn<int>("start");
+        QTest::addColumn<int>("count");
+        QTest::addColumn<QByteArray>("request");
+        QTest::addColumn<QByteArray>("response");
+        QTest::addColumn<QJsonArray>("expected");
+        const auto bits = [](const char *text) { QJsonArray a; for (; *text; ++text) a.append(*text == '1'); return a; };
+        // Modbus Application Protocol V1.1b3 §6.1/6.2/6.4 的 PDU 示例，固定 RTU 封装。
+        QTest::newRow("01-coils") << QString("read-coils") << QString("coils") << 19 << 37
+            << QByteArray::fromHex("1101001300250e84") << QByteArray::fromHex("110105cd6bb20e1b45e6")
+            << bits("1011001111010110010011010111000011011");
+        QTest::newRow("02-discrete") << QString("read-discrete") << QString("discrete") << 196 << 22
+            << QByteArray::fromHex("110200c40016baa9") << QByteArray::fromHex("110203acdb352018")
+            << bits("0011010111011011101011");
+        QTest::newRow("03-holding") << QString("read-holding") << QString("holding") << 107 << 3
+            << QByteArray::fromHex("1103006b00037687") << QByteArray::fromHex("110306022b00000064c8ba")
+            << QJsonArray({555, 0, 100});
+        QTest::newRow("04-input") << QString("read-input") << QString("input") << 8 << 1
+            << QByteArray::fromHex("110400080001b298") << QByteArray::fromHex("110402000af8f4")
+            << QJsonArray({10});
+    }
+    void fourAreaSpecificationVectors() {
+        QFETCH(QString, action); QFETCH(QString, area); QFETCH(int, start); QFETCH(int, count);
+        QFETCH(QByteArray, request); QFETCH(QByteArray, response); QFETCH(QJsonArray, expected);
+        Harness h(catalog);
+        QVERIFY(h.start());
+        const auto id = h.session.submit(action, {{"unit", 17}, {"start", start}, {"count", count}});
+        h.advance(5000);
+        QCOMPARE(h.wire.writes.last().second, request);
+        h.localSent(id);
+        h.receive(response.left(4));
+        h.advance(500);
+        h.receive(response.mid(4));
+        h.advance(5000);
+        const auto operation = h.session.operation(id);
+        QCOMPARE(operation.update.state, "success");
+        QCOMPARE(operation.update.result.value("values").toArray(), expected);
+        QCOMPARE(operation.update.result.value("area").toString(), area);
+        QCOMPARE(operation.update.result.value("unit").toInt(), 17);
+        QCOMPARE(operation.update.result.value("start").toInt(), start);
+        QCOMPARE(h.session.messages(id).last().sources.size(), 2);
+    }
+    void fourAreaBoundsAndExceptions() {
+        for (const auto &action : {"read-coils", "read-discrete", "read-holding", "read-input"}) {
+            Harness h(catalog);
+            QVERIFY(h.start());
+            const bool bit = QString(action) == "read-coils" || QString(action) == "read-discrete";
+            for (const auto &parameters : QList<QJsonObject>{
+                    {{"unit", 1}, {"start", 0}, {"count", bit ? 2001 : 126}},
+                    {{"unit", 1}, {"start", 65535}, {"count", 2}},
+                    {{"unit", 1}, {"start", 0.5}, {"count", 1}},
+                    {{"unit", 1}, {"start", 0}, {"count", 0}}}) {
+                const auto invalid = h.session.submit(action, parameters);
+                QCOMPARE(h.session.operation(invalid).update.state, "invalid");
+            }
+            QVERIFY(h.wire.writes.isEmpty());
+            const auto id = h.session.submit(action, {{"unit", 1}, {"start", 65535}, {"count", 1}});
+            h.advance(5000);
+            h.localSent(id);
+            const QByteArray exception = QString(action) == "read-coils" ? "018102c191" :
+                QString(action) == "read-discrete" ? "018202c161" : QString(action) == "read-input" ? "018402c2c1" : "018302c0f1";
+            h.receive(QByteArray::fromHex(exception));
+            h.advance(5000);
+            QCOMPARE(h.session.operation(id).update.state, "exception");
+            QVERIFY(h.session.operation(id).update.result.value("values").isUndefined());
+        }
+        Harness maximum(catalog);
+        QVERIFY(maximum.start());
+        maximum.session.submit("read-coils", {{"unit", 1}, {"start", 0}, {"count", 2000}});
+        maximum.advance(5000);
+        QCOMPARE(maximum.wire.writes.last().second.toHex(), "0101000007d03fa6");
+    }
+    void wrongAreaResponseCannotBecomeObservation() {
+        Harness h(catalog);
+        QVERIFY(h.start());
+        const auto id = h.session.submit("read-coils", {{"unit", 1}, {"start", 0}, {"count", 1}});
+        h.advance(5000); h.localSent(id);
+        h.receive(QByteArray::fromHex("010201016048")); // 相同地址/长度的离散输入不是线圈响应。
+        h.advance(5000);
+        QCOMPARE(h.session.messages(id).last().status, "unmatched");
+        QVERIFY(h.session.operation(id).update.result.value("values").isUndefined());
+        h.receive(QByteArray::fromHex("010101ff11c8")); // CRC 正确，但未请求的高7位不是0。
+        h.advance(5000);
+        QCOMPARE(h.session.messages(id).last().status, "invalid");
+        QVERIFY(h.session.messages(id).last().detail.contains(QStringLiteral("未用高位")));
+        QVERIFY(h.session.operation(id).update.result.value("values").isUndefined());
+        h.receive(QByteArray::fromHex("010101019048"));
+        h.advance(5000);
+        QCOMPARE(h.session.operation(id).update.result.value("values").toArray(), QJsonArray({true}));
     }
     void invalidRequests_data() {
         QTest::addColumn<QJsonObject>("parameters");
@@ -389,6 +483,44 @@ private slots:
         QTest::newRow("success") << QString("success");
         QTest::newRow("exception") << QString("exception");
         QTest::newRow("timeout") << QString("timeout");
+    }
+    void widgetFourAreaObservations() {
+        Wire wire;
+        Workbench window(catalog, nullptr, wire.factory());
+        int reply = 0;
+        const QList<QByteArray> responses{QByteArray::fromHex("010101019048"), QByteArray::fromHex("020402fffffc80")};
+        wire.onWrite = [&](quint64 id) {
+            wire.events.sent(id, true, {});
+            const auto bytes = responses[reply++];
+            QTimer::singleShot(10, &window, [&, bytes] { wire.events.received(bytes); });
+        };
+        window.resize(940, 900); window.show();
+        auto *read = window.findChild<QPushButton *>("readHolding");
+        auto *area = window.findChild<QComboBox *>("readArea");
+        auto *table = window.findChild<QTableWidget *>("masterObservations");
+        auto *result = window.findChild<QLabel *>("readResult");
+        QVERIFY(read && area && table && result);
+        QTest::mouseClick(window.findChild<QPushButton *>("start"), Qt::LeftButton);
+        QTRY_VERIFY(read->isEnabled());
+        area->setCurrentIndex(0);
+        QCOMPARE(window.findChild<QSpinBox *>("registerCount")->maximum(), 2000);
+        QTest::mouseClick(read, Qt::LeftButton);
+        QTRY_VERIFY(result->text().contains("true"));
+        QTRY_COMPARE(table->rowCount(), 1);
+        QCOMPARE(table->item(0, 0)->text(), "1");
+        QCOMPARE(table->item(0, 1)->text(), "coils");
+        QTRY_VERIFY(read->isEnabled());
+        area->setCurrentIndex(3);
+        window.findChild<QSpinBox *>("unit")->setValue(2);
+        QCOMPARE(window.findChild<QSpinBox *>("registerCount")->maximum(), 125);
+        QTest::mouseClick(read, Qt::LeftButton);
+        QTRY_VERIFY(result->text().contains("65535"));
+        QTRY_COMPARE(table->rowCount(), 2);
+        QCOMPARE(table->item(1, 1)->text(), "input");
+        QCOMPARE(table->item(1, 0)->text(), "2");
+        QVERIFY(table->item(0, 3)->text().contains("true"));
+        const auto output = qEnvironmentVariable("DEBUGGER_EVIDENCE_DIR");
+        if (!output.isEmpty()) QVERIFY(window.grab().save(output + "/four-area-observations-controlled.png"));
     }
     void widgetReadFlow() {
         QFETCH(QString, outcome);

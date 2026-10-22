@@ -53,19 +53,25 @@ void RtuSession::submit(const OperationRequest &request)
     const int unit = request.parameters.value("unit").toInt(-1);
     const int start = request.parameters.value("start").toInt(-1);
     const int count = request.parameters.value("count").toInt(-1);
+    const QStringList actions{"read-coils", "read-discrete", "read-holding", "read-input"};
+    const QStringList areas{"coils", "discrete", "holding", "input"};
+    const int function = actions.indexOf(request.action) + 1;
+    const int maximum = function <= 2 ? 2000 : 125;
     QString error;
     if (!active_) error = QStringLiteral("会话尚未启动");
     else if (request_.id) error = QStringLiteral("总线已有在途读取，请等待结束");
     else if (uncertain_) error = QStringLiteral("上次交互未确认，无法可靠区分迟到响应；请停止并重启会话");
-    else if (request.action != "read-holding") error = QStringLiteral("当前仅支持读取保持寄存器（03）");
+    else if (!function) error = QStringLiteral("未知读取操作；支持功能码 01、02、03、04");
     else if (unit < 1 || unit > 247) error = QStringLiteral("从站地址必须为 1..247，不支持广播读取");
-    else if (start < 0 || start > 65535 || count < 1 || count > 125 || start + count > 65536)
-        error = QStringLiteral("PDU 起始地址为 0..65535，数量为 1..125，范围不得越界");
+    else if (start < 0 || start > 65535 || count < 1 || count > maximum || start + count > 65536)
+        error = QStringLiteral("PDU 起始地址为 0..65535，数量为 1..%1，范围不得越界").arg(maximum);
     if (!error.isEmpty()) { services_.publish({request.id, "invalid", error, {}}); return; }
     request_ = request;
     unit_ = unit;
     start_ = start;
     count_ = count;
+    function_ = function;
+    area_ = areas[function - 1];
     phase_ = Phase::WaitingIdle;
     deadlineUs_ = services_.nowUs() + qMax(timeoutUs_, 1000000LL);
     services_.publish({request.id, "queued", QStringLiteral("读取已接受，等待 RTU 帧间静默"), {}});
@@ -110,13 +116,13 @@ void RtuSession::finishFrame()
         const auto function = quint8(buffer_[1]);
         message.fields = {{"unit", unit}, {"function", function}};
         if (!request_.id || phase_ != Phase::AwaitingResponse || unit != unit_
-            || (function != 3 && function != 0x83)) {
+            || (function != function_ && function != (function_ | 0x80))) {
             message.status = "unmatched";
             message.detail = QStringLiteral("未确认归属的响应：地址/功能码不匹配或当前没有等待应答的读取");
         } else if (lastInputUs_ > deadlineUs_) {
             message.status = "late";
             message.detail = QStringLiteral("响应晚于本次应答期限，不作为设备确认");
-        } else if (function == 0x83 && buffer_.size() == 5 && quint8(buffer_[2]) != 0) {
+        } else if (function == (function_ | 0x80) && buffer_.size() == 5 && quint8(buffer_[2]) != 0) {
             message.operationId = request_.id;
             message.status = "exception";
             const int code = quint8(buffer_[2]);
@@ -125,16 +131,26 @@ void RtuSession::finishFrame()
             services_.publishMessage(message);
             finish("exception", message.detail, {{"exceptionCode", code}});
             published = true;
-        } else if (function == 3 && buffer_.size() == 5 + 2 * count_ && quint8(buffer_[2]) == 2 * count_) {
+        } else if (function_ <= 2 && function == function_ && count_ % 8
+                   && buffer_.size() == 5 + (count_ + 7) / 8
+                   && (quint8(buffer_[buffer_.size() - 3]) & (0xff << (count_ % 8)))) {
+            message.detail = QStringLiteral("位响应最后字节的未用高位必须为 0");
+        } else if (function == function_ && buffer_.size() == 5 + (function_ <= 2 ? (count_ + 7) / 8 : 2 * count_)
+                   && quint8(buffer_[2]) == (function_ <= 2 ? (count_ + 7) / 8 : 2 * count_)) {
             QJsonArray values;
-            for (int i = 0; i < count_; ++i)
-                values.append((quint8(buffer_[3 + 2 * i]) << 8) | quint8(buffer_[4 + 2 * i]));
+            for (int i = 0; i < count_; ++i) {
+                if (function_ <= 2) values.append(bool(quint8(buffer_[3 + i / 8]) & (1 << (i % 8))));
+                else values.append((quint8(buffer_[3 + 2 * i]) << 8) | quint8(buffer_[4 + 2 * i]));
+            }
             message.operationId = request_.id;
             message.status = "success";
-            message.detail = QStringLiteral("已验证功能码 03 的设备应答");
+            message.detail = QStringLiteral("已验证功能码 %1 的设备应答").arg(function_, 2, 16, QChar('0'));
             message.fields["values"] = values;
+            message.fields["area"] = area_;
+            message.fields["start"] = start_;
             services_.publishMessage(message);
-            finish("success", message.detail, {{"unit", unit_}, {"start", start_}, {"values", values}});
+            finish("success", message.detail, {{"unit", unit_}, {"start", start_}, {"area", area_},
+                                               {"function", function_}, {"values", values}});
             published = true;
         } else message.detail = QStringLiteral("响应长度、字节计数或异常格式不符合当前读取");
     }
@@ -148,7 +164,7 @@ bool RtuSession::candidateComplete() const
     if (oversizedFrame_) return true;
     if (buffer_.size() < 5) return false;
     const auto function = quint8(buffer_[1]);
-    if (function == 3 || function == 4) return buffer_.size() >= 5 + quint8(buffer_[2]);
+    if (function >= 1 && function <= 4) return buffer_.size() >= 5 + quint8(buffer_[2]);
     return true;
 }
 void RtuSession::onSent(quint64 id, bool ok, const QString &reason, qint64 observedUs)
@@ -183,7 +199,7 @@ void RtuSession::tick()
     if (phase_ == Phase::WaitingIdle && !haveInput_ && now - lastActivityUs_ >= interFrameUs_) {
         QByteArray request;
         request.append(char(unit_));
-        request.append(char(3));
+        request.append(char(function_));
         appendWord(request, start_);
         appendWord(request, count_);
         const auto crc = crc16(request);

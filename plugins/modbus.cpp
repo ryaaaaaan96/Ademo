@@ -1,5 +1,6 @@
 #include "debugger/sdk.h"
 #include "rtu_session.h"
+#include <QComboBox>
 #include <QFormLayout>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -8,6 +9,8 @@
 #include <QPushButton>
 #include <QSpinBox>
 #include <QTimer>
+#include <QTableWidget>
+#include <QHeaderView>
 #include <QVBoxLayout>
 
 using namespace debugger;
@@ -20,9 +23,17 @@ public:
         unit_ = spin("unit", 1, 247, 1);
         start_ = spin("registerStart", 0, 65535, 0);
         count_ = spin("registerCount", 1, 125, 1);
+        area_ = new QComboBox(this);
+        area_->setObjectName("readArea");
+        area_->addItem(QStringLiteral("线圈（01，布尔）"), "read-coils");
+        area_->addItem(QStringLiteral("离散输入（02，布尔）"), "read-discrete");
+        area_->addItem(QStringLiteral("保持寄存器（03，16 位）"), "read-holding");
+        area_->addItem(QStringLiteral("输入寄存器（04，16 位）"), "read-input");
+        area_->setCurrentIndex(2);
         form->addRow(QStringLiteral("从站地址"), unit_);
+        form->addRow(QStringLiteral("数据区"), area_);
         form->addRow(QStringLiteral("PDU 起始地址（从 0 开始）"), start_);
-        form->addRow(QStringLiteral("保持寄存器数量"), count_);
+        form->addRow(QStringLiteral("读取数量"), count_);
         layout->addLayout(form);
         read_ = new QPushButton(QStringLiteral("读取保持寄存器（03）"), this);
         read_->setObjectName("readHolding");
@@ -31,15 +42,27 @@ public:
         result_->setObjectName("readResult");
         result_->setWordWrap(true);
         layout->addWidget(result_);
+        observations_ = new QTableWidget(0, 4, this);
+        observations_->setObjectName("masterObservations");
+        observations_->setHorizontalHeaderLabels({QStringLiteral("从站"), QStringLiteral("数据区"),
+            QStringLiteral("PDU 范围"), QStringLiteral("最近成功观测值")});
+        observations_->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        observations_->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        observations_->setMinimumHeight(130);
+        layout->addWidget(observations_);
         details_ = new QPlainTextEdit(this);
         details_->setObjectName("operationTrace");
         details_->setReadOnly(true);
         details_->setMinimumHeight(150);
         layout->addWidget(details_);
         QObject::connect(read_, &QPushButton::clicked, this, [this] {
-            if (access_.submit) operationId_ = access_.submit("read-holding",
+            if (access_.submit) operationId_ = access_.submit(area_->currentData().toString(),
                 {{"unit", unit_->value()}, {"start", start_->value()}, {"count", count_->value()}});
             refresh();
+        });
+        QObject::connect(area_, &QComboBox::currentIndexChanged, this, [this] {
+            count_->setMaximum(area_->currentIndex() <= 1 ? 2000 : 125);
+            read_->setText(QStringLiteral("读取%1").arg(area_->currentText()));
         });
         auto *timer = new QTimer(this);
         timer->setInterval(50);
@@ -64,7 +87,21 @@ private:
         const auto registers = operation.update.result.value("values").toArray();
         const int start = operation.request.parameters.value("start").toInt();
         for (int i = 0; i < registers.size(); ++i)
-            values << QStringLiteral("PDU %1 = %2").arg(start + i).arg(registers[i].toInt());
+            values << QStringLiteral("PDU %1 = %2").arg(start + i).arg(registers[i].isBool()
+                ? (registers[i].toBool() ? "true" : "false") : QString::number(registers[i].toInt()));
+        if (operation.update.state == "success" && observedOperationId_ != operationId_) {
+            observedOperationId_ = operationId_;
+            const auto unit = QString::number(operation.update.result.value("unit").toInt());
+            const auto area = operation.update.result.value("area").toString();
+            int row = 0;
+            for (; row < observations_->rowCount(); ++row)
+                if (observations_->item(row, 0)->text() == unit && observations_->item(row, 1)->text() == area) break;
+            if (row == observations_->rowCount()) observations_->insertRow(row);
+            observations_->setItem(row, 0, new QTableWidgetItem(unit));
+            observations_->setItem(row, 1, new QTableWidgetItem(area));
+            observations_->setItem(row, 2, new QTableWidgetItem(QStringLiteral("%1..%2").arg(start).arg(start + registers.size() - 1)));
+            observations_->setItem(row, 3, new QTableWidgetItem(values.join(QStringLiteral("；"))));
+        }
         result_->setText(QStringLiteral("操作 #%1 · %2\n%3\n%4")
             .arg(operationId_).arg(operation.update.state, operation.update.detail, values.join("；")));
         QStringList lines{QStringLiteral("本次操作观察窗口（未匹配的 RX 不表示已确认归属）")};
@@ -92,6 +129,9 @@ private:
     }
     SessionAccess access_;
     quint64 operationId_ = 0;
+    quint64 observedOperationId_ = 0;
+    QComboBox *area_;
+    QTableWidget *observations_;
     QSpinBox *unit_;
     QSpinBox *start_;
     QSpinBox *count_;
@@ -106,7 +146,7 @@ class modbusPlugin final : public QObject, public ProtocolPlugin {
 public:
     Descriptor describe() const override {
         return {"modbus.rtu", QStringLiteral("Modbus RTU"), buildKey(), {"master"},
-                {"serial"}, {"lifecycle", "read-holding"}, {}};
+                {"serial"}, {"lifecycle", "read-coils", "read-discrete", "read-holding", "read-input"}, {}};
     }
     std::unique_ptr<ProtocolSession> createSession(ProtocolServices services) override {
         return std::make_unique<RtuSession>(std::move(services));
