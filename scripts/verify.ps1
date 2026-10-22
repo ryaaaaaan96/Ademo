@@ -1,3 +1,4 @@
+param([string]$EvidenceId = '02')
 $ErrorActionPreference = 'Stop'
 $cmakeExecutable = 'C:\Qt\Tools\CMake_64\bin\cmake.exe'
 $ctestExecutable = 'C:\Qt\Tools\CMake_64\bin\ctest.exe'
@@ -5,7 +6,7 @@ $projectDirectory = Split-Path $PSScriptRoot -Parent
 Push-Location $projectDirectory
 try {
     foreach ($preset in @('qt-llvm-debug', 'qt-llvm-release')) {
-        $evidenceDirectory = Join-Path $projectDirectory ".scratch/multi-protocol-debugger/evidence/02/$preset"
+        $evidenceDirectory = Join-Path $projectDirectory ".scratch/multi-protocol-debugger/evidence/$EvidenceId/$preset"
         New-Item -ItemType Directory -Force $evidenceDirectory | Out-Null
         & $cmakeExecutable --preset $preset 2>&1 | Tee-Object -FilePath "$evidenceDirectory/configure.log"
         if ($LASTEXITCODE -ne 0) { throw "配置失败：$preset" }
@@ -18,14 +19,14 @@ try {
             $testExitCode = $LASTEXITCODE
         }
         finally { $env:DEBUGGER_EVIDENCE_DIR = $previousEvidenceDirectory }
-        Copy-Item "build/$preset/test-results.txt" "$evidenceDirectory/test-results.txt"
-        Copy-Item "build/$preset/read-results.txt" "$evidenceDirectory/read-results.txt"
+        Get-ChildItem -Path "build/$preset/*-results.txt" -File | Copy-Item -Destination $evidenceDirectory
         if ($testExitCode -ne 0) { throw "测试失败：$preset" }
         $artifactPaths = @(
             "build/$preset/bin/multi_protocol_debugger.exe",
-            "build/$preset/bin/session_tests.exe", "build/$preset/bin/rtu_read_tests.exe",
             "build/$preset/bin/plugins/libmodbus_plugin.dll", "build/$preset/bin/plugins/libserial_plugin.dll"
         )
+        $artifactPaths += Get-ChildItem -Path "build/$preset/bin/*tests.exe" -File |
+            ForEach-Object { [IO.Path]::GetRelativePath($projectDirectory, $_.FullName).Replace('\', '/') }
         $artifactPaths += Get-ChildItem -LiteralPath $evidenceDirectory -File |
             Where-Object { $_.Name -ne 'sha256.txt' } |
             ForEach-Object { [IO.Path]::GetRelativePath($projectDirectory, $_.FullName).Replace('\', '/') }
