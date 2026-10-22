@@ -1,0 +1,20 @@
+********* Start testing of PollTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : PollTests::initTestCase()
+PASS   : PollTests::defaultTwoRetriesAndIndependentGap()
+PASS   : PollTests::zeroRetriesAndExceptions()
+PASS   : PollTests::lateGapAndAmbiguousRetryResponse()
+PASS   : PollTests::manualAndPollingShareOneBus()
+PASS   : PollTests::exhaustedDeviceDoesNotStrandOtherPolls()
+PASS   : PollTests::boundedQueueAndStop()
+PASS   : PollTests::writeCannotEnterRetryOrPollPath()
+PASS   : PollTests::invalidSettingsDoNotOpenTransport()
+PASS   : PollTests::runtimeSettingsPersistAndTransportFailureDoesNotRetry()
+PASS   : PollTests::previousLogicalTimeoutHasUncertainFreshness()
+PASS   : PollTests::manyTimeoutShapesStayConservativelyUncertain()
+PASS   : PollTests::crcFailureRetriesOnlyAfterDeadline()
+PASS   : PollTests::widgetConfiguresTwoDevicesAndObserves()
+PASS   : PollTests::retryAndPassiveTokensShareOneAllocatorAcrossRuns()
+PASS   : PollTests::cleanupTestCase()
+Totals: 16 passed, 0 failed, 0 skipped, 0 blacklisted, 1255ms
+********* Finished testing of PollTests *********

@@ -1,0 +1,20 @@
+[1/34] Automatic MOC for target debugger_host
+[2/33] Automatic MOC for target serial_plugin
+[3/31] Automatic MOC for target modbus_plugin
+[4/29] Automatic MOC for target incompatible_plugin
+[5/27] Automatic MOC for target trace_fixture_plugin
+[6/25] Building CXX object CMakeFiles/debugger_host.dir/src/host.cpp.obj
+[7/25] Linking CXX static library libdebugger_host.a
+[8/25] Linking CXX executable bin\rtu_slave_tests.exe
+[9/25] Automatic MOC for target session_tests
+[10/24] Automatic MOC for target rtu_read_tests
+[11/23] Automatic MOC for target rtu_write_tests
+[12/22] Automatic MOC for target trace_tests
+[13/21] Linking CXX executable bin\multi_protocol_debugger.exe
+[14/21] Linking CXX executable bin\rtu_read_tests.exe
+[15/21] Linking CXX executable bin\rtu_write_tests.exe
+[16/21] Linking CXX executable bin\trace_tests.exe
+[17/21] Linking CXX executable bin\session_tests.exe
+[18/21] Automatic MOC for target rtu_poll_tests
+[19/20] Building CXX object CMakeFiles/rtu_poll_tests.dir/tests/rtu_poll_tests.cpp.obj
+[20/20] Linking CXX executable bin\rtu_poll_tests.exe

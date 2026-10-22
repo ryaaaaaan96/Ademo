@@ -1,0 +1,58 @@
+UpdateCTestConfiguration  from :C:/Users/81966/Documents/Ademo/.worktrees/rtu-master/DartConfiguration.tcl
+UpdateCTestConfiguration  from :C:/Users/81966/Documents/Ademo/.worktrees/rtu-master/build/qt-llvm-debug/DartConfiguration.tcl
+Test project C:/Users/81966/Documents/Ademo/.worktrees/rtu-master/build/qt-llvm-debug
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 1
+    Start 1: session_lifecycle
+
+1: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-master\build\qt-llvm-debug\bin\session_tests.exe "-o" "test-results.txt,txt"
+1: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-master/build/qt-llvm-debug
+1: Environment variables: 
+1:  QT_QPA_PLATFORM=windows
+1: Test timeout computed to be: 30
+1/5 Test #1: session_lifecycle ................   Passed    6.92 sec
+test 2
+    Start 2: rtu_first_read
+
+2: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-master\build\qt-llvm-debug\bin\rtu_read_tests.exe "-o" "read-results.txt,txt"
+2: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-master/build/qt-llvm-debug
+2: Environment variables: 
+2:  QT_QPA_PLATFORM=windows
+2: Test timeout computed to be: 30
+2/5 Test #2: rtu_first_read ...................   Passed    8.25 sec
+test 3
+    Start 3: rtu_polling
+
+3: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-master\build\qt-llvm-debug\bin\rtu_poll_tests.exe "-o" "poll-results.txt,txt"
+3: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-master/build/qt-llvm-debug
+3: Environment variables: 
+3:  QT_QPA_PLATFORM=windows
+3: Test timeout computed to be: 30
+3/5 Test #3: rtu_polling ......................   Passed   13.39 sec
+test 4
+    Start 4: rtu_explicit_write
+
+4: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-master\build\qt-llvm-debug\bin\rtu_write_tests.exe "-o" "write-results.txt,txt"
+4: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-master/build/qt-llvm-debug
+4: Environment variables: 
+4:  QT_QPA_PLATFORM=windows
+4: Test timeout computed to be: 30
+4/5 Test #4: rtu_explicit_write ...............   Passed    6.45 sec
+test 5
+    Start 5: trace_query_export
+
+5: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-master\build\qt-llvm-debug\bin\trace_tests.exe "-o" "trace-results.txt,txt"
+5: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-master/build/qt-llvm-debug
+5: Environment variables: 
+5:  QT_QPA_PLATFORM=windows
+5: Test timeout computed to be: 30
+5/5 Test #5: trace_query_export ...............   Passed    5.23 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Total Test time (real) =  40.26 sec

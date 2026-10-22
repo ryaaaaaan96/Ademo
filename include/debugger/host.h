@@ -76,6 +76,7 @@ private:
     void sent(quint64 run, quint64 id, bool ok, const QString &, qint64 observedUs);
     bool send(quint64 run, quint64 id, const QByteArray &);
     quint64 sendPassive(quint64 run, const QByteArray &);
+    quint64 allocateSendToken() { return (quint64(1) << 63) | nextSendToken_++; }
     void publish(OperationUpdate);
     void publishMessage(Message);
     std::shared_ptr<PluginCatalog> catalog_;
@@ -100,12 +101,14 @@ private:
     quint64 expiredTraces_ = 0;
     bool preparing_ = false;
     BackgroundExecutor preparationExecutor_;
-    quint64 nextPassiveId_ = (quint64(1) << 63);
     QSet<quint64> passiveSends_;
     QMap<quint64, qint64> passiveDeadlines_;
     quint64 expiredMessages_ = 0;
     quint64 expiredOperations_ = 0;
     TraceLimits traceLimits_;
+    struct SendAttempt { quint64 token = 0; int attempt = 0; bool completed = false; };
+    QMap<quint64, SendAttempt> sendAttempts_;
+    quint64 nextSendToken_ = 1;
 };
 class Workbench : public QWidget {
 public:
