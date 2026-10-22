@@ -57,4 +57,38 @@ QString encodeWritePdu(const QString &action, const QJsonObject &parameters, Wri
     output = std::move(result);
     return {};
 }
+int decodeWritePdu(const QByteArray &pdu, WritePdu &output, QJsonArray &values)
+{
+    if (pdu.isEmpty()) return 3;
+    const int function = quint8(pdu[0]);
+    const bool single = function == 5 || function == 6, coils = function == 5 || function == 15;
+    const QString action = function == 5 ? "write-single-coil" : function == 6 ? "write-single-register"
+        : function == 15 ? "write-multiple-coils" : function == 16 ? "write-multiple-registers" : QString();
+    if (action.isEmpty()) return 1;
+    if (pdu.size() < (single ? 5 : 6) || (single && pdu.size() != 5)) return 3;
+    const auto readWord = [&](int offset) { return (quint8(pdu[offset]) << 8) | quint8(pdu[offset + 1]); };
+    const int start = readWord(1), count = single ? 1 : readWord(3);
+    QJsonArray decoded;
+    QJsonObject parameters{{"start", start}};
+    if (single) {
+        const int value = readWord(3);
+        if (coils && value != 0 && value != 0xff00) return 3;
+        const QJsonValue typed = coils ? QJsonValue(value != 0) : QJsonValue(value);
+        decoded.append(typed); parameters["value"] = typed;
+    } else {
+        if (count < 1 || count > (coils ? 1968 : 123)) return 3;
+        const int byteCount = coils ? (count + 7) / 8 : 2 * count;
+        if (quint8(pdu[5]) != byteCount || pdu.size() != 6 + byteCount) return 3;
+        if (coils && count % 8 && (quint8(pdu.back()) >> (count % 8)) != 0) return 3;
+        for (int i = 0; i < count; ++i)
+            decoded.append(coils ? QJsonValue((quint8(pdu[6 + i / 8]) & (1 << (i % 8))) != 0)
+                                 : QJsonValue(readWord(6 + 2 * i)));
+        parameters["values"] = decoded;
+    }
+    if (start + count > 65536) return 2;
+    WritePdu checked;
+    if (!encodeWritePdu(action, parameters, checked).isEmpty()) return 3;
+    output = std::move(checked); values = std::move(decoded);
+    return 0;
+}
 }
