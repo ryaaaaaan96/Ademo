@@ -1,5 +1,6 @@
 #pragma once
 #include "debugger/sdk.h"
+#include "write_pdu.h"
 
 namespace debugger {
 class RtuSession final : public ProtocolSession {
@@ -39,5 +40,7 @@ private:
     int count_ = 0;
     int function_ = 3;
     QString area_ = "holding";
+    WritePdu write_;
+    bool writeSubmitted_ = false;
 };
 }
