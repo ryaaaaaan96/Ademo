@@ -1,6 +1,8 @@
 #include "debugger/sdk.h"
 #include "rtu_session.h"
 #include <QFormLayout>
+#include <QComboBox>
+#include <QLineEdit>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QLabel>
@@ -27,6 +29,22 @@ public:
         read_ = new QPushButton(QStringLiteral("读取保持寄存器（03）"), this);
         read_->setObjectName("readHolding");
         layout->addWidget(read_);
+        auto *writeForm = new QFormLayout;
+        writeAction_ = new QComboBox(this);
+        writeAction_->setObjectName("writeAction");
+        writeAction_->addItem(QStringLiteral("单线圈（05）"), "write-single-coil");
+        writeAction_->addItem(QStringLiteral("单保持寄存器（06）"), "write-single-register");
+        writeAction_->addItem(QStringLiteral("多线圈（0F）"), "write-multiple-coils");
+        writeAction_->addItem(QStringLiteral("多保持寄存器（10）"), "write-multiple-registers");
+        writeValues_ = new QLineEdit("true", this);
+        writeValues_->setObjectName("writeValues");
+        writeValues_->setPlaceholderText(QStringLiteral("单值 true / 42；多个值 [true,false] / [42,43]"));
+        writeForm->addRow(QStringLiteral("设备写入功能（沿用上方设备与 PDU 起址）"), writeAction_);
+        writeForm->addRow(QStringLiteral("写入值（JSON）"), writeValues_);
+        layout->addLayout(writeForm);
+        writeButton_ = new QPushButton(QStringLiteral("执行设备写入（不会自动重试）"), this);
+        writeButton_->setObjectName("writeDevice");
+        layout->addWidget(writeButton_);
         result_ = new QLabel(QStringLiteral("启动会话后读取；本地发送不等于设备应答。应答超时 1000 ms，本项不自动重试。"), this);
         result_->setObjectName("readResult");
         result_->setWordWrap(true);
@@ -39,6 +57,22 @@ public:
         QObject::connect(read_, &QPushButton::clicked, this, [this] {
             if (access_.submit) operationId_ = access_.submit("read-holding",
                 {{"unit", unit_->value()}, {"start", start_->value()}, {"count", count_->value()}});
+            refresh();
+        });
+        QObject::connect(writeButton_, &QPushButton::clicked, this, [this] {
+            const auto action = writeAction_->currentData().toString();
+            const bool multiple = action.startsWith("write-multiple");
+            // 用单元素数组解析标量，避免将无效 JSON 静默转换为 0/false。
+            QJsonParseError error;
+            const auto parsed = QJsonDocument::fromJson(("[" + writeValues_->text() + "]").toUtf8(), &error);
+            const auto wrapper = parsed.array();
+            if (error.error != QJsonParseError::NoError || wrapper.size() != 1) {
+                result_->setText(QStringLiteral("写入值不是有效 JSON，尚未提交设备写入"));
+                return;
+            }
+            QJsonObject parameters{{"unit", unit_->value()}, {"start", start_->value()}};
+            parameters[multiple ? "values" : "value"] = wrapper[0];
+            if (access_.submit) operationId_ = access_.submit(action, parameters);
             refresh();
         });
         auto *timer = new QTimer(this);
@@ -59,14 +93,19 @@ private:
         const bool running = access_.running && access_.running();
         const auto operation = access_.operation ? access_.operation(operationId_) : OperationSnapshot{};
         read_->setEnabled(running && (!operationId_ || operation.finished));
+        writeButton_->setEnabled(running && (!operationId_ || operation.finished));
         if (!operationId_) return;
         QStringList values;
         const auto registers = operation.update.result.value("values").toArray();
         const int start = operation.request.parameters.value("start").toInt();
         for (int i = 0; i < registers.size(); ++i)
             values << QStringLiteral("PDU %1 = %2").arg(start + i).arg(registers[i].toInt());
+        QString detail = operation.update.detail;
+        if (operation.request.action.startsWith("write-") && operation.sendAccepted
+            && operation.update.state != "success" && operation.update.state != "exception")
+            detail += QStringLiteral("\n设备写入尚未确认，结果不确定；不会自动重试，停止也不能撤回已提交的字节。");
         result_->setText(QStringLiteral("操作 #%1 · %2\n%3\n%4")
-            .arg(operationId_).arg(operation.update.state, operation.update.detail, values.join("；")));
+            .arg(operationId_).arg(operation.update.state, detail, values.join("；")));
         QStringList lines{QStringLiteral("本次操作观察窗口（未匹配的 RX 不表示已确认归属）")};
         if (operation.omittedObservedRefCount)
             lines << QStringLiteral("另有 %1 条较早观察引用已超过保留上限，对应原始记录已过期").arg(operation.omittedObservedRefCount);
@@ -96,6 +135,9 @@ private:
     QSpinBox *start_;
     QSpinBox *count_;
     QPushButton *read_;
+    QComboBox *writeAction_;
+    QLineEdit *writeValues_;
+    QPushButton *writeButton_;
     QLabel *result_;
     QPlainTextEdit *details_;
 };
@@ -106,7 +148,8 @@ class modbusPlugin final : public QObject, public ProtocolPlugin {
 public:
     Descriptor describe() const override {
         return {"modbus.rtu", QStringLiteral("Modbus RTU"), buildKey(), {"master"},
-                {"serial"}, {"lifecycle", "read-holding"}, {}};
+                {"serial"}, {"lifecycle", "read-holding", "write-single-coil", "write-single-register",
+                               "write-multiple-coils", "write-multiple-registers"}, {}};
     }
     std::unique_ptr<ProtocolSession> createSession(ProtocolServices services) override {
         return std::make_unique<RtuSession>(std::move(services));
