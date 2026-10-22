@@ -1,0 +1,8 @@
+19705a30ac13dde01cef606beab1fd365b9082c4fbcb9a68b08030a02c077683  build/qt-llvm-release/bin/multi_protocol_debugger.exe
+b903b4e4c0c7962cbc219a634a5f91decbda4735055c08702356e789c208d2f6  build/qt-llvm-release/bin/session_tests.exe
+f18ba32a38f49fe00526421eaacfe9edae423b6754d2b24dcf9fd9739c07e5dd  build/qt-llvm-release/bin/plugins/libmodbus_plugin.dll
+52cc6f8bef932cefb5b342c46c5d03afc212bb96db64e896edd69f54471ac103  build/qt-llvm-release/bin/plugins/libserial_plugin.dll
+4599ec08c8b887ebfb3e3bb9298df767ecb7c0dd14b9607a1a14feb9bef00a71  .scratch/multi-protocol-debugger/evidence/01/qt-llvm-release/test-results.txt
+a83871ea91c9a984500beb664e9aff1fc846e0ba034c4a9d8b98f84512ad39b7  .scratch/multi-protocol-debugger/evidence/01/qt-llvm-release/01-open-error.png
+d9cd8e999a0f5b773022c0dba955609d87837b5de0b6ca7299bed71efccdb0fd  .scratch/multi-protocol-debugger/evidence/01/qt-llvm-release/02-running-controlled.png
+0f92e69f7807bad7cc2699c5d203a29a98e881891f02a5e3449fe18916b78c45  .scratch/multi-protocol-debugger/evidence/01/qt-llvm-release/03-stopped-controlled.png

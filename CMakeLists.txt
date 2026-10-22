@@ -1,0 +1,41 @@
+cmake_minimum_required(VERSION 3.30)
+project(MultiProtocolDebugger VERSION 0.1.0 LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+find_package(Qt6 6.12 REQUIRED COMPONENTS Core Widgets SerialPort Test)
+add_library(debugger_sdk INTERFACE)
+target_include_directories(debugger_sdk INTERFACE include)
+target_link_libraries(debugger_sdk INTERFACE Qt6::Widgets)
+# 配套交付指纹：SDK、产品、Qt、编译器与配置必须一致。
+target_compile_definitions(debugger_sdk INTERFACE
+  DEBUGGER_BUILD_KEY="sdk1-product0.1-qt${Qt6_VERSION}-${CMAKE_CXX_COMPILER_ID}${CMAKE_CXX_COMPILER_VERSION}-${CMAKE_SYSTEM_PROCESSOR}-$<CONFIG>")
+add_library(debugger_host STATIC src/host.cpp src/workbench.cpp include/debugger/host.h)
+target_link_libraries(debugger_host PUBLIC debugger_sdk)
+foreach(plugin IN ITEMS modbus serial)
+  add_library(${plugin}_plugin MODULE plugins/${plugin}.cpp)
+  target_link_libraries(${plugin}_plugin PRIVATE debugger_sdk)
+  set_target_properties(${plugin}_plugin PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/plugins"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/plugins")
+endforeach()
+target_link_libraries(serial_plugin PRIVATE Qt6::SerialPort)
+add_executable(multi_protocol_debugger WIN32 src/main.cpp)
+target_link_libraries(multi_protocol_debugger PRIVATE debugger_host)
+add_dependencies(multi_protocol_debugger modbus_plugin serial_plugin)
+enable_testing()
+add_executable(session_tests tests/session_tests.cpp)
+target_link_libraries(session_tests PRIVATE debugger_host Qt6::Test Qt6::SerialPort)
+add_dependencies(session_tests modbus_plugin serial_plugin)
+add_test(NAME session_lifecycle COMMAND session_tests -o test-results.txt,txt)
+set_tests_properties(session_lifecycle PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=windows" TIMEOUT 30)
+add_library(incompatible_plugin MODULE tests/incompatible_plugin.cpp)
+target_link_libraries(incompatible_plugin PRIVATE debugger_sdk)
+set_target_properties(incompatible_plugin PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/fixtures"
+  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/fixtures")
+add_dependencies(session_tests incompatible_plugin)
+add_custom_command(TARGET session_tests POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:modbus_plugin> "${CMAKE_BINARY_DIR}/bin/fixtures/a.dll"
+  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:modbus_plugin> "${CMAKE_BINARY_DIR}/bin/fixtures/b.dll")

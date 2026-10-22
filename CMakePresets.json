@@ -1,0 +1,45 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "qt-llvm-base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "environment": {
+        "PATH": "C:/Qt/6.12.0/llvm-mingw_64/bin;C:/Qt/Tools/llvm-mingw2217_64/bin;C:/Qt/Tools/Ninja;$penv{PATH}"
+      },
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "C:/Qt/Tools/llvm-mingw2217_64/bin/clang++.exe",
+        "CMAKE_MAKE_PROGRAM": "C:/Qt/Tools/Ninja/ninja.exe",
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.12.0/llvm-mingw_64"
+      }
+    },
+    {
+      "name": "qt-llvm-debug",
+      "inherits": "qt-llvm-base",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "qt-llvm-release",
+      "inherits": "qt-llvm-base",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    }
+  ],
+  "buildPresets": [
+    { "name": "qt-llvm-debug", "configurePreset": "qt-llvm-debug" },
+    { "name": "qt-llvm-release", "configurePreset": "qt-llvm-release" }
+  ],
+  "testPresets": [
+    {
+      "name": "qt-llvm-debug",
+      "configurePreset": "qt-llvm-debug",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "qt-llvm-release",
+      "configurePreset": "qt-llvm-release",
+      "output": { "outputOnFailure": true }
+    }
+  ]
+}
