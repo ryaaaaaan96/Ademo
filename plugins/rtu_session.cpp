@@ -231,4 +231,3 @@ void RtuSession::tick()
     }
 }
 }
-
