@@ -52,6 +52,12 @@ struct TraceRecord {
     QByteArray bytes;
     QString detail;
     std::optional<qint64> idleBeforeUs; // 仅后端确知的线路静默；QSerialPort 没有此精度。
+    QJsonObject metadata; // 仅记录后端实际提供的元数据。
+};
+struct TraceRange {
+    quint64 recordId = 0;
+    int offset = 0;
+    int length = -1; // -1 表示旧插件未声明区间且来源已不可用。
 };
 struct Message {
     quint64 id = 0;
@@ -60,6 +66,9 @@ struct Message {
     QString status;
     QString detail;
     QJsonObject fields;
+    QList<TraceRange> sourceRanges;
+    qint64 monotonicUs = 0;
+    QDateTime observedUtc;
 };
 struct OperationSnapshot {
     OperationRequest request;
@@ -86,6 +95,7 @@ struct SessionAccess {
 struct ReceiveChunk {
     QByteArray bytes;
     std::optional<qint64> idleBeforeUs;
+    QJsonObject metadata;
     ReceiveChunk(QByteArray data = {}, std::optional<qint64> idle = {})
         : bytes(std::move(data)), idleBeforeUs(idle) {}
 };
@@ -129,7 +139,7 @@ public:
     virtual std::unique_ptr<Endpoint> createEndpoint(const QJsonObject &, EndpointEvents) = 0;
 };
 }
-#define DebuggerProtocolIid "org.ademo.debugger.Protocol/2.0"
-#define DebuggerTransportIid "org.ademo.debugger.Transport/2.0"
+#define DebuggerProtocolIid "org.ademo.debugger.Protocol/3.0"
+#define DebuggerTransportIid "org.ademo.debugger.Transport/3.0"
 Q_DECLARE_INTERFACE(debugger::ProtocolPlugin, DebuggerProtocolIid)
 Q_DECLARE_INTERFACE(debugger::TransportPlugin, DebuggerTransportIid)

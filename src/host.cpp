@@ -215,7 +215,7 @@ quint64 DebugSession::appendTrace(const QString &kind, const QByteArray &bytes, 
     const auto id = nextTraceId_++;
     traces_.append({id, generation_, operationId, observedUs < 0 ? nowUs() : observedUs,
                     QDateTime::currentDateTimeUtc(), kind, bytes, detail});
-    if (traces_.size() > 256) { traces_.removeFirst(); ++expiredTraces_; }
+    if (traces_.size() > traceLimits_.records) { traces_.removeFirst(); ++expiredTraces_; }
     for (auto &operation : operations_) {
         if ((!operation.finished && (kind == "rx" || operation.request.id == operationId))
             || operation.request.id == operationId) {
@@ -236,6 +236,7 @@ void DebugSession::received(quint64 run, ReceiveChunk input, qint64 observedUs)
         const auto chunk = input.bytes.mid(offset, 4096);
         const auto id = appendTrace("rx", chunk, 0, {}, observedUs);
         traces_.last().idleBeforeUs = offset == 0 ? input.idleBeforeUs : std::nullopt;
+        traces_.last().metadata = input.metadata;
         protocol_->onInput(*trace(id)); // 原始记录分配稳定身份后，才进入协议。
     }
 }
@@ -269,19 +270,31 @@ void DebugSession::publish(OperationUpdate update)
 void DebugSession::publishMessage(Message message)
 {
     message.id = nextMessageId_++;
+    message.monotonicUs = nowUs();
+    message.observedUtc = QDateTime::currentDateTimeUtc();
+    message.sources = message.sources.mid(0, 256);
+    message.sourceRanges = message.sourceRanges.mid(0, 256);
+    if (message.sourceRanges.isEmpty()) for (auto id : message.sources) {
+        const auto record = trace(id);
+        message.sourceRanges.append({id, 0, record ? int(record->bytes.size()) : -1});
+    }
+    for (const auto &range : message.sourceRanges)
+        if (!message.sources.contains(range.recordId)) message.sources.append(range.recordId);
     messages_.append(std::move(message));
-    if (messages_.size() > 256) messages_.removeFirst();
+    if (messages_.size() > traceLimits_.messages) { messages_.removeFirst(); ++expiredMessages_; }
     if (!notificationTimer_.isActive()) notificationTimer_.start();
 }
 quint64 DebugSession::submit(const QString &action, const QJsonObject &parameters)
 {
     const auto id = nextOperationId_++;
     const OperationRequest request{id, action, parameters};
-    if (operations_.size() >= 128) {
+    if (operations_.size() >= traceLimits_.operations) {
         for (qsizetype i = 0; i < operations_.size(); ++i) if (operations_[i].finished) {
-            operations_.removeAt(i); break;
+            operations_.removeAt(i); ++expiredOperations_; break;
         }
     }
+    // 未完成操作不能被淘汰；满时拒绝且不增加常驻条目。
+    if (operations_.size() >= traceLimits_.operations) return 0;
     operations_.append({request, {id, "queued", QStringLiteral("操作已提交，等待协议校验"), {}}, false, false, false, {}});
     if (state_ != SessionState::Running || !protocol_) publish({id, "invalid", QStringLiteral("请先启动会话"), {}});
     else protocol_->submit(request);

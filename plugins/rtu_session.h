@@ -29,6 +29,7 @@ private:
     bool trustedTiming_ = false;
     QByteArray buffer_;
     QList<quint64> sources_;
+    QList<TraceRange> sourceRanges_;
     qint64 lastInputUs_ = 0;
     qint64 lastActivityUs_ = 0;
     qint64 deadlineUs_ = 0;

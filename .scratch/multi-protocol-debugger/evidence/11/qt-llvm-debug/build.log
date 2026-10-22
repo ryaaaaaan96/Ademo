@@ -1,0 +1,10 @@
+[1/12] Automatic MOC for target debugger_host
+[2/11] Building CXX object CMakeFiles/debugger_host.dir/src/trace_query.cpp.obj
+[3/11] Building CXX object CMakeFiles/debugger_host.dir/src/trace_panel.cpp.obj
+[4/11] Linking CXX static library libdebugger_host.a
+[5/11] Linking CXX executable bin\multi_protocol_debugger.exe
+[6/11] Linking CXX executable bin\rtu_read_tests.exe
+[7/11] Linking CXX executable bin\session_tests.exe
+[8/11] Automatic MOC for target trace_tests
+[9/10] Building CXX object CMakeFiles/trace_tests.dir/tests/trace_tests.cpp.obj
+[10/10] Linking CXX executable bin\trace_tests.exe
