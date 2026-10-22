@@ -10,7 +10,7 @@ public:
     Descriptor describe() const override {
         return {"incompatible", "incompatible", "sdk0-wrong-build", {"master"}, {"serial"}, {}, {}};
     }
-    std::unique_ptr<ProtocolSession> createSession() override { qFatal("不兼容插件不得创建会话"); }
-    QWidget *createView(QWidget *) override { qFatal("不兼容插件不得创建视图"); }
+    std::unique_ptr<ProtocolSession> createSession(ProtocolServices) override { qFatal("不兼容插件不得创建会话"); }
+    QWidget *createView(SessionAccess, QWidget *) override { qFatal("不兼容插件不得创建视图"); }
 };
 #include "incompatible_plugin.moc"

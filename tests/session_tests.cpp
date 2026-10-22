@@ -20,6 +20,7 @@ public:
     ~ControlledEndpoint() override { --wire_.live; }
     void open() override {}
     void close() override {}
+    bool send(quint64, const QByteArray &) override { return false; }
 private:
     ControlledWire &wire_;
 };

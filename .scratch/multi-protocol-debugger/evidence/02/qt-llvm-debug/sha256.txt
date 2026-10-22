@@ -1,0 +1,16 @@
+55e4272223ab96ddad6be68ca671e5b9ebb91dffe00170a5621f9b62f3b500d1  build/qt-llvm-debug/bin/multi_protocol_debugger.exe
+76596d3e8a50fdd8273fcc73a54cb9154d8e82d75c994a601f63c412075a1192  build/qt-llvm-debug/bin/session_tests.exe
+f8771ab519c7f69008a5faf51f923c183a8d896edc0668114b8c0e6bd6daecae  build/qt-llvm-debug/bin/rtu_read_tests.exe
+e8cdfd043215521a9596091e90d9e3097ff593c5c3b19461566c279a05af1fe0  build/qt-llvm-debug/bin/plugins/libmodbus_plugin.dll
+ae66346eb6ef5fc0a0589d2f5b59a1fca1e4bec9f59d752ecd33b728b961531b  build/qt-llvm-debug/bin/plugins/libserial_plugin.dll
+176c42e09f186371d2cd89bd0026aaf9c2a5848a461199c14bd1b66b28cecca6  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-debug/01-open-error.png
+da5e7185fa3741169c61992cc8670fc2b9e10a5f4141460a42022f01466da10a  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-debug/02-running-controlled.png
+97e9d2304413db7746faf8074e0f1e76c6d5c160e7abd97cdd10eff505fc0c1a  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-debug/03-stopped-controlled.png
+c4edfd7a4dc8e6f3b20d70cabf4eef296772fd6772eb629750f1621b8d12e96a  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-debug/build.log
+f9bc3a4ede92c9ba5b0b12127b4fc20aeb40a42529523b3ac529e23c7253319d  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-debug/configure.log
+4e12275526774ad60d4f031947f85d704928cf4a5930f27c3496658500b5334a  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-debug/ctest.log
+5beef319f0ee905a0bdf88855c1623702c5fcd4b849bad1dcb8066015eecad1a  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-debug/read-exception-controlled.png
+f8bfed6bc95bbe5facb087bd570f112e4ea8b94bad619893d32d8804898cef92  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-debug/read-results.txt
+bd76dc55286327971ac1abf0f5766332b3cf21c25301f69b14700c7f8b6c2f64  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-debug/read-success-controlled.png
+ea7f040c818a712856d115289d78d915b611bb6afc25f12cde26ea8ffd4d4d6c  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-debug/read-timeout-controlled.png
+be709914844e1a5242a69837f5a0b2964af79940b138c013cb79863493d76aac  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-debug/test-results.txt

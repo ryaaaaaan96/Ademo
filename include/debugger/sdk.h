@@ -2,8 +2,10 @@
 #include <QJsonObject>
 #include <QStringList>
 #include <QWidget>
+#include <QDateTime>
 #include <functional>
 #include <memory>
+#include <optional>
 
 namespace debugger {
 inline QString buildKey() { return QStringLiteral(DEBUGGER_BUILD_KEY); }
@@ -29,15 +31,76 @@ struct SessionConfig {
     QJsonObject endpoint;
     QJsonObject protocol;
 };
+struct OperationRequest {
+    quint64 id = 0;
+    QString action;
+    QJsonObject parameters;
+};
+struct OperationUpdate {
+    quint64 id = 0;
+    QString state;
+    QString detail;
+    QJsonObject result;
+};
+struct TraceRecord {
+    quint64 id = 0;
+    quint64 generation = 0;
+    quint64 operationId = 0; // RX 未经协议确认归属时为 0。
+    qint64 monotonicUs = 0;
+    QDateTime observedUtc;
+    QString kind;
+    QByteArray bytes;
+    QString detail;
+    std::optional<qint64> idleBeforeUs; // 仅后端确知的线路静默；QSerialPort 没有此精度。
+};
+struct Message {
+    quint64 id = 0;
+    quint64 operationId = 0;
+    QList<quint64> sources;
+    QString status;
+    QString detail;
+    QJsonObject fields;
+};
+struct OperationSnapshot {
+    OperationRequest request;
+    OperationUpdate update;
+    bool sendAccepted = false;
+    bool localSent = false;
+    bool finished = false;
+    QList<quint64> observedRefs; // 操作观察窗口中的流量，不冒充已确认的响应归属。
+    quint64 omittedObservedRefCount = 0;
+};
+struct ProtocolServices {
+    std::function<qint64()> nowUs;
+    std::function<bool(quint64, QByteArray)> send;
+    std::function<void(OperationUpdate)> publish;
+    std::function<void(Message)> publishMessage;
+};
+struct SessionAccess {
+    std::function<quint64(QString, QJsonObject)> submit;
+    std::function<OperationSnapshot(quint64)> operation;
+    std::function<QList<TraceRecord>(quint64)> traces;
+    std::function<QList<Message>(quint64)> messages;
+    std::function<bool()> running;
+};
+struct ReceiveChunk {
+    QByteArray bytes;
+    std::optional<qint64> idleBeforeUs;
+    ReceiveChunk(QByteArray data = {}, std::optional<qint64> idle = {})
+        : bytes(std::move(data)), idleBeforeUs(idle) {}
+};
 struct EndpointEvents {
     std::function<void(bool, QString)> opened;
     std::function<void(QString)> failed;
+    std::function<void(ReceiveChunk)> received;
+    std::function<void(quint64, bool, QString)> sent;
 };
 class Endpoint {
 public:
     virtual ~Endpoint() = default;
     virtual void open() = 0;
     virtual void close() = 0;
+    virtual bool send(quint64 id, const QByteArray &) = 0;
 };
 class ProtocolSession {
 public:
@@ -45,13 +108,17 @@ public:
     virtual QString prepare(const SessionConfig &) = 0;
     virtual void activate() = 0;
     virtual void stop() = 0;
+    virtual void submit(const OperationRequest &) = 0;
+    virtual void onInput(const TraceRecord &) = 0;
+    virtual void onSent(quint64, bool, const QString &, qint64 observedUs) = 0;
+    virtual void tick() = 0;
 };
 class ProtocolPlugin {
 public:
     virtual ~ProtocolPlugin() = default;
     virtual Descriptor describe() const = 0;
-    virtual std::unique_ptr<ProtocolSession> createSession() = 0;
-    virtual QWidget *createView(QWidget *parent) = 0;
+    virtual std::unique_ptr<ProtocolSession> createSession(ProtocolServices) = 0;
+    virtual QWidget *createView(SessionAccess, QWidget *parent) = 0;
 };
 class TransportPlugin {
 public:
@@ -62,7 +129,7 @@ public:
     virtual std::unique_ptr<Endpoint> createEndpoint(const QJsonObject &, EndpointEvents) = 0;
 };
 }
-#define DebuggerProtocolIid "org.ademo.debugger.Protocol/1.0"
-#define DebuggerTransportIid "org.ademo.debugger.Transport/1.0"
+#define DebuggerProtocolIid "org.ademo.debugger.Protocol/2.0"
+#define DebuggerTransportIid "org.ademo.debugger.Transport/2.0"
 Q_DECLARE_INTERFACE(debugger::ProtocolPlugin, DebuggerProtocolIid)
 Q_DECLARE_INTERFACE(debugger::TransportPlugin, DebuggerTransportIid)

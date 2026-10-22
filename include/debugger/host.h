@@ -4,6 +4,9 @@
 #include <QPointer>
 #include <QPluginLoader>
 #include <QSet>
+#include <QElapsedTimer>
+#include <QTimer>
+#include <optional>
 #include <vector>
 
 namespace debugger {
@@ -17,7 +20,7 @@ public:
     QStringList diagnostics() const { return diagnostics_; }
     ProtocolPlugin *protocol(const QString &) const;
     TransportPlugin *transport(const QString &) const;
-    QWidget *createView(const QString &, QWidget *parent);
+    QWidget *createView(const QString &, QWidget *parent, SessionAccess = {});
     bool acquire(const QString &key);
     void release(const QString &key);
 private:
@@ -34,7 +37,7 @@ class DebugSession : public QObject {
 public:
     using EndpointFactory = std::function<std::unique_ptr<Endpoint>(const QJsonObject &, EndpointEvents)>;
     explicit DebugSession(std::shared_ptr<PluginCatalog>, QObject *parent = nullptr,
-                          EndpointFactory endpointFactory = {});
+                          EndpointFactory endpointFactory = {}, std::function<qint64()> clock = {});
     ~DebugSession() override;
     bool start(const SessionConfig &);
     void stop();
@@ -42,12 +45,28 @@ public:
     QString diagnostic() const { return diagnostic_; }
     quint64 generation() const { return generation_; }
     SessionConfig config() const { return config_; }
+    quint64 submit(const QString &action, const QJsonObject &parameters);
+    OperationSnapshot operation(quint64) const;
+    QList<TraceRecord> traces(quint64 operationId = 0) const;
+    QList<Message> messages(quint64 operationId = 0) const;
+    std::optional<TraceRecord> trace(quint64 id) const;
+    quint64 expiredTraceCount() const { return expiredTraces_; }
+    SessionAccess access();
+    void poll(); // 可控时钟测试入口；产品由精确 Qt 定时器驱动。
 signals:
     void changed();
 private:
     void opened(quint64, bool, const QString &);
     void fail(const QString &);
     void retire();
+    qint64 nowUs() const;
+    quint64 appendTrace(const QString &, const QByteArray & = {}, quint64 operationId = 0,
+                        const QString &detail = {}, qint64 observedUs = -1);
+    void received(quint64 run, ReceiveChunk, qint64 observedUs);
+    void sent(quint64 run, quint64 id, bool ok, const QString &, qint64 observedUs);
+    bool send(quint64 run, quint64 id, const QByteArray &);
+    void publish(OperationUpdate);
+    void publishMessage(Message);
     std::shared_ptr<PluginCatalog> catalog_;
     std::unique_ptr<ProtocolSession> protocol_;
     std::unique_ptr<Endpoint> endpoint_;
@@ -57,11 +76,22 @@ private:
     QString key_;
     quint64 generation_ = 0;
     EndpointFactory endpointFactory_;
+    std::function<qint64()> clock_;
+    QElapsedTimer elapsed_;
+    QTimer pollTimer_;
+    QTimer notificationTimer_;
+    QList<TraceRecord> traces_;
+    QList<Message> messages_;
+    QList<OperationSnapshot> operations_;
+    quint64 nextTraceId_ = 1;
+    quint64 nextMessageId_ = 1;
+    quint64 nextOperationId_ = 1;
+    quint64 expiredTraces_ = 0;
 };
 class Workbench : public QWidget {
 public:
     explicit Workbench(std::shared_ptr<PluginCatalog>, QWidget *parent = nullptr,
-                       DebugSession::EndpointFactory endpointFactory = {});
+                       DebugSession::EndpointFactory endpointFactory = {}, std::function<qint64()> clock = {});
     ~Workbench() override;
 private:
     std::shared_ptr<PluginCatalog> catalog_;

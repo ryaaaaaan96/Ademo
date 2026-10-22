@@ -1,0 +1,31 @@
+UpdateCTestConfiguration  from :C:/Users/81966/Documents/Ademo/DartConfiguration.tcl
+UpdateCTestConfiguration  from :C:/Users/81966/Documents/Ademo/build/qt-llvm-debug/DartConfiguration.tcl
+Test project C:/Users/81966/Documents/Ademo/build/qt-llvm-debug
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 1
+    Start 1: session_lifecycle
+
+1: Test command: C:\Users\81966\Documents\Ademo\build\qt-llvm-debug\bin\session_tests.exe "-o" "test-results.txt,txt"
+1: Working Directory: C:/Users/81966/Documents/Ademo/build/qt-llvm-debug
+1: Environment variables: 
+1:  QT_QPA_PLATFORM=windows
+1: Test timeout computed to be: 30
+1/2 Test #1: session_lifecycle ................   Passed    6.71 sec
+test 2
+    Start 2: rtu_first_read
+
+2: Test command: C:\Users\81966\Documents\Ademo\build\qt-llvm-debug\bin\rtu_read_tests.exe "-o" "read-results.txt,txt"
+2: Working Directory: C:/Users/81966/Documents/Ademo/build/qt-llvm-debug
+2: Environment variables: 
+2:  QT_QPA_PLATFORM=windows
+2: Test timeout computed to be: 30
+2/2 Test #2: rtu_first_read ...................   Passed    3.94 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =  10.66 sec

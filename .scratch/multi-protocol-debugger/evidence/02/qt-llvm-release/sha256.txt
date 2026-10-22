@@ -1,0 +1,16 @@
+99e65a60f214ebaa3d8e71613a3e0d240de259ad2b35ac3bfe19715e451f455f  build/qt-llvm-release/bin/multi_protocol_debugger.exe
+9e77ddea49973c20b218f167de79e0a3818a061d28a0e7c127efbdcd0d71acc1  build/qt-llvm-release/bin/session_tests.exe
+ec8a18e6fced80c4a64c84c1adb43d6af44ad36f0f6b80ebf71643bd6857943f  build/qt-llvm-release/bin/rtu_read_tests.exe
+63fb1eef811c268247dbd2fb0771fef52759a6f2534ccb86d4945a987be0991f  build/qt-llvm-release/bin/plugins/libmodbus_plugin.dll
+8ccda149fdcbb382961fa38718484e5c281fe9680048f7c5eccf4f2d3f3ef131  build/qt-llvm-release/bin/plugins/libserial_plugin.dll
+176c42e09f186371d2cd89bd0026aaf9c2a5848a461199c14bd1b66b28cecca6  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-release/01-open-error.png
+da5e7185fa3741169c61992cc8670fc2b9e10a5f4141460a42022f01466da10a  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-release/02-running-controlled.png
+97e9d2304413db7746faf8074e0f1e76c6d5c160e7abd97cdd10eff505fc0c1a  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-release/03-stopped-controlled.png
+e1c7460d49314863eb19a3ac5fb05156d5c46916ee87e8d5952d4c13e7c1458f  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-release/build.log
+c13cd6048fd1c909b4ddbd4f013e795fc25ea562e9ea1b9b1aee3e919d16a61c  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-release/configure.log
+c0d2f9fa0f57d07c46844faae3dd78507de2c184fe3ecb1aa9740c0b04c3179c  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-release/ctest.log
+e5a4fe63fa1741bc2d3d2f75e3e202716b79c292d36b7b603bb14eba5913b246  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-release/read-exception-controlled.png
+0e079e25f59d041a3f0ba0db7f5148ea5347a172deecc6735768798278e4e8ae  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-release/read-results.txt
+79a3c08fa7d9198f143241cb862e6c496738c20cff41641f2fe0851e12b29157  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-release/read-success-controlled.png
+b7feb8136a521c83be8754391998038203a485cc37ce25ad494ade710009e5ba  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-release/read-timeout-controlled.png
+4e6fb088d3001f7844d1e81615a80d7981e07bebc627f0b94ddcb7f5d4c3896c  .scratch/multi-protocol-debugger/evidence/02/qt-llvm-release/test-results.txt

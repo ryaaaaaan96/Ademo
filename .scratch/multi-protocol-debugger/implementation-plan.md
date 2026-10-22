@@ -32,9 +32,9 @@ Status: ready-for-agent
 
 ## 第一项可执行工作
 
-2026-10-22，[01：启动与停止 RTU 串口会话](issues/01-rtu-session-lifecycle.md) 已完成验收勾选，见 [01 验收证据](evidence/01/acceptance.md)。分诊标签保持不变，不用它代表完成状态。当前下一项为 02；本次仅实施 01，未启动任何后续任务。
+2026-10-22，[01：启动与停止 RTU 串口会话](issues/01-rtu-session-lifecycle.md) 和 [02：完成一次 RTU 保持寄存器读取](issues/02-rtu-first-register-read.md) 已完成验收勾选，分别见 [01 证据](evidence/01/acceptance.md)、[02 证据](evidence/02/acceptance.md)。分诊标签保持不变，不用它代表完成状态。本次仅实施 02；03、04、11 的直接前置现已满足，尚未开始这些任务。
 
-Qt/LLVM-MinGW、Debug/Release 与 LLDB 验证已完成，见 [环境证据](toolchain-environment.md)，不重复选型。原工具链 issue 中尚未完成的 Modbus 实现路径选择由 [02](issues/02-rtu-first-register-read.md) 的首次读取流程承接。
+Qt/LLVM-MinGW、Debug/Release 与 LLDB 验证已完成，见 [环境证据](toolchain-environment.md)，不重复选型。原工具链 issue 的 Modbus 实现路径选择已由 [02](issues/02-rtu-first-register-read.md) 完成核验，见 [路径决定](modbus-implementation-path.md)；其余功能码和主从实现仍按任务依赖推进。
 
 ## 依赖与状态规则
 

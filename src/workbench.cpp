@@ -8,8 +8,8 @@
 
 namespace debugger {
 Workbench::Workbench(std::shared_ptr<PluginCatalog> catalog, QWidget *parent,
-                     DebugSession::EndpointFactory factory)
-    : QWidget(parent), catalog_(std::move(catalog)), session_(catalog_, nullptr, std::move(factory))
+                     DebugSession::EndpointFactory factory, std::function<qint64()> clock)
+    : QWidget(parent), catalog_(std::move(catalog)), session_(catalog_, nullptr, std::move(factory), std::move(clock))
 {
     setWindowTitle(QStringLiteral("多协议调试工具 · RTU 会话"));
     resize(680, 540);
@@ -59,7 +59,7 @@ Workbench::Workbench(std::shared_ptr<PluginCatalog> catalog, QWidget *parent,
         auto *p = catalog_->protocol(protocol->currentData().toString());
         if (!p) return;
         for (const auto &r : p->describe().roles) role->addItem(r, r);
-        view_ = catalog_->createView(p->describe().id, this);
+        view_ = catalog_->createView(p->describe().id, this, session_.access());
         if (view_) layout->addWidget(view_);
     };
     connect(transport, &QComboBox::currentIndexChanged, this, updateTransport);

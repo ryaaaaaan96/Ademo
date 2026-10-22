@@ -5,7 +5,7 @@ $projectDirectory = Split-Path $PSScriptRoot -Parent
 Push-Location $projectDirectory
 try {
     foreach ($preset in @('qt-llvm-debug', 'qt-llvm-release')) {
-        $evidenceDirectory = Join-Path $projectDirectory ".scratch/multi-protocol-debugger/evidence/01/$preset"
+        $evidenceDirectory = Join-Path $projectDirectory ".scratch/multi-protocol-debugger/evidence/02/$preset"
         New-Item -ItemType Directory -Force $evidenceDirectory | Out-Null
         & $cmakeExecutable --preset $preset 2>&1 | Tee-Object -FilePath "$evidenceDirectory/configure.log"
         if ($LASTEXITCODE -ne 0) { throw "配置失败：$preset" }
@@ -19,7 +19,21 @@ try {
         }
         finally { $env:DEBUGGER_EVIDENCE_DIR = $previousEvidenceDirectory }
         Copy-Item "build/$preset/test-results.txt" "$evidenceDirectory/test-results.txt"
+        Copy-Item "build/$preset/read-results.txt" "$evidenceDirectory/read-results.txt"
         if ($testExitCode -ne 0) { throw "测试失败：$preset" }
+        $artifactPaths = @(
+            "build/$preset/bin/multi_protocol_debugger.exe",
+            "build/$preset/bin/session_tests.exe", "build/$preset/bin/rtu_read_tests.exe",
+            "build/$preset/bin/plugins/libmodbus_plugin.dll", "build/$preset/bin/plugins/libserial_plugin.dll"
+        )
+        $artifactPaths += Get-ChildItem -LiteralPath $evidenceDirectory -File |
+            Where-Object { $_.Name -ne 'sha256.txt' } |
+            ForEach-Object { [IO.Path]::GetRelativePath($projectDirectory, $_.FullName).Replace('\', '/') }
+        $hashLines = foreach ($artifactPath in $artifactPaths) {
+            $artifactHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $artifactPath).Hash.ToLowerInvariant()
+            "$artifactHash  $artifactPath"
+        }
+        $hashLines | Set-Content -Encoding utf8 "$evidenceDirectory/sha256.txt"
     }
 }
 finally { Pop-Location }
