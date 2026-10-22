@@ -1,0 +1,67 @@
+UpdateCTestConfiguration  from :C:/Users/81966/Documents/Ademo/.worktrees/rtu-slave/DartConfiguration.tcl
+UpdateCTestConfiguration  from :C:/Users/81966/Documents/Ademo/.worktrees/rtu-slave/build/qt-llvm-release/DartConfiguration.tcl
+Test project C:/Users/81966/Documents/Ademo/.worktrees/rtu-slave/build/qt-llvm-release
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 1
+    Start 1: session_lifecycle
+
+1: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-slave\build\qt-llvm-release\bin\session_tests.exe "-o" "test-results.txt,txt"
+1: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-slave/build/qt-llvm-release
+1: Environment variables: 
+1:  QT_QPA_PLATFORM=windows
+1: Test timeout computed to be: 30
+1/6 Test #1: session_lifecycle ................   Passed    2.13 sec
+test 2
+    Start 2: rtu_first_read
+
+2: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-slave\build\qt-llvm-release\bin\rtu_read_tests.exe "-o" "read-results.txt,txt"
+2: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-slave/build/qt-llvm-release
+2: Environment variables: 
+2:  QT_QPA_PLATFORM=windows
+2: Test timeout computed to be: 30
+2/6 Test #2: rtu_first_read ...................   Passed    2.14 sec
+test 3
+    Start 3: rtu_explicit_write
+
+3: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-slave\build\qt-llvm-release\bin\rtu_write_tests.exe "-o" "write-results.txt,txt"
+3: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-slave/build/qt-llvm-release
+3: Environment variables: 
+3:  QT_QPA_PLATFORM=windows
+3: Test timeout computed to be: 30
+3/6 Test #3: rtu_explicit_write ...............   Passed    2.91 sec
+test 4
+    Start 4: rtu_slave_json_read
+
+4: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-slave\build\qt-llvm-release\bin\rtu_slave_tests.exe "-o" "slave-results.txt,txt"
+4: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-slave/build/qt-llvm-release
+4: Environment variables: 
+4:  QT_QPA_PLATFORM=windows
+4: Test timeout computed to be: 30
+4/6 Test #4: rtu_slave_json_read ..............   Passed    4.12 sec
+test 5
+    Start 5: rtu_slave_write
+
+5: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-slave\build\qt-llvm-release\bin\rtu_slave_write_tests.exe "-o" "slave-write-results.txt,txt"
+5: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-slave/build/qt-llvm-release
+5: Environment variables: 
+5:  QT_QPA_PLATFORM=windows
+5: Test timeout computed to be: 30
+5/6 Test #5: rtu_slave_write ..................   Passed    3.60 sec
+test 6
+    Start 6: trace_query_export
+
+6: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-slave\build\qt-llvm-release\bin\trace_tests.exe "-o" "trace-results.txt,txt"
+6: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-slave/build/qt-llvm-release
+6: Environment variables: 
+6:  QT_QPA_PLATFORM=windows
+6: Test timeout computed to be: 30
+6/6 Test #6: trace_query_export ...............   Passed    0.66 sec
+
+100% tests passed, 0 tests failed out of 6
+
+Total Test time (real) =  15.58 sec

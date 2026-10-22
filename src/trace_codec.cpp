@@ -35,7 +35,7 @@ QJsonObject encode(const OperationSnapshot &operation) {
     return {{"type", "operation"}, {"id", QString::number(operation.request.id)},
         {"action", operation.request.action}, {"parameters", operation.request.parameters}, {"state", operation.update.state},
         {"detail", operation.update.detail}, {"result", operation.update.result}, {"sendAccepted", operation.sendAccepted},
-        {"localSent", operation.localSent}, {"finished", operation.finished}, {"observedRefs", ids(operation.observedRefs)},
+        {"localSent", operation.localSent}, {"finished", operation.finished}, {"localOnly", operation.localOnly}, {"observedRefs", ids(operation.observedRefs)},
         {"omittedObservedRefCount", QString::number(operation.omittedObservedRefCount)}};
 }
 TraceRecord decodeTrace(const QJsonObject &object) {
@@ -73,6 +73,7 @@ OperationSnapshot decodeOperation(const QJsonObject &object) {
     operation.update = {id, object.value("state").toString(), object.value("detail").toString(), object.value("result").toObject()};
     operation.sendAccepted = object.value("sendAccepted").toBool(); operation.localSent = object.value("localSent").toBool();
     operation.finished = object.value("finished").toBool(); operation.observedRefs = readIds(object.value("observedRefs"), 512);
+    operation.localOnly = object.value("localOnly").toBool();
     operation.omittedObservedRefCount = object.value("omittedObservedRefCount").toString().toULongLong();
     return operation;
 }
