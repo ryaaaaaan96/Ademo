@@ -86,6 +86,7 @@ struct ProtocolServices {
     std::function<void(Message)> publishMessage;
     std::function<quint64(QString, QJsonObject)> submit; // 协议调度仍由宿主分配逻辑操作 ID。
     std::function<void(QJsonObject)> publishConfiguration; // 更新可保存配置，不由宿主解释协议字段。
+    std::function<quint64(QByteArray)> sendPassive;
 };
 struct SessionAccess {
     std::function<quint64(QString, QJsonObject)> submit;
@@ -94,7 +95,8 @@ struct SessionAccess {
     std::function<QList<Message>(quint64)> messages;
     std::function<bool()> running;
     std::function<SessionConfig()> config;
-    std::function<bool(QJsonObject)> configure; // 仅停止/错误状态可更改启动配置。
+    std::function<bool(QJsonObject)> configure;
+    std::function<QJsonObject()> snapshot;
 };
 struct ReceiveChunk {
     QByteArray bytes;
@@ -120,6 +122,9 @@ class ProtocolSession {
 public:
     virtual ~ProtocolSession() = default;
     virtual QString prepare(const SessionConfig &) = 0;
+    // 后台准备只能读取配置/文件，不得调用 ProtocolServices 或并发访问宿主。
+    virtual bool prepareInBackground(const SessionConfig &) const { return false; }
+    virtual QJsonObject snapshot() const { return {}; }
     virtual void activate() = 0;
     virtual void stop() = 0;
     virtual void submit(const OperationRequest &) = 0;
@@ -143,7 +148,7 @@ public:
     virtual std::unique_ptr<Endpoint> createEndpoint(const QJsonObject &, EndpointEvents) = 0;
 };
 }
-#define DebuggerProtocolIid "org.ademo.debugger.Protocol/4.0"
-#define DebuggerTransportIid "org.ademo.debugger.Transport/4.0"
+#define DebuggerProtocolIid "org.ademo.debugger.Protocol/5.0"
+#define DebuggerTransportIid "org.ademo.debugger.Transport/5.0"
 Q_DECLARE_INTERFACE(debugger::ProtocolPlugin, DebuggerProtocolIid)
 Q_DECLARE_INTERFACE(debugger::TransportPlugin, DebuggerTransportIid)

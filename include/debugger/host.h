@@ -37,8 +37,10 @@ class DebugSession : public QObject {
     Q_OBJECT
 public:
     using EndpointFactory = std::function<std::unique_ptr<Endpoint>(const QJsonObject &, EndpointEvents)>;
+    using BackgroundExecutor = std::function<void(std::function<void()>)>;
     explicit DebugSession(std::shared_ptr<PluginCatalog>, QObject *parent = nullptr,
-                          EndpointFactory endpointFactory = {}, std::function<qint64()> clock = {});
+                          EndpointFactory endpointFactory = {}, std::function<qint64()> clock = {},
+                          BackgroundExecutor preparationExecutor = {});
     ~DebugSession() override;
     bool start(const SessionConfig &);
     void stop();
@@ -47,6 +49,7 @@ public:
     quint64 generation() const { return generation_; }
     SessionConfig config() const { return config_; }
     bool configure(QJsonObject protocol);
+    QJsonObject snapshot() const;
     quint64 submit(const QString &action, const QJsonObject &parameters);
     OperationSnapshot operation(quint64) const;
     QList<TraceRecord> traces(quint64 operationId = 0) const;
@@ -62,6 +65,7 @@ public:
 signals:
     void changed();
 private:
+    bool prepared(quint64 run, const QString &error);
     void opened(quint64, bool, const QString &);
     void fail(const QString &);
     void retire();
@@ -71,10 +75,12 @@ private:
     void received(quint64 run, ReceiveChunk, qint64 observedUs);
     void sent(quint64 run, quint64 id, bool ok, const QString &, qint64 observedUs);
     bool send(quint64 run, quint64 id, const QByteArray &);
+    quint64 sendPassive(quint64 run, const QByteArray &);
+    quint64 allocateSendToken() { return (quint64(1) << 63) | nextSendToken_++; }
     void publish(OperationUpdate);
     void publishMessage(Message);
     std::shared_ptr<PluginCatalog> catalog_;
-    std::unique_ptr<ProtocolSession> protocol_;
+    std::shared_ptr<ProtocolSession> protocol_;
     std::unique_ptr<Endpoint> endpoint_;
     SessionConfig config_;
     SessionState state_ = SessionState::Stopped;
@@ -93,6 +99,10 @@ private:
     quint64 nextMessageId_ = 1;
     quint64 nextOperationId_ = 1;
     quint64 expiredTraces_ = 0;
+    bool preparing_ = false;
+    BackgroundExecutor preparationExecutor_;
+    QSet<quint64> passiveSends_;
+    QMap<quint64, qint64> passiveDeadlines_;
     quint64 expiredMessages_ = 0;
     quint64 expiredOperations_ = 0;
     TraceLimits traceLimits_;

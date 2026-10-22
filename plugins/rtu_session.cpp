@@ -22,6 +22,10 @@ void appendWord(QByteArray &bytes, int word)
 RtuSession::RtuSession(ProtocolServices services) : services_(std::move(services)) {}
 QString RtuSession::prepare(const SessionConfig &config)
 {
+    if (config.role == "slave") {
+        slave_ = std::make_unique<RtuSlave>(services_);
+        return slave_->prepare(config);
+    }
     if (config.role != "master") return QStringLiteral("当前仅支持 RTU 主站会话");
     const bool noParity = config.endpoint.value("parity") == "none";
     if (config.endpoint.value("stopBits").toString() != (noParity ? "2" : "1"))
@@ -71,11 +75,13 @@ QString RtuSession::configureSettings(const QJsonObject &settings)
 }
 void RtuSession::activate()
 {
+    if (slave_) { slave_->activate(); return; }
     active_ = true;
     lastActivityUs_ = services_.nowUs(); // 包括启动时的 t3.5 静默。
 }
 void RtuSession::stop()
 {
+    if (slave_) { slave_->stop(); return; }
     active_ = false;
     for (const auto &request : pending_) services_.publish({request.id, "cancelled", QStringLiteral("会话停止，排队操作已取消"), {}});
     pending_.clear();
@@ -88,6 +94,7 @@ void RtuSession::stop()
 }
 void RtuSession::submit(const OperationRequest &request)
 {
+    if (slave_) { slave_->submit(request); return; }
     if (request.action == "configure-polling") {
         const auto error = !active_ ? QStringLiteral("会话尚未启动") : request_.id || !pending_.isEmpty()
             ? QStringLiteral("请等待在途与排队操作结束后调整会话配置") : configureSettings(request.parameters);
@@ -202,6 +209,7 @@ void RtuSession::readTimeout()
 }
 void RtuSession::onInput(const TraceRecord &record)
 {
+    if (slave_) { slave_->onInput(record); return; }
     if (record.bytes.isEmpty()) return;
     if (haveInput_ && record.idleBeforeUs) {
         const auto gap = *record.idleBeforeUs;
@@ -327,6 +335,7 @@ bool RtuSession::candidateComplete() const
 }
 void RtuSession::onSent(quint64 id, bool ok, const QString &reason, qint64 observedUs)
 {
+    if (slave_) { slave_->onSent(id, ok, reason, observedUs); return; }
     if (request_.id != id || phase_ != Phase::Sending) return;
     lastActivityUs_ = qMax(lastActivityUs_, observedUs);
     if (observedUs >= deadlineUs_) {
@@ -345,6 +354,7 @@ void RtuSession::onSent(quint64 id, bool ok, const QString &reason, qint64 obser
 }
 void RtuSession::tick()
 {
+    if (slave_) { slave_->tick(); return; }
     if (!active_) return;
     const auto now = services_.nowUs();
     // 观测块时间无法证明物理字节间隙：没有可信静默元数据时保留不完整候选帧。

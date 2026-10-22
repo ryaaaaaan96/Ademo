@@ -1,6 +1,8 @@
 #include "debugger/host.h"
 #include <QComboBox>
 #include <QDialog>
+#include <QFile>
+#include <QJsonDocument>
 #include <QJsonArray>
 #include <QLabel>
 #include <QPushButton>
@@ -8,6 +10,7 @@
 #include <QScrollArea>
 #include <QTableWidget>
 #include <QTest>
+#include <QTemporaryDir>
 
 using namespace debugger;
 namespace {
@@ -276,6 +279,41 @@ private slots:
         if (!output.isEmpty()) QVERIFY(window.grab().save(output + "/poll-observations-controlled.png"));
         QTest::mouseClick(window.findChild<QPushButton *>("stop"), Qt::LeftButton);
         const auto count = wire.writes.size(); QTest::qWait(600); QCOMPARE(wire.writes.size(), count);
+    }
+    void retryAndPassiveTokensShareOneAllocatorAcrossRuns() {
+        Harness h(catalog); QVERIFY(h.start({{"responseTimeoutMs", 10}, {"retryIntervalMs", 1}}));
+        h.session.submit("read-holding", readOne);
+        h.advance(1750); h.sent(h.wire.writes.last().first); h.advance(10000); h.advance(1000);
+        QCOMPARE(h.wire.writes.size(), 2);
+        const auto retryToken = h.wire.writes.last().first;
+        const auto oldEvents = h.wire.events;
+        h.session.stop();
+        QTemporaryDir directory;
+        const auto path = directory.filePath("device.json");
+        const QJsonObject data{{"version", 1}, {"areas", QJsonObject{
+            {"coils", QJsonObject{{"start", 0}, {"values", QJsonArray{true}}}},
+            {"discrete", QJsonObject{{"start", 0}, {"values", QJsonArray{false}}}},
+            {"holding", QJsonObject{{"start", 0}, {"values", QJsonArray{10}}}},
+            {"input", QJsonObject{{"start", 0}, {"values", QJsonArray{20}}}}}}};
+        QFile file(path); QVERIFY(file.open(QIODevice::WriteOnly));
+        QVERIFY(file.write(QJsonDocument(data).toJson()) > 0); file.close();
+        auto config = h.session.config(); config.role = "slave";
+        config.protocol = {{"devices", QJsonArray{QJsonObject{{"unit", 1}, {"path", path}}}}};
+        QVERIFY(h.session.start(config)); QTRY_COMPARE(h.session.state(), SessionState::Running);
+        h.wire.events.received(QByteArray::fromHex("010300000001840a"));
+        h.advance(1750);
+        QCOMPARE(h.wire.writes.size(), 3);
+        const auto passiveToken = h.wire.writes.last().first;
+        QVERIFY(passiveToken != retryToken);
+        QCOMPARE(h.wire.writes.last().second.toHex(), "010302000a3843");
+        oldEvents.sent(retryToken, true, {}); QCoreApplication::processEvents();
+        h.sent(passiveToken);
+        QCOMPARE(h.session.messages().last().status, "response-sent");
+        h.wire.events.received(QByteArray::fromHex("010300000001840a")); h.advance(1750);
+        h.time += 1000000; // 未poll，迟到完成也不能绕过被动发送期限。
+        h.sent(h.wire.writes.last().first);
+        QCOMPARE(h.session.messages().last().status, "response-send-failed");
+        QVERIFY(h.session.messages().last().detail.contains(QStringLiteral("超时")));
     }
 };
 QTEST_MAIN(PollTests)
