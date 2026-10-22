@@ -92,11 +92,11 @@ QJsonObject RtuSlave::snapshot() const
 {
     QJsonArray devices;
     for (const auto &device : devices_)
-        devices.append(QJsonObject{{"unit", device.unit}, {"path", device.path}, {"data", device.document}, {"dirty", device.dirty}});
+        devices.append(QJsonObject{{"unit", device.unit}, {"path", device.path}, {"data", device.document}, {"dirty", device.dirty}, {"revision", QString::number(device.revision)}});
     return {{"role", "slave"}, {"devices", devices}};
 }
 void RtuSlave::activate() { active_ = true; lastActivity_ = services_.nowUs(); }
-void RtuSlave::stop() { active_ = false; buffer_.clear(); sources_.clear(); response_.clear(); pendingSend_ = 0; }
+void RtuSlave::stop() { active_ = false; buffer_.clear(); sources_.clear(); sourceRanges_.clear(); response_.clear(); pendingSend_ = 0; responseSources_.clear(); sentSources_.clear(); }
 void RtuSlave::submit(const OperationRequest &request)
 {
     services_.publish({request.id, "invalid", QStringLiteral("从站运行数据只读；本项不提供设备写入或编辑入口"), {}});
@@ -110,15 +110,16 @@ void RtuSlave::onInput(const TraceRecord &record)
     }
     lastInput_ = record.monotonicUs;
     lastActivity_ = qMax(lastActivity_, lastInput_);
-    if (sources_.size() < 256) sources_.append(record.id);
+    if (sources_.size() < 256) { sources_.append(record.id); sourceRanges_.append({record.id, 0, int(record.bytes.size())}); }
     if (buffer_.size() + record.bytes.size() > 256) oversized_ = true;
-    buffer_.append(record.bytes.first(qMax(0, 256 - int(buffer_.size()))));
+    buffer_.append(record.bytes.left(qMax(0, 256 - int(buffer_.size()))));
 }
 void RtuSlave::finishFrame()
 {
     if (buffer_.isEmpty()) return;
     Message message;
     message.sources = sources_;
+    message.sourceRanges = sourceRanges_;
     message.status = "invalid";
     if (broken_ || oversized_ || buffer_.size() < 4 || crc16(buffer_) != 0)
         message.detail = QStringLiteral("请求帧 CRC、长度或可信 t1.5 间隙无效，不应答");
@@ -160,19 +161,27 @@ void RtuSlave::finishFrame()
                 message.detail = QStringLiteral("上次从站应答尚未完成，本请求不排入无限队列");
             } else {
                 response_ = response;
+                responseSources_ = sourceRanges_;
                 message.status = exception ? "exception" : "response-ready";
                 message.detail = QStringLiteral("请求已验证，应答等待帧间静默及统一通道发送");
             }
         }
     }
     services_.publishMessage(std::move(message));
-    buffer_.clear(); sources_.clear(); broken_ = oversized_ = false;
+    buffer_.clear(); sources_.clear(); sourceRanges_.clear(); broken_ = oversized_ = false;
 }
-void RtuSlave::onSent(quint64 id, bool, const QString &, qint64 observedUs)
+void RtuSlave::onSent(quint64 id, bool ok, const QString &reason, qint64 observedUs)
 {
     if (pendingSend_ != id) return;
     pendingSend_ = 0;
     lastActivity_ = qMax(lastActivity_, observedUs);
+    Message message;
+    message.sourceRanges = std::exchange(sentSources_, {});
+    for (const auto &source : message.sourceRanges) message.sources.append(source.recordId);
+    message.fields["localSendId"] = QString::number(id);
+    message.status = ok ? "response-sent" : "response-send-failed";
+    message.detail = ok ? QStringLiteral("从站应答本地发送完成；不代表主站已接收") : QStringLiteral("从站应答本地发送失败，不自动重发：") + reason;
+    services_.publishMessage(std::move(message));
 }
 void RtuSlave::tick()
 {
@@ -182,7 +191,9 @@ void RtuSlave::tick()
         && (buffer_.size() >= 8 || (buffer_.size() >= 4 && (quint8(buffer_[1]) < 1 || quint8(buffer_[1]) > 4)))) finishFrame();
     if (!response_.isEmpty() && !pendingSend_ && now - lastActivity_ >= t35_) {
         const auto bytes = std::exchange(response_, {});
+        sentSources_ = std::exchange(responseSources_, {});
         pendingSend_ = services_.sendPassive ? services_.sendPassive(bytes) : 0;
+        if (!pendingSend_) onSent(0, false, QStringLiteral("统一通道拒绝被动应答"), now);
     }
 }
 }

@@ -102,6 +102,7 @@ private:
     BackgroundExecutor preparationExecutor_;
     quint64 nextPassiveId_ = (quint64(1) << 63);
     QSet<quint64> passiveSends_;
+    QMap<quint64, qint64> passiveDeadlines_;
     quint64 expiredMessages_ = 0;
     quint64 expiredOperations_ = 0;
     TraceLimits traceLimits_;

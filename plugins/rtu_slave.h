@@ -8,6 +8,7 @@ struct SlaveDevice {
     QString path;
     QJsonObject document;
     bool dirty = false;
+    quint64 revision = 0;
 };
 QString validateSlaveDocument(const QJsonObject &document);
 class RtuSlave final : public ProtocolSession {
@@ -28,9 +29,11 @@ private:
     QMap<int, SlaveDevice> devices_;
     QByteArray buffer_;
     QList<quint64> sources_;
+    QList<TraceRange> sourceRanges_;
     bool active_ = false, broken_ = false, oversized_ = false;
     qint64 lastInput_ = 0, lastActivity_ = 0, t15_ = 0, t35_ = 0;
     QByteArray response_;
     quint64 pendingSend_ = 0;
+    QList<TraceRange> responseSources_, sentSources_;
 };
 }

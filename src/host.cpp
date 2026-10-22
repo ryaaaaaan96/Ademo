@@ -111,6 +111,7 @@ void DebugSession::retire()
     if (protocol_ && !preparing_) protocol_->stop();
     preparing_ = false;
     passiveSends_.clear();
+    passiveDeadlines_.clear();
     if (endpoint_) endpoint_->close();
     endpoint_.reset();
     protocol_.reset();
@@ -251,7 +252,13 @@ void DebugSession::opened(quint64 run, bool ok, const QString &reason)
 }
 
 qint64 DebugSession::nowUs() const { return clock_ ? clock_() : elapsed_.nsecsElapsed() / 1000; }
-void DebugSession::poll() { if (state_ == SessionState::Running && protocol_) protocol_->tick(); }
+void DebugSession::poll() {
+    if (state_ != SessionState::Running || !protocol_) return;
+    const auto ids = passiveDeadlines_.keys();
+    for (auto id : ids) if (nowUs() >= passiveDeadlines_.value(id))
+        sent(generation_, id, false, QStringLiteral("被动应答本地发送超时，未自动重发"), nowUs());
+    protocol_->tick();
+}
 quint64 DebugSession::appendTrace(const QString &kind, const QByteArray &bytes, quint64 operationId,
                                   const QString &detail, qint64 observedUs)
 {
@@ -300,13 +307,14 @@ quint64 DebugSession::sendPassive(quint64 run, const QByteArray &bytes)
     appendTrace("send-request", bytes, 0, QStringLiteral("被动应答，本地发送 ID %1").arg(id));
     const bool accepted = endpoint_->send(id, bytes);
     appendTrace(accepted ? "send-accepted" : "send-rejected", {}, 0, QStringLiteral("本地发送 ID %1").arg(id));
-    if (accepted) { passiveSends_.insert(id); return id; }
+    if (accepted) { passiveSends_.insert(id); passiveDeadlines_.insert(id, nowUs() + 1000000); return id; }
     return 0;
 }
 void DebugSession::sent(quint64 run, quint64 id, bool ok, const QString &reason, qint64 observedUs)
 {
     if (run != generation_ || state_ != SessionState::Running || !protocol_) return;
     if (passiveSends_.remove(id)) {
+        passiveDeadlines_.remove(id);
         appendTrace(ok ? "local-sent" : "local-send-failed", {}, 0, QStringLiteral("本地发送 ID %1：%2").arg(id).arg(reason), observedUs);
         protocol_->onSent(id, ok, reason, observedUs);
         return;

@@ -114,7 +114,8 @@ private:
         return editor;
     }
     void refresh() {
-        const bool running = access_.running && access_.running();
+        const bool running = access_.running && access_.running()
+            && (!access_.config || access_.config().role == "master");
         const auto operation = access_.operation ? access_.operation(operationId_) : OperationSnapshot{};
         read_->setEnabled(running && (!operationId_ || operation.finished));
         writeButton_->setEnabled(running && (!operationId_ || operation.finished));
