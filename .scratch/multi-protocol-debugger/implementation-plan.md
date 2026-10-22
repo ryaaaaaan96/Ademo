@@ -42,9 +42,12 @@ Qt/LLVM-MinGW、Debug/Release 与 LLDB 验证已完成，见 [环境证据](tool
 | --- | --- | --- | --- |
 | 03 | `dccb047` | [03 验收](evidence/03/acceptance.md)，Debug/Release 各 56 项通过 | 集成 Debug 构建与 CTest 2/2 通过 |
 | 04 | `ee4a71c`、`176e1bb` | [04 验收](evidence/04/acceptance.md)，Debug/Release 各 85 项通过 | 整合 03/04 后 Debug 构建与 CTest 3/3 通过 |
+| 05 | `c77a9a6` | [05 验收](evidence/05/acceptance.md)，Debug/Release 各 117 项通过 | [05/06 组合验收](evidence/integration05-06/acceptance.md)，两配置各 147 项通过 |
+| 06 | `dd39760` | [06 验收](evidence/06/acceptance.md)，Debug/Release 各 131 项通过 | 同上，SDK5 合并提交 `0943bc2` |
+| 07 | `48df1a6` | [07 验收](evidence/07/acceptance.md)，Debug/Release 各 156 项通过 | 整合 05/06/07/11 后 Debug 构建与 CTest 7/7 通过 |
 | 11 | `a4dec16` | [11 验收](evidence/11/acceptance.md)，Debug/Release 各 59 项通过 | 整合 03/04/11 后 Debug 构建与 CTest 4/4 通过 |
 
-03、04、11 已合入，05、06 已启动。其余任务继续按依赖等待。
+03–07、11 已合入，08、09、12 已按依赖启动。10 等待 08、09；13–19 不启动。
 
 ## 依赖与状态规则
 
