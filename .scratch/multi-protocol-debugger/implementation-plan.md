@@ -42,8 +42,9 @@ Qt/LLVM-MinGW、Debug/Release 与 LLDB 验证已完成，见 [环境证据](tool
 | --- | --- | --- | --- |
 | 03 | `dccb047` | [03 验收](evidence/03/acceptance.md)，Debug/Release 各 56 项通过 | 集成 Debug 构建与 CTest 2/2 通过 |
 | 04 | `ee4a71c`、`176e1bb` | [04 验收](evidence/04/acceptance.md)，Debug/Release 各 85 项通过 | 整合 03/04 后 Debug 构建与 CTest 3/3 通过 |
+| 11 | `a4dec16` | [11 验收](evidence/11/acceptance.md)，Debug/Release 各 59 项通过 | 整合 03/04/11 后 Debug 构建与 CTest 4/4 通过 |
 
-03、04 已合入，05、06 已启动；11 并行实施中。其余任务继续按依赖等待。
+03、04、11 已合入，05、06 已启动。其余任务继续按依赖等待。
 
 ## 依赖与状态规则
 
