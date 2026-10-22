@@ -1,6 +1,7 @@
 #pragma once
 #include "debugger/sdk.h"
 #include <QMap>
+#include <QSet>
 
 namespace debugger {
 struct SlaveDevice {
@@ -9,6 +10,7 @@ struct SlaveDevice {
     QJsonObject document;
     bool dirty = false;
     quint64 revision = 0;
+    QJsonObject savedDocument;
 };
 QString validateSlaveDocument(const QJsonObject &document);
 class RtuSlave final : public ProtocolSession {
@@ -17,6 +19,7 @@ public:
     QString prepare(const SessionConfig &) override;
     bool prepareInBackground(const SessionConfig &) const override { return true; }
     QJsonObject snapshot() const override;
+    LocalState localState() const override;
     void activate() override;
     void stop() override;
     void submit(const OperationRequest &) override;
@@ -25,8 +28,12 @@ public:
     void tick() override;
 private:
     void finishFrame();
+    void publishBindings();
+    bool validReplacement(int unit, const QJsonObject &, QString &error) const;
     ProtocolServices services_;
     QMap<int, SlaveDevice> devices_;
+    QSet<int> fileJobs_;
+    QMap<int, QString> fileTargets_;
     QByteArray buffer_;
     QList<quint64> sources_;
     QList<TraceRange> sourceRanges_;

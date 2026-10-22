@@ -37,6 +37,7 @@ QWidget *createSlaveView(SessionAccess access, QWidget *parent)
     data->setHorizontalHeaderLabels({QStringLiteral("设备"), QStringLiteral("数据区"), QStringLiteral("PDU 范围"), QStringLiteral("模拟值（前 16 项）"), QStringLiteral("启动文件")});
     data->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch); data->setEditTriggers(QAbstractItemView::NoEditTriggers);
     data->setMinimumHeight(180); layout->addWidget(data);
+    addSlaveEditor(access, view, layout);
     QObject::connect(browse, &QPushButton::clicked, view, [view, path] {
         const auto selected = QFileDialog::getOpenFileName(view, QStringLiteral("选择单个设备 JSON"), {}, "JSON (*.json)");
         if (!selected.isEmpty()) path->setText(selected);
