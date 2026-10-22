@@ -1,5 +1,6 @@
 #pragma once
 #include "sdk.h"
+#include "trace_query.h"
 #include <QObject>
 #include <QPointer>
 #include <QPluginLoader>
@@ -55,6 +56,10 @@ public:
     QList<Message> messages(quint64 operationId = 0) const;
     std::optional<TraceRecord> trace(quint64 id) const;
     quint64 expiredTraceCount() const { return expiredTraces_; }
+    bool configureTrace(TraceLimits, QString *error = nullptr);
+    TraceLimits traceLimits() const { return traceLimits_; }
+    TraceSnapshot queryTrace(const TraceFilter & = {}) const;
+    std::shared_future<ExportResult> exportTrace(const TraceFilter &, const QString &path, const QString &format) const;
     SessionAccess access();
     void poll(); // 可控时钟测试入口；产品由精确 Qt 定时器驱动。
 signals:
@@ -97,6 +102,9 @@ private:
     BackgroundExecutor preparationExecutor_;
     quint64 nextPassiveId_ = (quint64(1) << 63);
     QSet<quint64> passiveSends_;
+    quint64 expiredMessages_ = 0;
+    quint64 expiredOperations_ = 0;
+    TraceLimits traceLimits_;
 };
 class Workbench : public QWidget {
 public:

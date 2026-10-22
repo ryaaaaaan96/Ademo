@@ -1,0 +1,17 @@
+169c54b464f92a261ab30edd0f64c450be13e9c929b26c36bf06981a7144249b  build/qt-llvm-release/bin/multi_protocol_debugger.exe
+5b7f01ea0d409370c7531bb3bed6f87c379d32475c8b59ad1d62c867cf20b736  build/qt-llvm-release/bin/trace_tests.exe
+35bc7af7ee471453382304add6b508e4fda3cc3d3f595766d986e7133ea88f12  build/qt-llvm-release/bin/plugins/libmodbus_plugin.dll
+91f6f53b49ff77aea7faedb2a08decf89dbdda6aac5629d9d846c6656b7d5dc3  build/qt-llvm-release/bin/plugins/libserial_plugin.dll
+1c51fe5009e8bda6c8df29c33e2c44ed7a04599424e8ff2d2d48eba5e339d671  .scratch/multi-protocol-debugger/evidence/11/qt-llvm-release/01-open-error.png
+e50058147f6829c746cda671c748892dbd123128c62b2b32d305651310ba9dff  .scratch/multi-protocol-debugger/evidence/11/qt-llvm-release/02-running-controlled.png
+41dcbc24aa9ca2832ed019963c9a809d046bc9cbb13626be2a3a769e9a3e9e90  .scratch/multi-protocol-debugger/evidence/11/qt-llvm-release/03-stopped-controlled.png
+510ce651ed3cf861fe95819e6fe5e8f49dca6745baaf0248f94becb78b82ec9c  .scratch/multi-protocol-debugger/evidence/11/qt-llvm-release/build.log
+f3f14fc5de06a5ea7046603dabbe5ba9aaf92e0b300cc950060b6df663bebcd2  .scratch/multi-protocol-debugger/evidence/11/qt-llvm-release/configure.log
+792717961c53951429b3bd9f072ba70062dfdade8253e7292773035e22427857  .scratch/multi-protocol-debugger/evidence/11/qt-llvm-release/ctest.log
+5dd2ac1d31b10584dee3aa8d24071b8d227f0cfb50fdaf34483775e0b078b177  .scratch/multi-protocol-debugger/evidence/11/qt-llvm-release/read-exception-controlled.png
+07e9108e1bbef600b7697dc7ef03c2c3837904477701c894f4538448f8089731  .scratch/multi-protocol-debugger/evidence/11/qt-llvm-release/read-results.txt
+faaea2a8cc87b91c0ea2ea062b0136535786f65cd812c70e08aa34b5a5046ad1  .scratch/multi-protocol-debugger/evidence/11/qt-llvm-release/read-success-controlled.png
+840c5a96e5b13099a463cd8a2af92dd2590224b4b99fb41ba2f8cbd99161680b  .scratch/multi-protocol-debugger/evidence/11/qt-llvm-release/read-timeout-controlled.png
+750818f7082bfc68f9769f2a75aee29bfa632b37a874f0f70f70c0429aa45981  .scratch/multi-protocol-debugger/evidence/11/qt-llvm-release/test-results.txt
+0878867b383a04c94691af3bee8aa871ea4fec075f2754521fd1cfa4cb29a128  .scratch/multi-protocol-debugger/evidence/11/qt-llvm-release/trace-query-export.png
+484c93cec09ed23496c43c17c6505841676e4726af160a40e3f7bb59ad529c95  .scratch/multi-protocol-debugger/evidence/11/qt-llvm-release/trace-results.txt
