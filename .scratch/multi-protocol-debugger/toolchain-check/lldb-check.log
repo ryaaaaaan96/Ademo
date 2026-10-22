@@ -1,0 +1,21 @@
+(lldb) target create ".scratch\\multi-protocol-debugger\\toolchain-check\\build\\qt-llvm-debug\\qt_toolchain_check.exe"
+Current executable set to 'C:\Users\81966\Documents\Ademo\.scratch\multi-protocol-debugger\toolchain-check\build\qt-llvm-debug\qt_toolchain_check.exe' (x86_64).
+(lldb) breakpoint set --name main
+Breakpoint 1: where = qt_toolchain_check.exe`main + 58 at main.cpp:17:28, address = 0x000000014000145a
+(lldb) run -platform offscreen
+Process 24052 launched: 'C:\Users\81966\Documents\Ademo\.scratch\multi-protocol-debugger\toolchain-check\build\qt-llvm-debug\qt_toolchain_check.exe' (x86_64)
+Process 24052 stopped
+* thread #1, stop reason = breakpoint 1.1
+    frame #0: 0x00007ff7d212145a qt_toolchain_check.exe`main(argc=3, argv=0x0000019ef06d9220) at main.cpp:17:28
+   14  	
+   15  	int main(int argc, char **argv)
+   16  	{
+-> 17  	    QApplication app(argc, argv);
+    	                           ^
+   18  	    MocProbe probe;
+   19  	    QWidget widget;
+   20  	    QSerialPort serial;
+(lldb) continue
+Qt=6.12.0 C++=201703 PointerBits=64 MOC=MocProbe CANPlugins=passthrucan,peakcan,systeccan,tinycan,vectorcan,virtualcan
+Process 24052 resuming
+Process 24052 exited with status = 0 (0x00000000)

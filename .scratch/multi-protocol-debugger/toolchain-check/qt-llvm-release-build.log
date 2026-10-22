@@ -1,0 +1,4 @@
+[1/4] Automatic MOC for target qt_toolchain_check
+[2/4] Building CXX object CMakeFiles/qt_toolchain_check.dir/qt_toolchain_check_autogen/mocs_compilation.cpp.obj
+[3/4] Building CXX object CMakeFiles/qt_toolchain_check.dir/main.cpp.obj
+[4/4] Linking CXX executable qt_toolchain_check.exe

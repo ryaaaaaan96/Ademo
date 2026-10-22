@@ -1,0 +1,6 @@
+{
+  "cmake.cmakePath": "C:/Qt/Tools/CMake_64/bin/cmake.exe",
+  "cmake.configureOnOpen": false,
+  "clangd.path": "C:/Qt/Tools/llvm-mingw2217_64/bin/clangd.exe",
+  "lldb-dap.executable-path": "C:/Qt/Tools/llvm-mingw2217_64/bin/lldb-dap.exe"
+}
