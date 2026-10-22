@@ -14,7 +14,11 @@ public:
     void onSent(quint64, bool, const QString &, qint64 observedUs) override;
     void tick() override;
 private:
-    enum class Phase { Idle, WaitingIdle, Sending, AwaitingResponse };
+    enum class Phase { Idle, WaitingIdle, Sending, AwaitingResponse, RetryWait, Quarantine };
+    struct PollTask { QString action; QJsonObject parameters; qint64 intervalUs; qint64 dueUs = 0; };
+    QString configureSettings(const QJsonObject &);
+    void begin(const OperationRequest &);
+    void readTimeout();
     void finish(const QString &state, const QString &detail, QJsonObject result = {});
     void finishFrame();
     bool candidateComplete() const;
@@ -43,5 +47,17 @@ private:
     QString area_ = "holding";
     WritePdu write_;
     bool writeSubmitted_ = false;
+    QList<OperationRequest> pending_;
+    QList<PollTask> polls_;
+    qsizetype nextPoll_ = 0;
+    int extraRetries_ = 2;
+    int attempt_ = 1;
+    qint64 retryIntervalUs_ = 100000;
+    qint64 retryReadyUs_ = 0;
+    QMap<QString, quint64> uncertainReads_; // 有界：记录曾耗尽的响应形状，不假定隔离能排除任意迟到。
+    bool freshnessUncertain_ = false;
+    bool allReadsUncertain_ = false;
+    QMap<quint64, qsizetype> pollOperations_;
+    QString responseShape() const;
 };
 }

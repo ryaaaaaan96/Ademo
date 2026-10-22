@@ -52,7 +52,7 @@ struct TraceRecord {
     QByteArray bytes;
     QString detail;
     std::optional<qint64> idleBeforeUs; // 仅后端确知的线路静默；QSerialPort 没有此精度。
-    QJsonObject metadata; // 仅记录后端实际提供的元数据。
+    QJsonObject metadata; // 实际观测及宿主发送身份；不虚构后端时间精度。
 };
 struct TraceRange {
     quint64 recordId = 0;
@@ -84,6 +84,8 @@ struct ProtocolServices {
     std::function<bool(quint64, QByteArray)> send;
     std::function<void(OperationUpdate)> publish;
     std::function<void(Message)> publishMessage;
+    std::function<quint64(QString, QJsonObject)> submit; // 协议调度仍由宿主分配逻辑操作 ID。
+    std::function<void(QJsonObject)> publishConfiguration; // 更新可保存配置，不由宿主解释协议字段。
 };
 struct SessionAccess {
     std::function<quint64(QString, QJsonObject)> submit;
@@ -91,6 +93,8 @@ struct SessionAccess {
     std::function<QList<TraceRecord>(quint64)> traces;
     std::function<QList<Message>(quint64)> messages;
     std::function<bool()> running;
+    std::function<SessionConfig()> config;
+    std::function<bool(QJsonObject)> configure; // 仅停止/错误状态可更改启动配置。
 };
 struct ReceiveChunk {
     QByteArray bytes;
@@ -110,7 +114,7 @@ public:
     virtual ~Endpoint() = default;
     virtual void open() = 0;
     virtual void close() = 0;
-    virtual bool send(quint64 id, const QByteArray &) = 0;
+    virtual bool send(quint64 id, const QByteArray &) = 0; // id 为不透明发送令牌，不是逻辑操作 ID。
 };
 class ProtocolSession {
 public:
@@ -139,7 +143,7 @@ public:
     virtual std::unique_ptr<Endpoint> createEndpoint(const QJsonObject &, EndpointEvents) = 0;
 };
 }
-#define DebuggerProtocolIid "org.ademo.debugger.Protocol/3.0"
-#define DebuggerTransportIid "org.ademo.debugger.Transport/3.0"
+#define DebuggerProtocolIid "org.ademo.debugger.Protocol/4.0"
+#define DebuggerTransportIid "org.ademo.debugger.Transport/4.0"
 Q_DECLARE_INTERFACE(debugger::ProtocolPlugin, DebuggerProtocolIid)
 Q_DECLARE_INTERFACE(debugger::TransportPlugin, DebuggerTransportIid)

@@ -46,6 +46,7 @@ public:
     QString diagnostic() const { return diagnostic_; }
     quint64 generation() const { return generation_; }
     SessionConfig config() const { return config_; }
+    bool configure(QJsonObject protocol);
     quint64 submit(const QString &action, const QJsonObject &parameters);
     OperationSnapshot operation(quint64) const;
     QList<TraceRecord> traces(quint64 operationId = 0) const;
@@ -95,6 +96,9 @@ private:
     quint64 expiredMessages_ = 0;
     quint64 expiredOperations_ = 0;
     TraceLimits traceLimits_;
+    struct SendAttempt { quint64 token = 0; int attempt = 0; bool completed = false; };
+    QMap<quint64, SendAttempt> sendAttempts_;
+    quint64 nextSendToken_ = 1;
 };
 class Workbench : public QWidget {
 public:
