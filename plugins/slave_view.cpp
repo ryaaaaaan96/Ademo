@@ -7,6 +7,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSpinBox>
+#include <QScrollArea>
 #include <QTableWidget>
 #include <QTimer>
 #include <QVBoxLayout>
@@ -16,7 +17,10 @@ QWidget *createSlaveView(SessionAccess access, QWidget *parent)
 {
     auto *view = new QWidget(parent);
     view->setObjectName("slaveView");
-    auto *layout = new QVBoxLayout(view);
+    auto *outer = new QVBoxLayout(view);
+    auto *scroll = new QScrollArea(view); scroll->setObjectName("slaveScroll"); scroll->setWidgetResizable(true); scroll->setMinimumHeight(240);
+    auto *content = new QWidget(scroll); scroll->setWidget(content); outer->addWidget(scroll);
+    auto *layout = new QVBoxLayout(content);
     auto *description = new QLabel(QStringLiteral("从站模拟数据：一设备一外部 JSON。配置后选择 slave 角色再启动；全部文件校验成功后才打开端点。运行中外部文件变化不自动加载。"), view);
     description->setWordWrap(true); layout->addWidget(description);
     auto *form = new QFormLayout;

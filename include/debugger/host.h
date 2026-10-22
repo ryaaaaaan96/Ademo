@@ -92,6 +92,7 @@ private:
     quint64 generation_ = 0;
     quint64 protocolRun_ = 0;
     std::function<bool()> discardGuard_;
+    bool resolvingUnsaved_ = false;
     EndpointFactory endpointFactory_;
     std::function<qint64()> clock_;
     QElapsedTimer elapsed_;

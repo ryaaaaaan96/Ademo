@@ -7,6 +7,9 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSpinBox>
+#include <QScrollArea>
+#include <QTabWidget>
+#include <QTableWidget>
 #include <QTest>
 
 namespace {
@@ -116,9 +119,35 @@ private slots:
         jobs.takeFirst()(); QCoreApplication::processEvents(); QCOMPARE(session.operation(id).update.state, "file-error");
         QCOMPARE(holding(session), 123); QCOMPARE(device(session).value("path").toString(), path);
     }
+    void changedStartupConfigCannotBeOverwrittenByOldModel() {
+        Harness h(catalog); QVERIFY(h.session.start(h.makeConfig())); QTRY_COMPARE(h.session.state(), SessionState::Running);
+        edit(h.session, 42); h.session.stop(); auto next = h.session.config().protocol;
+        next["customSetting"] = "preserve-new-config";
+        QVERIFY(!h.session.configure(next)); // 无界面不能隐式丢弃修改。
+        h.session.submit("slave-discard", {{"unit", 17}});
+        const auto changed = h.directory.filePath("new-device.json"); QVERIFY(save(changed, document(777)));
+        auto devices = next.value("devices").toArray(); auto first = devices[0].toObject(); first["path"] = changed; devices[0] = first; next["devices"] = devices;
+        QVERIFY(h.session.configure(next)); QVERIFY(h.session.snapshot().isEmpty());
+        const auto staleSave = h.session.submit("slave-save", {{"unit", 17}});
+        QCOMPARE(h.session.operation(staleSave).update.state, "invalid"); QCOMPARE(h.session.config().protocol, next);
+        QVERIFY(h.session.start(h.session.config())); QTRY_COMPARE(h.session.state(), SessionState::Running); QCOMPARE(holding(h.session), 777);
+        QCOMPARE(h.session.config().protocol.value("customSetting").toString(), "preserve-new-config");
+        h.session.stop(); edit(h.session, 999);
+        int guardCalls = 0; bool nestedStarted = true;
+        h.session.access().setDiscardGuard([&] {
+            if (++guardCalls > 1) return false;
+            nestedStarted = h.session.start(h.session.config());
+            h.session.submit("slave-discard", {{"unit", 17}}); return true;
+        });
+        QVERIFY(h.session.start(h.session.config())); QTRY_COMPARE(h.session.state(), SessionState::Running);
+        QCOMPARE(guardCalls, 1); QVERIFY(!nestedStarted);
+    }
     void widgetEditSaveAndReloadCancel() {
         Harness h(catalog); QVERIFY(h.session.start(h.makeConfig())); QTRY_COMPARE(h.session.state(), SessionState::Running);
         std::unique_ptr<QWidget> view(catalog->createView("modbus.rtu", nullptr, h.session.access())); view->resize(950, 850); view->show();
+        qobject_cast<QTabWidget *>(view.get())->setCurrentIndex(1);
+        auto *scroll = view->findChild<QScrollArea *>("slaveScroll");
+        scroll->ensureWidgetVisible(view->findChild<QPushButton *>("slaveEditApply"));
         view->findChild<QSpinBox *>("slaveEditUnit")->setValue(17); view->findChild<QSpinBox *>("slaveEditAddress")->setValue(107);
         view->findChild<QLineEdit *>("slaveEditValue")->setText("42");
         QTest::mouseClick(view->findChild<QPushButton *>("slaveEditApply"), Qt::LeftButton); QCOMPARE(holding(h.session), 42);
@@ -128,8 +157,15 @@ private slots:
         QVERIFY(!h.session.start(h.session.config())); QCOMPARE(holding(h.session), 77);
         QTimer::singleShot(0, [] { if (auto *box = qobject_cast<QMessageBox *>(QApplication::activeModalWidget())) QTest::mouseClick(box->button(QMessageBox::Save), Qt::LeftButton); });
         QVERIFY2(h.session.start(h.session.config()), qPrintable(h.session.diagnostic())); QTRY_COMPARE(h.session.state(), SessionState::Running); QCOMPARE(holding(h.session), 77);
+        QTRY_COMPARE(view->findChild<QTableWidget *>("slaveData")->rowCount(), 8);
+        QTRY_VERIFY(!view->findChild<QLabel *>("slaveDirtyStatus")->text().isEmpty());
         const auto evidence = qEnvironmentVariable("DEBUGGER_EVIDENCE_DIR");
-        if (!evidence.isEmpty()) { QDir().mkpath(evidence); QVERIFY(view->findChild<QWidget *>("slaveView")->grab().save(evidence + "/slave-edit-save-controlled.png")); }
+        if (!evidence.isEmpty()) {
+            QDir().mkpath(evidence); scroll->ensureWidgetVisible(view->findChild<QTableWidget *>("slaveData")); QCoreApplication::processEvents();
+            QVERIFY(view->grab().save(evidence + "/slave-edited-data-controlled.png"));
+            scroll->ensureWidgetVisible(view->findChild<QLabel *>("slaveEditStatus")); QCoreApplication::processEvents();
+            QVERIFY(view->grab().save(evidence + "/slave-edit-save-controlled.png"));
+        }
     }
 };
 QTEST_MAIN(SlaveEditTests)

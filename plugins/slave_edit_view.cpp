@@ -69,6 +69,7 @@ void addSlaveEditor(SessionAccess access, QWidget *view, QVBoxLayout *layout) {
     auto *values = new QPlainTextEdit("[10,20]", view); values->setMaximumHeight(70); values->setObjectName("slaveAreaValues");
     auto *path = new QLineEdit(view); path->setObjectName("slaveFilePath");
     auto *status = new QLabel(view); status->setWordWrap(true); status->setObjectName("slaveEditStatus");
+    auto *dirtyStatus = new QLabel(view); dirtyStatus->setWordWrap(true); dirtyStatus->setObjectName("slaveDirtyStatus");
     auto operation = std::make_shared<quint64>(0);
     auto submit = [access, operation](QString action, QJsonObject parameters) {
         if (access.submit) *operation = access.submit(std::move(action), std::move(parameters));
@@ -114,10 +115,12 @@ void addSlaveEditor(SessionAccess access, QWidget *view, QVBoxLayout *layout) {
         if (!selected.isEmpty()) submit("slave-save", {{"unit", unit->value()}, {"path", selected}});
     });
     button(QStringLiteral("放弃目标设备未保存修改"), "slaveDiscard", [=] {
-        if (deviceFor(access, unit->value()).value("dirty").toBool() && decision(view) == "discard")
-            submit("slave-discard", {{"unit", unit->value()}});
+        if (deviceFor(access, unit->value()).value("dirty").toBool()) {
+            const auto choice = decision(view);
+            if (choice != "cancel") submit(choice == "save" ? "slave-save" : "slave-discard", {{"unit", unit->value()}});
+        }
     });
-    form->addRow(status); layout->addLayout(form);
+    form->addRow(dirtyStatus); form->addRow(status); layout->addLayout(form);
     if (access.setDiscardGuard) {
         QPointer<QWidget> weak(view);
         access.setDiscardGuard([weak, access] { return weak && resolveUnsaved(access, weak); });
@@ -125,6 +128,10 @@ void addSlaveEditor(SessionAccess access, QWidget *view, QVBoxLayout *layout) {
     }
     auto *timer = new QTimer(view); timer->setInterval(100);
     QObject::connect(timer, &QTimer::timeout, view, [=] {
+        QStringList dirty;
+        if (access.snapshot) for (const auto &entry : access.snapshot().value("devices").toArray())
+            if (entry.toObject().value("dirty").toBool()) dirty << QString::number(entry.toObject().value("unit").toInt());
+        dirtyStatus->setText(QStringLiteral("未保存设备：%1；停止通信仍保留本地数据，可继续保存。").arg(dirty.isEmpty() ? QStringLiteral("无") : dirty.join(',')));
         if (*operation && access.operation) {
             const auto result = access.operation(*operation);
             status->setText(QStringLiteral("%1：%2").arg(result.update.state, result.update.detail));

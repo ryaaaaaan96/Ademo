@@ -147,7 +147,8 @@ void DebugSession::fail(const QString &reason)
 bool DebugSession::start(const SessionConfig &config)
 {
     if (state_ == SessionState::Starting || state_ == SessionState::Running) return false;
-    if (!resolveUnsaved()) return false;
+    QPointer<DebugSession> guard(this);
+    if (!resolveUnsaved() || !guard) return false;
     retire();
     config_ = config;
     auto *p = catalog_->protocol(config.protocolId);
@@ -460,6 +461,8 @@ bool DebugSession::configure(QJsonObject protocol)
     if (state_ == SessionState::Starting || state_ == SessionState::Running) return false;
     if (protocol_ && protocol_->localState().busy) return false;
     if (!resolveUnsaved()) return false;
+    // 新启动配置生效后撤下旧本地模型，避免旧绑定的文件作业写回覆盖新配置。
+    protocol_.reset();
     config_.protocol = std::move(protocol);
     emit changed();
     return true;
@@ -471,12 +474,19 @@ QJsonObject DebugSession::snapshot() const
 bool DebugSession::ownsProtocol(quint64 run) const { return protocol_ && protocolRun_ == run; }
 bool DebugSession::resolveUnsaved()
 {
+    if (resolvingUnsaved_) return false;
     if (!protocol_ || preparing_) return true;
     if (protocol_->localState().busy) {
         diagnostic_ = QStringLiteral("后台文件操作尚未结束，请等待后再重新加载或关闭"); emit changed(); return false;
     }
     if (!protocol_->localState().dirty) return true;
-    if (discardGuard_ && discardGuard_() && !protocol_->localState().dirty && !protocol_->localState().busy) return true;
+    QPointer<DebugSession> guard(this);
+    const auto decision = discardGuard_;
+    resolvingUnsaved_ = true;
+    const bool resolved = decision && decision();
+    if (!guard) return false;
+    resolvingUnsaved_ = false;
+    if (resolved && protocol_ && !protocol_->localState().dirty && !protocol_->localState().busy) return true;
     diagnostic_ = QStringLiteral("保留未保存修改；请保存、放弃或取消后再重新加载或关闭"); emit changed(); return false;
 }
 bool DebugSession::background(quint64 run, std::function<QJsonObject()> task, std::function<void(QJsonObject)> completion)
