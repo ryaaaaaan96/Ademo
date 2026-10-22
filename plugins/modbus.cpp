@@ -1,5 +1,6 @@
 #include "debugger/sdk.h"
 #include "rtu_session.h"
+#include "slave_view.h"
 #include <QComboBox>
 #include <QFormLayout>
 #include <QLineEdit>
@@ -13,6 +14,7 @@
 #include <QTableWidget>
 #include <QHeaderView>
 #include <QVBoxLayout>
+#include <QTabWidget>
 
 using namespace debugger;
 class RtuView final : public QWidget {
@@ -112,7 +114,8 @@ private:
         return editor;
     }
     void refresh() {
-        const bool running = access_.running && access_.running();
+        const bool running = access_.running && access_.running()
+            && (!access_.config || access_.config().role == "master");
         const auto operation = access_.operation ? access_.operation(operationId_) : OperationSnapshot{};
         read_->setEnabled(running && (!operationId_ || operation.finished));
         writeButton_->setEnabled(running && (!operationId_ || operation.finished));
@@ -186,7 +189,7 @@ class modbusPlugin final : public QObject, public ProtocolPlugin {
     Q_INTERFACES(debugger::ProtocolPlugin)
 public:
     Descriptor describe() const override {
-        return {"modbus.rtu", QStringLiteral("Modbus RTU"), buildKey(), {"master"},
+        return {"modbus.rtu", QStringLiteral("Modbus RTU"), buildKey(), {"master", "slave"},
                 {"serial"}, {"lifecycle", "read-coils", "read-discrete", "read-holding", "read-input", "write-single-coil", "write-single-register",
                                "write-multiple-coils", "write-multiple-registers"}, {}};
     }
@@ -194,7 +197,10 @@ public:
         return std::make_unique<RtuSession>(std::move(services));
     }
     QWidget *createView(SessionAccess access, QWidget *parent) override {
-        return new RtuView(std::move(access), parent);
+        auto *tabs = new QTabWidget(parent);
+        tabs->addTab(new RtuView(access, tabs), QStringLiteral("主站观测与设备写入"));
+        tabs->addTab(createSlaveView(std::move(access), tabs), QStringLiteral("从站文件与模拟数据"));
+        return tabs;
     }
 };
 #include "modbus.moc"

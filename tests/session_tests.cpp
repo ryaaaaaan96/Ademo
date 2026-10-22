@@ -132,7 +132,7 @@ private slots:
         ControlledWire wire;
         DebugSession session(catalog, nullptr, controlled(wire));
         auto bad = config();
-        bad.role = "slave";
+        bad.role = "unavailable-role";
         QVERIFY(!session.start(bad));
         QVERIFY(session.diagnostic().contains(QStringLiteral("不支持")));
         bad = config();

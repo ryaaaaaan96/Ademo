@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "areas": {
+    "coils": { "start": 0, "values": [true, false, true, false] },
+    "discrete": { "start": 0, "values": [false, true, false, true] },
+    "holding": { "start": 0, "values": [10, 20, 30, 40] },
+    "input": { "start": 0, "values": [100, 200, 300, 400] }
+  }
+}

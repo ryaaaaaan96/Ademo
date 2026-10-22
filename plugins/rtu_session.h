@@ -1,12 +1,15 @@
 #pragma once
 #include "debugger/sdk.h"
 #include "write_pdu.h"
+#include "rtu_slave.h"
 
 namespace debugger {
 class RtuSession final : public ProtocolSession {
 public:
     explicit RtuSession(ProtocolServices services);
     QString prepare(const SessionConfig &) override;
+    bool prepareInBackground(const SessionConfig &config) const override { return config.role == "slave"; }
+    QJsonObject snapshot() const override { return slave_ ? slave_->snapshot() : QJsonObject{{"role", "master"}}; }
     void activate() override;
     void stop() override;
     void submit(const OperationRequest &) override;
@@ -14,6 +17,7 @@ public:
     void onSent(quint64, bool, const QString &, qint64 observedUs) override;
     void tick() override;
 private:
+    std::unique_ptr<RtuSlave> slave_;
     enum class Phase { Idle, WaitingIdle, Sending, AwaitingResponse };
     void finish(const QString &state, const QString &detail, QJsonObject result = {});
     void finishFrame();
