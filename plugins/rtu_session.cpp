@@ -47,6 +47,7 @@ void RtuSession::stop()
     if (request_.id) finish("cancelled", QStringLiteral("会话停止，读取已取消"));
     buffer_.clear();
     sources_.clear();
+    sourceRanges_.clear();
 }
 void RtuSession::submit(const OperationRequest &request)
 {
@@ -90,7 +91,10 @@ void RtuSession::onInput(const TraceRecord &record)
     haveInput_ = true;
     lastInputUs_ = record.monotonicUs;
     lastActivityUs_ = qMax(lastActivityUs_, lastInputUs_);
-    if (sources_.size() < 256) sources_.append(record.id);
+    if (sources_.size() < 256) {
+        sources_.append(record.id);
+        sourceRanges_.append({record.id, 0, int(record.bytes.size())});
+    }
     if (buffer_.size() + record.bytes.size() > 256) oversizedFrame_ = true;
     buffer_.append(record.bytes.left(qMax(0, 256 - int(buffer_.size()))));
 }
@@ -100,6 +104,7 @@ void RtuSession::finishFrame()
     Message message;
     bool published = false;
     message.sources = sources_;
+    message.sourceRanges = sourceRanges_;
     message.status = "invalid";
     if (oversizedFrame_) message.detail = QStringLiteral("RTU 帧超过 256 字节");
     else if (brokenFrame_) message.detail = QStringLiteral("帧内间隙超过 t1.5，丢弃不完整 RTU 帧");
@@ -141,6 +146,7 @@ void RtuSession::finishFrame()
     if (!published) services_.publishMessage(message);
     buffer_.clear();
     sources_.clear();
+    sourceRanges_.clear();
     brokenFrame_ = oversizedFrame_ = haveInput_ = false;
 }
 bool RtuSession::candidateComplete() const
