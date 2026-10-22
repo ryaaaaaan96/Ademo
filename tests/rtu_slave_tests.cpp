@@ -158,7 +158,7 @@ private slots:
     void widgetBindingsAndData() {
         Harness files(catalog); const auto settings=files.makeConfig(); Wire wire;
         Workbench window(catalog,nullptr,wire.factory()); window.resize(1100,1050); window.show();
-        auto *tabs=window.findChild<QTabWidget *>(); QVERIFY(tabs); tabs->setCurrentIndex(1);
+        auto *tabs=window.findChild<QTabWidget *>("protocolTabs"); QVERIFY(tabs); tabs->setCurrentIndex(1);
         auto *role=window.findChild<QComboBox *>("role"); role->setCurrentIndex(role->findData("slave"));
         auto *unit=window.findChild<QSpinBox *>("slaveUnit"); auto *path=window.findChild<QLineEdit *>("slavePath");
         for(const auto &binding : settings.protocol["devices"].toArray()) {
@@ -175,7 +175,7 @@ private slots:
     }
     void widgetMissingFileError() {
         Wire wire; Workbench window(catalog,nullptr,wire.factory()); window.resize(1100,1050); window.show();
-        window.findChild<QTabWidget *>()->setCurrentIndex(1);
+        window.findChild<QTabWidget *>("protocolTabs")->setCurrentIndex(1);
         auto *role=window.findChild<QComboBox *>("role"); role->setCurrentIndex(role->findData("slave"));
         const auto path=QDir::tempPath()+"/missing-debugger-device-06.json";
         window.findChild<QSpinBox *>("slaveUnit")->setValue(17); window.findChild<QLineEdit *>("slavePath")->setText(path);

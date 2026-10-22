@@ -9,6 +9,8 @@
 #include <QTimer>
 #include <optional>
 #include <vector>
+class QTabWidget;
+class QCloseEvent;
 
 namespace debugger {
 // 注册表由会话和视图共同持有，确保 DLL 晚于其创建的对象销毁。
@@ -43,6 +45,9 @@ public:
                           BackgroundExecutor preparationExecutor = {});
     ~DebugSession() override;
     bool start(const SessionConfig &);
+    bool reconnect();
+    bool configureRecovery(QJsonObject);
+    bool canReconnect() const { return recoverable_ && protocol_ && !preparing_ && state_ == SessionState::Error; }
     void stop();
     SessionState state() const { return state_; }
     QString diagnostic() const { return diagnostic_; }
@@ -67,6 +72,8 @@ signals:
     void changed();
 private:
     bool prepared(quint64 run, const QString &error);
+    bool openConnection();
+    void connectionFailed(const QString &);
     void opened(quint64, bool, const QString &);
     void fail(const QString &);
     void retire(bool retainLocal = false);
@@ -91,6 +98,9 @@ private:
     QString key_;
     quint64 generation_ = 0;
     quint64 protocolRun_ = 0;
+    bool recoverable_ = false;
+    bool activated_ = false;
+    qint64 reconnectDueUs_ = -1;
     std::function<bool()> discardGuard_;
     bool resolvingUnsaved_ = false;
     EndpointFactory endpointFactory_;
@@ -116,16 +126,26 @@ private:
     QMap<quint64, SendAttempt> sendAttempts_;
     quint64 nextSendToken_ = 1;
 };
+class SessionPane;
 class Workbench : public QWidget {
 public:
     explicit Workbench(std::shared_ptr<PluginCatalog>, QWidget *parent = nullptr,
                        DebugSession::EndpointFactory endpointFactory = {}, std::function<qint64()> clock = {});
     ~Workbench() override;
+    int addSession(const SessionConfig & = {}, const QString &title = {});
+    bool closeSession(int index);
+    int sessionCount() const;
+    DebugSession *session(int index) const;
+    SessionConfig sessionConfiguration(int index) const;
+    int currentSessionIndex() const;
+    void selectSession(int index);
 protected:
     void closeEvent(QCloseEvent *) override;
 private:
     std::shared_ptr<PluginCatalog> catalog_;
-    DebugSession session_;
-    QWidget *view_ = nullptr;
+    DebugSession::EndpointFactory factory_;
+    std::function<qint64()> clock_;
+    QTabWidget *tabs_ = nullptr;
+    int nextSessionNumber_ = 1;
 };
 }
