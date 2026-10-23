@@ -42,8 +42,8 @@ private slots:
         const QJsonObject firstBinding{{"unit", 17}, {"path", first}, {"vendor", "first"}, {"future", QJsonObject{{"mode", 9}}}};
         const QJsonObject secondBinding{{"unit", 18}, {"path", second}, {"vendor", "second"}, {"future", QJsonArray{true, 23}}};
         Wire wire; Workbench window(catalog, nullptr, wire.factory()); QVERIFY(window.closeSession(0));
-        window.addSession(config({firstBinding, secondBinding})); auto *session = window.session(0);
-        QVERIFY(session->start(window.sessionConfiguration(0))); QTRY_COMPARE(session->state(), SessionState::Running);
+        const auto index = window.addSession(config({firstBinding, secondBinding})); auto *session = window.session(index);
+        QVERIFY(session->start(window.sessionConfiguration(index))); QTRY_COMPARE(session->state(), SessionState::Running);
         auto id = session->submit("slave-save", {{"unit", 17}, {"path", saved}});
         QTRY_VERIFY(session->operation(id).finished); QCOMPARE(session->operation(id).update.state, QString("success"));
         auto expectedFirst = firstBinding; expectedFirst["path"] = saved;
@@ -54,9 +54,9 @@ private slots:
         const QJsonArray expected{expectedFirst, secondBinding}; QCOMPARE(session->config().protocol.value("devices").toArray(), expected);
         id = window.saveWorkspace(workspace); QTRY_COMPARE(window.workspaceOperation(id).state, QString("success"));
         Workbench restored(catalog); id = restored.openWorkspace(workspace); QTRY_COMPARE(restored.workspaceOperation(id).state, QString("success"));
-        QCOMPARE(restored.sessionConfiguration(0).protocol.value("devices").toArray(), expected);
-        QCOMPARE(restored.session(0)->state(), SessionState::Stopped);
-        QVERIFY(!restored.sessionConfiguration(0).protocol.contains("data"));
+        QCOMPARE(restored.sessionConfiguration(index).protocol.value("devices").toArray(), expected);
+        QCOMPARE(restored.session(index)->state(), SessionState::Stopped);
+        QVERIFY(!restored.sessionConfiguration(index).protocol.contains("data"));
     }
     void editAndRangeAreImmediateAndIsolated() {
         Harness h(catalog); QVERIFY(h.session.start(h.makeConfig())); QTRY_COMPARE(h.session.state(), SessionState::Running);

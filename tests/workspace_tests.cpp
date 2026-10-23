@@ -16,7 +16,7 @@ QJsonObject entry(QString protocol = "modbus.rtu", QString role = "master", QJso
 }
 QJsonObject workspace(QJsonArray sessions) {return {{"version",1},{"sessions",sessions},{"futureRoot",QJsonArray{1,2}}, {"layout",QJsonObject{{"futureLayout",true},{"activeSession",0}}}};}
 QJsonObject read(const QString &path) {QFile f(path); if (!f.open(QIODevice::ReadOnly)) return {}; return QJsonDocument::fromJson(f.readAll()).object();}
-QWidget *pane(Workbench &w,int i=0) {return w.findChild<QTabWidget *>("sessionTabs")->widget(i);}
+QWidget *pane(Workbench &w,int i=0) {return w.sessionView(i);}
 }
 class WorkspaceTests : public QObject {
  Q_OBJECT
@@ -102,7 +102,7 @@ private slots:
  QList<std::function<void()>> jobs; QList<Workbench *> windows; for(int n=0;n<4;++n) {auto *w=new Workbench(catalog,nullptr,{}, {},[&](std::function<void()> job){jobs.append(std::move(job));}); windows.append(w); QVERIFY(w->openWorkspace(path));} qDeleteAll(windows); for(auto &job:jobs) job(); jobs.clear(); QCoreApplication::processEvents();
  }
  void replacementRechecksEarlierDirtySession() {
- QTemporaryDir dir; auto file=dir.filePath("device.json"),path=dir.filePath("empty.json"); QVERIFY(save(file,document())); QVERIFY(save(path,workspace({}))); Wire wire; Workbench w(catalog,nullptr,wire.factory()); QVERIFY(w.closeSession(0));
+ QTemporaryDir dir; auto file=dir.filePath("device.json"),path=dir.filePath("empty.json"); QVERIFY(save(file,document())); QVERIFY(save(path,workspace({}))); Wire wire; Workbench w(catalog,nullptr,wire.factory()); auto emptyId=w.openWorkspace(path); QTRY_COMPARE(w.workspaceOperation(emptyId).state,QString("success"));
  for(int i=0;i<2;++i) {auto n=w.addSession(config({QJsonObject{{"unit",17},{"path",file}}},QString("COM%1").arg(124+i))); QVERIFY(w.session(n)->start(w.sessionConfiguration(n))); QTRY_COMPARE(w.session(n)->state(),SessionState::Running);}
  auto *first=w.session(0),*second=w.session(1); const auto edit=[](DebugSession *s,int v){s->submit("slave-edit-value",{{"unit",17},{"area","holding"},{"address",107},{"value",v}});}; edit(first,111); edit(second,222);
  first->access().setDiscardGuard([first]{first->submit("slave-discard",{{"unit",17}});return true;}); second->access().setDiscardGuard([&]{edit(first,999);second->submit("slave-discard",{{"unit",17}});return true;});

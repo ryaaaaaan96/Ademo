@@ -1,0 +1,9 @@
+Test project C:/Users/81966/Documents/Ademo/build/qt-llvm-debug
+    Start  3: parallel_sessions_recovery
+1/2 Test  #3: parallel_sessions_recovery .......   Passed    9.57 sec
+    Start 12: workspace_roundtrip
+2/2 Test #12: workspace_roundtrip ..............   Passed    9.58 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =  19.18 sec

@@ -13,10 +13,13 @@ target_compile_definitions(debugger_sdk INTERFACE
   DEBUGGER_BUILD_KEY="sdk11-product0.2-qt${Qt6_VERSION}-${CMAKE_CXX_COMPILER_ID}${CMAKE_CXX_COMPILER_VERSION}-${CMAKE_SYSTEM_PROCESSOR}-$<CONFIG>")
 add_library(debugger_widgets STATIC src/parameter_table.cpp)
 target_link_libraries(debugger_widgets PUBLIC debugger_sdk)
-add_library(debugger_host STATIC src/workspace.cpp src/session_recovery.cpp src/host.cpp src/workbench.cpp src/trace_query.cpp src/trace_panel.cpp
+add_library(debugger_host STATIC src/workspace.cpp src/session_recovery.cpp src/host.cpp src/workbench.cpp src/session_window.cpp src/trace_query.cpp src/trace_panel.cpp
   src/trace_codec.cpp src/recording.cpp src/archive_query.cpp src/archive_format.cpp src/recording_panel.cpp include/debugger/host.h)
 
 target_link_libraries(debugger_host PUBLIC debugger_sdk)
+if(WIN32)
+  target_link_libraries(debugger_host PRIVATE dwmapi)
+endif()
 foreach(plugin IN ITEMS modbus serial)
   add_library(${plugin}_plugin MODULE plugins/${plugin}.cpp)
   target_link_libraries(${plugin}_plugin PRIVATE debugger_sdk)
