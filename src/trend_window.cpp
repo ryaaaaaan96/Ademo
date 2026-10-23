@@ -53,6 +53,7 @@ TrendWindow::TrendWindow(QList<TrendSeries> definitions, QWidget *owner)
         });
     }
     summary_ = new QLabel(details); summary_->setAccessibleName(QStringLiteral("曲线数据概要")); summary_->setTextFormat(Qt::PlainText); summary_->setWordWrap(true);
+    summary_->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     detailsLayout->addWidget(summary_, 1);
     auto *scroll = new QScrollArea(body); scroll->setWidgetResizable(true); scroll->setWidget(details); scroll->setMaximumHeight(170); layout->addWidget(scroll);
     layout->addWidget(new QLabel(QStringLiteral("每条曲线保留最近 %1 点；暂停显示不停止通信，完整数据请使用记录功能。 ").arg(sampleCapacity), body));

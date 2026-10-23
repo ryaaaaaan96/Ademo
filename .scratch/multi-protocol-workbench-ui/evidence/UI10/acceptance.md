@@ -27,3 +27,14 @@
 - `08-offscreen-debug-poll.txt`、`09-offscreen-debug-window.txt`：相关参数轮询与窗口读取回归通过。
 
 以上离屏警告包括平台不支持 raise/propagateSizeHints 和 Qt 字体目录缺省；不将其视作 Windows 原生窗口视觉验收。最终 SDK12 同步、Windows 原生图形后端、截图与 Debug/Release 复验待追加，任务暂不标记完成。
+
+## SDK11 Windows 原生阶段
+
+经集成协调分配独占桌面时段，退出 `QT_QUICK_BACKEND=software` 覆盖，设置 `QT_QPA_PLATFORM=windows`、`QSG_INFO=1`，并将 `DEBUGGER_EVIDENCE_DIR` 分别设为 windows-debug/windows-release。仅运行 UI10 曲线测试，没有并发运行旧恢复/Z-order 测试。
+
+- `windows-debug/trends.txt`：11/11 PASS，容量段 29074 ms，总时长 38366 ms。
+- `windows-release/trends.txt`：11/11 PASS，总时长 33645 ms。
+- 两者均使用日志中实际选中的 Intel Iris Xe Graphics 适配器；无 QWARN、QML 错误或交换链重建错误。QQuickWidget Ready、framebuffer 非空及跨浮动/停靠保持实例均通过。
+- 目视检查两参数与 32 参数客户区截图：白底、真实 Y 值与相对秒数、单位/身份、按钮及曲线可读。32 条长图例暴露概要默认垂直居中使顶部不可见，已改为顶部对齐，最终配套复验更新截图。截图不含 Windows 非客户区；系统三按钮标志由实际 QMainWindow 测试验证。
+
+以上仍为 SDK11 配套阶段，最终合入 SDK12 后追加相关增量复验，不冒充用户或真实串口验收。
