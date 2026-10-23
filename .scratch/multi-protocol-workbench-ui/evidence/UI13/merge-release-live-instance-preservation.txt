@@ -1,0 +1,9 @@
+C:\Users\81966\Documents\Ademo\build\qt-llvm-release\bin\multi_protocol_debugger.exe -> C:\Users\81966\Documents\Ademo\build\qt-llvm-release\live-instance-backup-ui13\multi_protocol_debugger.exe SHA256=0FB82349C57BA9AB583ACE84242ABC0048FDB948DBDA6ED7600ED8CCB8947264
+C:\Users\81966\Documents\Ademo\build\qt-llvm-release\bin\plugins\libserial_plugin.dll -> C:\Users\81966\Documents\Ademo\build\qt-llvm-release\live-instance-backup-ui13\libserial_plugin.dll SHA256=466B2D8DCF6ADE97AB3E58423591B607EFB3BF519B0DD97EE956B53361265237
+C:\Users\81966\Documents\Ademo\build\qt-llvm-release\bin\plugins\libmodbus_plugin.dll -> C:\Users\81966\Documents\Ademo\build\qt-llvm-release\live-instance-backup-ui13\libmodbus_plugin.dll SHA256=23C78634A74CAB79A7E2EA2F988D190C762BC6F9A6792BBA5E87C60B894058FC
+
+Id   : 22240
+Path : C:\Users\81966\Documents\Ademo\build\portable\rtu-preview-0.2.0-win64\multi_protocol_debugger.exe
+
+Id   : 28136
+Path : C:\Users\81966\Documents\Ademo\build\qt-llvm-release\bin\multi_protocol_debugger.exe

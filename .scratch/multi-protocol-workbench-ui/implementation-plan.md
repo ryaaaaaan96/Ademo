@@ -28,7 +28,7 @@ Status: ready-for-agent
 | [UI10](issues/10-qml-parameter-trends.md) | 用 QWidget 内嵌 QML 展示设备参数趋势 | ready-for-agent | UI06 | 已完成：c008399；合入 640ce33；[验收与集成复测](evidence/UI10/integration.md) |
 | [UI11](issues/11-window-workspace-recovery.md) | 保存并恢复多窗口工作区和插件配置 | ready-for-agent | UI03、UI06、UI08 | 已完成：90a475d；合入 1003854；[验收与集成复测](evidence/UI11/integration.md) |
 | [UI12](issues/12-plugin-ui-contract-validation.md) | 通过独立示例插件验证表格与编辑页扩展 | ready-for-agent | UI03、UI07 | 已完成：e394d58；合入 66ffa7e；[验收与集成复测](evidence/UI12/integration.md) |
-| [UI13](issues/13-rtu-ui-acceptance-migration.md) | 验收 RTU 新界面完整流程并完成旧入口迁移 | ready-for-agent | UI09、UI10、UI11、UI12 | 软件实施中：codex/ui13-acceptance-migration；基于 df3a8a4；正式用户操作确认待完成 |
+| [UI13](issues/13-rtu-ui-acceptance-migration.md) | 验收 RTU 新界面完整流程并完成旧入口迁移 | ready-for-agent | UI09、UI10、UI11、UI12 | 软件迁移/自动验收完成，整体审查与用户正式操作确认待完成：36daaba；合入 0040f55；[集成验收](evidence/UI13/integration.md) |
 | [旧13](../multi-protocol-debugger/issues/13-rtu-phase-acceptance.md) | 验收 RTU 第一阶段的真实互通与负载 | needs-info | UI13、旧10/12（已完成）；硬件/对端 | 未启动 |
 | [旧14](../multi-protocol-debugger/issues/14-upp-can-receive.md) | 通过插件接收并解析真实 UPP/CAN 消息 | needs-info | 旧13；UPP 规范/硬件 | 未启动 |
 | [旧15](../multi-protocol-debugger/issues/15-upp-can-exchange.md) | 完成真实 UPP/CAN 发送交互并与 RTU 并行 | needs-info | 旧14；真实交互条件 | 未启动 |

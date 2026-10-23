@@ -1,0 +1,17 @@
+********* Start testing of ParameterTrendTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : ParameterTrendTests::initTestCase()
+PASS   : ParameterTrendTests::selectedParametersOpenRealQmlWithoutSendingAndKeepTheirDevice()
+PASS   : ParameterTrendTests::pauseLegendZoomAndClearOnlyAffectDisplay()
+PASS   : ParameterTrendTests::clearDoesNotReplaySamplesWaitingForDisplayRefresh()
+PASS   : ParameterTrendTests::capacityRefusesTooManySeriesInsteadOfSilentlyTruncating()
+PASS   : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot()
+PASS   : ParameterTrendTests::equalAddressesInDifferentAreasRemainDifferentCurves()
+PASS   : ParameterTrendTests::unsuccessfulUnsolicitedAndUncertainValuesAreNotSamples()
+QINFO  : ParameterTrendTests::maximumCurvesRemainBoundedWhileRtuContinues() 2200 completed real RTU requests; 32 curves each capped at 2048 samples; elapsed ms 32327
+PASS   : ParameterTrendTests::maximumCurvesRemainBoundedWhileRtuContinues()
+PASS   : ParameterTrendTests::floatingAndDockingPreserveQuickWidgetAndViewDestructionClosesPlot()
+PASS   : ParameterTrendTests::plotDestructionCanReleaseTheLastCatalogLease()
+PASS   : ParameterTrendTests::cleanupTestCase()
+Totals: 12 passed, 0 failed, 0 skipped, 0 blacklisted, 37584ms
+********* Finished testing of ParameterTrendTests *********

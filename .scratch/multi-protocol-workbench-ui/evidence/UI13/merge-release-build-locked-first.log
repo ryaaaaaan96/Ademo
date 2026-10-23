@@ -1,0 +1,60 @@
+[1/156] Automatic MOC for target serial_plugin
+[2/156] Automatic MOC for target debugger_host
+[3/156] Automatic MOC for target debugger_widgets
+[4/156] Automatic RCC for src/trends.qrc
+[5/156] Automatic MOC for target trace_fixture_plugin
+[6/156] Building CXX object CMakeFiles/debugger_host.dir/debugger_host_autogen/mocs_compilation.cpp.obj
+[7/156] Building CXX object CMakeFiles/debugger_widgets.dir/debugger_widgets_autogen/mocs_compilation.cpp.obj
+[8/156] Building CXX object CMakeFiles/debugger_widgets.dir/src/confirmation.cpp.obj
+[9/156] Building CXX object CMakeFiles/debugger_widgets.dir/src/parameter_table.cpp.obj
+[10/156] Building CXX object CMakeFiles/debugger_widgets.dir/debugger_widgets_autogen/UVLADIE3JM/qrc_trends.cpp.obj
+[11/156] Building CXX object CMakeFiles/debugger_widgets.dir/src/file_editor.cpp.obj
+[12/156] Building CXX object CMakeFiles/debugger_host.dir/src/application_style.cpp.obj
+[13/156] Building CXX object CMakeFiles/debugger_widgets.dir/src/trend_window.cpp.obj
+[14/156] Linking CXX static library libdebugger_widgets.a
+[15/156] Building CXX object CMakeFiles/debugger_host.dir/src/workspace.cpp.obj
+[16/156] Building CXX object CMakeFiles/debugger_host.dir/src/session_recovery.cpp.obj
+[17/156] Automatic MOC for target modbus_plugin
+[18/156] Building CXX object CMakeFiles/debugger_host.dir/src/session_window.cpp.obj
+[19/156] Building CXX object CMakeFiles/debugger_host.dir/src/workbench.cpp.obj
+[20/156] Building CXX object CMakeFiles/debugger_host.dir/src/host.cpp.obj
+[21/156] Building CXX object CMakeFiles/debugger_host.dir/src/trace_query.cpp.obj
+[22/156] Building CXX object CMakeFiles/debugger_host.dir/src/session_records.cpp.obj
+[23/156] Building CXX object CMakeFiles/debugger_host.dir/src/trace_panel.cpp.obj
+[24/156] Building CXX object CMakeFiles/debugger_host.dir/src/trace_codec.cpp.obj
+[25/156] Building CXX object CMakeFiles/debugger_host.dir/src/archive_format.cpp.obj
+[26/156] Building CXX object CMakeFiles/debugger_host.dir/src/recording.cpp.obj
+[27/156] Building CXX object CMakeFiles/modbus_plugin.dir/modbus_plugin_autogen/mocs_compilation.cpp.obj
+[28/156] Building CXX object CMakeFiles/debugger_host.dir/src/archive_query.cpp.obj
+[29/156] Building CXX object CMakeFiles/debugger_host.dir/src/recording_panel.cpp.obj
+[30/156] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/modbus.cpp.obj
+[31/156] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/master_controls.cpp.obj
+[32/156] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/master_trends.cpp.obj
+[33/156] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/master_parameters.cpp.obj
+[34/156] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/parameter_definition.cpp.obj
+[35/156] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/parameter_file_editor.cpp.obj
+[36/156] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/parameter_read_scope.cpp.obj
+[37/156] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_file_editor.cpp.obj
+[38/156] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_parameters.cpp.obj
+[39/156] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/rtu_session.cpp.obj
+[40/156] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/write_pdu.cpp.obj
+[41/156] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/rtu_slave.cpp.obj
+[42/156] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_view.cpp.obj
+[43/156] Building CXX object CMakeFiles/serial_plugin.dir/serial_plugin_autogen/mocs_compilation.cpp.obj
+[44/156] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_edit.cpp.obj
+[45/156] Building CXX object CMakeFiles/trace_fixture_plugin.dir/trace_fixture_plugin_autogen/mocs_compilation.cpp.obj
+[46/156] Building CXX object CMakeFiles/serial_plugin.dir/plugins/serial.cpp.obj
+[47/156] Linking CXX static library libdebugger_host.a
+[48/156] Building CXX object CMakeFiles/trace_fixture_plugin.dir/tests/trace_fixture_plugin.cpp.obj
+[49/156] Linking CXX shared module bin\plugins\libserial_plugin.dll
+FAILED: bin/plugins/libserial_plugin.dll
+C:\WINDOWS\system32\cmd.exe /C "cd . && C:\Qt\Tools\llvm-mingw2217_64\bin\clang++.exe -O3 -DNDEBUG   -shared -o bin\plugins\libserial_plugin.dll -Wl,--major-image-version,0,--minor-image-version,0 CMakeFiles/serial_plugin.dir/serial_plugin_autogen/mocs_compilation.cpp.obj CMakeFiles/serial_plugin.dir/plugins/serial.cpp.obj  C:/Qt/6.12.0/llvm-mingw_64/lib/libQt6SerialPort.a  C:/Qt/6.12.0/llvm-mingw_64/lib/libQt6Widgets.a  C:/Qt/6.12.0/llvm-mingw_64/lib/libQt6Gui.a  -ld3d11  -ldxgi  -ldxguid  -ld3d12  C:/Qt/6.12.0/llvm-mingw_64/lib/libQt6Core.a  -pthread  -lmpr  -luserenv  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 && cd ."
+ld.lld: error: failed to write output 'bin\plugins\libserial_plugin.dll': Permission denied
+
+clang-22: error: unable to remove file: Permission denied
+
+clang-22: error: linker command failed with exit code 1 (use -v to see invocation)
+
+[50/156] Linking CXX shared module bin\trace-fixtures\libtrace_fixture_plugin.dll
+[51/156] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_edit_view.cpp.obj
+ninja: build stopped: subcommand failed.
