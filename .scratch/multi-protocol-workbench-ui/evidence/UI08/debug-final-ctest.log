@@ -1,0 +1,13 @@
+Test project C:/Users/81966/Documents/Ademo/build/worktrees/ui08/build/qt-llvm-debug
+    Start  1: slave_parameter_workflow
+1/4 Test  #1: slave_parameter_workflow .........   Passed    6.79 sec
+    Start  2: plugin_ui_contract
+2/4 Test  #2: plugin_ui_contract ...............   Passed    6.94 sec
+    Start 16: rtu_slave_json_read
+3/4 Test #16: rtu_slave_json_read ..............   Passed    4.31 sec
+    Start 17: rtu_slave_write
+4/4 Test #17: rtu_slave_write ..................   Passed    3.89 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =  21.95 sec

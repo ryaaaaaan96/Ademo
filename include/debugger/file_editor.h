@@ -17,10 +17,16 @@ public:
 };
 class FileEditorPage final : public QWidget {
 public:
+    struct Options {
+        qint64 maximumBytes = 1024 * 1024;
+        std::function<QString(QString)> canSave;
+    };
     using Apply = std::function<QString(QString target, const QJsonObject &, QString path)>;
     FileEditorPage(SessionAccess, FileDocumentEditor *, Apply, QWidget *parent = nullptr);
+    FileEditorPage(SessionAccess, FileDocumentEditor *, Apply, Options, QWidget *parent = nullptr);
     bool bindTarget(const QString &id, const QString &label, const QJsonObject &, const QString &path);
     bool resolveDraft();
+    bool isBusy() const { return busy_; }
 private:
     void refresh();
     void save(const QString &destination = {});
@@ -29,6 +35,7 @@ private:
     SessionAccess access_;
     FileDocumentEditor *editor_;
     Apply apply_;
+    Options options_;
     QString target_;
     QString documentPath_;
     QJsonObject cleanDocument_;

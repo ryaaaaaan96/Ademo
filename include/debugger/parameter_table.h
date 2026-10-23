@@ -28,6 +28,8 @@ public:
     QStringList selectedParameterIds() const;
     std::function<void(QString parameterId, QString actionId)> onAction;
     std::function<void(QString parameterId, QString columnId, QString text)> onEdit;
+    // 完整编辑提交（取消编辑不触发）；交互回调在编辑器退出后排队执行。
+    std::function<void(QString parameterId, QString columnId, QString text)> onCommit;
 private:
     void updateCell(int row, int column, const ParameterRow &);
     QList<ParameterColumn> columns_;

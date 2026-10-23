@@ -158,20 +158,16 @@ private slots:
     void widgetReflectsExternalWrite() {
         Harness files(catalog); const auto settings=writableConfig(files); Wire wire;
         Workbench window(catalog,nullptr,wire.factory()); window.resize(1100,1100); window.show();
-        auto *tabs=window.findChild<QTabWidget *>("protocolTabs"); QVERIFY(tabs); tabs->setCurrentIndex(1);
-        auto *role=window.findChild<QComboBox *>("role"); role->setCurrentIndex(role->findData("slave"));
-        for(const auto &binding : settings.protocol["devices"].toArray()) {
-            window.findChild<QSpinBox *>("slaveUnit")->setValue(binding.toObject()["unit"].toInt());
-            window.findChild<QLineEdit *>("slavePath")->setText(binding.toObject()["path"].toString());
-            QTest::mouseClick(window.findChild<QPushButton *>("addSlaveDevice"),Qt::LeftButton);
-        }
-        QTest::mouseClick(window.findChild<QPushButton *>("applySlaveBindings"),Qt::LeftButton);
-        QTest::mouseClick(window.findChild<QPushButton *>("start"),Qt::LeftButton);
-        QTRY_VERIFY(window.findChild<QLabel *>("status")->text().contains(QStringLiteral("运行中")));
+        const auto index=window.addSession(settings); auto *view=window.parameterView(index); QVERIFY(view);
+        QVERIFY(window.session(index)->start(window.sessionConfiguration(index)));
+        QTRY_COMPARE(window.session(index)->state(),SessionState::Running);
         wire.events.received(QByteArray::fromHex("11100001000204000a0102c6f0"));
         QTRY_COMPARE(wire.writes.size(),1); QCOMPARE(wire.writes.last().second.toHex(),"1110000100021298");
-        auto *data=window.findChild<QTableWidget *>("slaveData"); QTRY_VERIFY(data->item(2,3) && data->item(2,3)->text().contains("10,258"));
-        QVERIFY(data->item(6,3)->text().contains("99,99,99,99"));
+        QTableWidget *data=nullptr;
+        for(auto *table:view->findChildren<QTableWidget *>()) if(table->accessibleName()==QStringLiteral("从站模拟参数")) data=table;
+        QVERIFY(data); QTRY_COMPARE(data->rowCount(),4); QTRY_COMPARE(data->item(1,3)->text(),QString("10")); QCOMPARE(data->item(2,3)->text(),QString("258"));
+        QVERIFY(view->selectDevice("18")); QTRY_COMPARE(data->item(0,3)->text(),QString("99"));
+        for(int row=0;row<4;++row) QCOMPARE(data->item(row,3)->text(),QString("99"));
         const auto evidence=qEnvironmentVariable("DEBUGGER_EVIDENCE_DIR");
         if(!evidence.isEmpty()) QVERIFY(window.grab().save(evidence+"/slave-external-write-controlled.png"));
     }

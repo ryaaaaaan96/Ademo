@@ -158,32 +158,25 @@ private slots:
     void widgetBindingsAndData() {
         Harness files(catalog); const auto settings=files.makeConfig(); Wire wire;
         Workbench window(catalog,nullptr,wire.factory()); window.resize(1100,1050); window.show();
-        auto *tabs=window.findChild<QTabWidget *>("protocolTabs"); QVERIFY(tabs); tabs->setCurrentIndex(1);
-        auto *role=window.findChild<QComboBox *>("role"); role->setCurrentIndex(role->findData("slave"));
-        auto *unit=window.findChild<QSpinBox *>("slaveUnit"); auto *path=window.findChild<QLineEdit *>("slavePath");
-        for(const auto &binding : settings.protocol["devices"].toArray()) {
-            unit->setValue(binding.toObject()["unit"].toInt()); path->setText(binding.toObject()["path"].toString());
-            QTest::mouseClick(window.findChild<QPushButton *>("addSlaveDevice"),Qt::LeftButton);
-        }
-        QTest::mouseClick(window.findChild<QPushButton *>("applySlaveBindings"),Qt::LeftButton);
-        QTest::mouseClick(window.findChild<QPushButton *>("start"),Qt::LeftButton);
-        QTRY_VERIFY(window.findChild<QLabel *>("status")->text().contains(QStringLiteral("运行中")));
-        auto *data=window.findChild<QTableWidget *>("slaveData"); QTRY_COMPARE(data->rowCount(),8);
-        QVERIFY(data->item(2,3)->text().contains("555")); QVERIFY(data->item(6,3)->text().contains("111"));
+        const auto index=window.addSession(settings); auto *view=window.parameterView(index); QVERIFY(view);
+        QCOMPARE(view->devices().size(),2); QVERIFY(window.session(index)->start(window.sessionConfiguration(index)));
+        QTRY_COMPARE(window.session(index)->state(),SessionState::Running);
+        QTableWidget *data=nullptr;
+        for(auto *table:view->findChildren<QTableWidget *>()) if(table->accessibleName()==QStringLiteral("从站模拟参数")) data=table;
+        QVERIFY(data); QTRY_COMPARE(data->rowCount(),3); QCOMPARE(data->item(0,3)->text(),QString("555"));
+        QVERIFY(view->selectDevice("18")); QTRY_COMPARE(data->item(0,3)->text(),QString("111"));
         const auto evidence=qEnvironmentVariable("DEBUGGER_EVIDENCE_DIR");
         if(!evidence.isEmpty()) QVERIFY(window.grab().save(evidence+"/slave-files-data-controlled.png"));
     }
     void widgetMissingFileError() {
         Wire wire; Workbench window(catalog,nullptr,wire.factory()); window.resize(1100,1050); window.show();
-        window.findChild<QTabWidget *>("protocolTabs")->setCurrentIndex(1);
-        auto *role=window.findChild<QComboBox *>("role"); role->setCurrentIndex(role->findData("slave"));
         const auto path=QDir::tempPath()+"/missing-debugger-device-06.json";
-        window.findChild<QSpinBox *>("slaveUnit")->setValue(17); window.findChild<QLineEdit *>("slavePath")->setText(path);
-        QTest::mouseClick(window.findChild<QPushButton *>("addSlaveDevice"),Qt::LeftButton);
-        QTest::mouseClick(window.findChild<QPushButton *>("applySlaveBindings"),Qt::LeftButton);
-        QTest::mouseClick(window.findChild<QPushButton *>("start"),Qt::LeftButton);
-        auto *status=window.findChild<QLabel *>("status"); QTRY_VERIFY(status->text().contains(QStringLiteral("文件不存在")));
-        QVERIFY(status->text().contains("17") && status->text().contains(path)); QCOMPARE(wire.opens,0);
+        const auto index=window.addSession(config({QJsonObject{{"unit",17},{"path",path}}}));
+        auto *session=window.session(index); QVERIFY(session->start(window.sessionConfiguration(index)));
+        QTRY_COMPARE(session->state(),SessionState::Error);
+        QVERIFY(session->diagnostic().contains(QStringLiteral("文件不存在")));
+        QVERIFY(session->diagnostic().contains("17") && session->diagnostic().contains(path)); QCOMPARE(wire.opens,0);
+        QVERIFY(window.parameterView(index)); QCOMPARE(window.parameterView(index)->devices().size(),1);
         const auto evidence=qEnvironmentVariable("DEBUGGER_EVIDENCE_DIR");
         if(!evidence.isEmpty()) QVERIFY(window.grab().save(evidence+"/slave-file-error-controlled.png"));
     }

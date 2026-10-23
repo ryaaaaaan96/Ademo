@@ -1,6 +1,7 @@
 #include "debugger/sdk.h"
 #include "rtu_session.h"
 #include "slave_view.h"
+#include "slave_parameters.h"
 #include "master_parameters.h"
 #include <QComboBox>
 #include <QDialog>
@@ -311,6 +312,7 @@ public:
         return tabs;
     }
     ParameterView *createParameterView(SessionAccess access, QWidget *parent) override {
+        if (access.config && access.config().role == "slave") return createSlaveParameterView(std::move(access), parent);
         return createMasterParameterView(std::move(access), parent);
     }
     QJsonObject relocateConfiguration(QJsonObject config, const QString &fromBase, const QString &toBase) const override {

@@ -40,7 +40,7 @@ private:
     std::shared_ptr<PluginCatalog> catalog_;
     QWidget *view_ = nullptr;
     SessionConfig original_;
-    std::function<void()> rebuildProtocol_, refresh_;
+    std::function<void()> rebuildProtocol_, rebuildView_, refresh_;
 };
 SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent,
                      DebugSession::EndpointFactory factory, std::function<qint64()> clock)
@@ -68,6 +68,7 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     protocol->setObjectName("protocol");
     transport->setObjectName("transport");
     role->setObjectName("role");
+    role->setAccessibleName(QStringLiteral("会话角色"));
     for (auto *p : catalog_->protocols()) protocol->addItem(p->describe().name, p->describe().id);
     for (auto *t : catalog_->transports()) transport->addItem(t->describe().name, t->describe().id);
     form->addRow(QStringLiteral("协议"), protocol);
@@ -98,30 +99,26 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
             endpointForm->addRow(field.label, editor);
         }
     };
-    auto selectedProtocol = std::make_shared<int>(protocol->currentIndex());
-    auto updateProtocol = [this, protocol, role, layout, selectedProtocol] {
-        QPointer<SessionPane> alive(this);
-        const bool resolved = !view_ || session_.resolveUnsaved();
-        if (!alive) return;
-        if (!resolved) {
-            const QSignalBlocker blocker(protocol);
-            protocol->setCurrentIndex(*selectedProtocol);
-            return;
-        }
-        *selectedProtocol = protocol->currentIndex();
-        role->clear();
+    auto selectedRole = std::make_shared<QString>();
+    auto roleRevision = std::make_shared<quint64>(0);
+    auto buildView = [this, protocol, role, layout, selectedRole, roleRevision] {
+        ++*roleRevision; *selectedRole = role->currentData().toString();
         delete view_;
         view_ = nullptr;
         parameterView_ = nullptr;
         auto *p = catalog_->protocol(protocol->currentData().toString());
         if (!p) return;
-        for (const auto &r : p->describe().roles) role->addItem(r, r);
         auto *pages = new QWidget(this);
         auto *pageLayout = new QVBoxLayout(pages);
         auto *stack = new QStackedWidget(pages);
-        parameterView_ = catalog_->createParameterView(p->describe().id, stack, session_.access());
+        auto access = session_.access();
+        QPointer<SessionPane> self(this);
+        access.config = [self] { return self ? self->configuration() : SessionConfig{}; };
+        parameterView_ = catalog_->createParameterView(p->describe().id, stack, access);
         if (parameterView_) stack->addWidget(parameterView_);
-        auto *legacy = catalog_->createView(p->describe().id, stack, session_.access());
+        // 新参数页拥有运行修改保护；兼容页不得覆盖它的守卫。
+        if (parameterView_) access.setDiscardGuard = {};
+        auto *legacy = catalog_->createView(p->describe().id, stack, access);
         if (legacy) {
             stack->addWidget(legacy);
             if (parameterView_) {
@@ -137,6 +134,35 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
         view_ = pages;
         layout->insertWidget(0, view_, 1);
     };
+    rebuildView_ = buildView;
+    auto selectedProtocol = std::make_shared<int>(protocol->currentIndex());
+    auto updateProtocol = [this, protocol, role, selectedProtocol, buildView] {
+        QPointer<SessionPane> alive(this);
+        const bool resolved = !view_ || session_.resolveUnsaved();
+        if (!alive) return;
+        if (!resolved) {
+            const QSignalBlocker blocker(protocol); protocol->setCurrentIndex(*selectedProtocol); return;
+        }
+        *selectedProtocol = protocol->currentIndex();
+        const QSignalBlocker blocker(role); role->clear();
+        if (auto *p = catalog_->protocol(protocol->currentData().toString()))
+            for (const auto &r : p->describe().roles) role->addItem(r, r);
+        buildView();
+    };
+    connect(role, &QComboBox::currentIndexChanged, this, [this, role, selectedRole, roleRevision, buildView] {
+        const auto next = role->currentData().toString();
+        if (next == *selectedRole) return;
+        { const QSignalBlocker blocker(role); role->setCurrentIndex(role->findData(*selectedRole)); }
+        const auto revision = ++*roleRevision;
+        QTimer::singleShot(0, this, [this, role, next, roleRevision, revision, buildView] {
+            if (revision != *roleRevision) return;
+            QPointer<SessionPane> alive(this);
+            if (!session_.resolveUnsaved() || !alive || revision != *roleRevision) return;
+            if (!session_.configure(session_.config().protocol) || !alive) return;
+            { const QSignalBlocker blocker(role); role->setCurrentIndex(role->findData(next)); }
+            buildView(); refresh_();
+        });
+    });
     rebuildProtocol_ = updateProtocol;
     connect(transport, &QComboBox::currentIndexChanged, this, updateTransport);
     connect(protocol, &QComboBox::currentIndexChanged, this, [this, updateProtocol] {
@@ -256,7 +282,8 @@ void SessionPane::loadConfiguration(const SessionConfig &config)
     auto *role = findChild<QComboBox *>("role");
     int roleIndex = role->findData(config.role);
     if (roleIndex < 0 && !config.role.isEmpty()) { role->addItem(QStringLiteral("不可用：") + config.role, config.role); roleIndex = role->count() - 1; }
-    if (roleIndex >= 0) role->setCurrentIndex(roleIndex);
+    if (roleIndex >= 0) { const QSignalBlocker blocker(role); role->setCurrentIndex(roleIndex); }
+    rebuildView_();
     if (auto *transport = catalog_->transport(config.transportId)) for (const auto &field : transport->describe().fields) {
         if (!config.endpoint.contains(field.key)) continue;
         if (auto *line = findChild<QLineEdit *>(field.key)) line->setText(config.endpoint.value(field.key).toString());
