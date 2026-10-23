@@ -25,7 +25,7 @@ Status: ready-for-agent
 | [UI07](issues/07-file-editor-save-apply.md) | 在独立文件页编辑、保存并应用参数配置 | ready-for-agent | UI05 | 已完成：286cbee；合入 105ef2a；[验收与集成复测](evidence/UI07/integration.md) |
 | [UI08](issues/08-slave-runtime-file-workflow.md) | 在新界面操作从站模拟值并独立保存、应用文件 | ready-for-agent | UI07 | 实施中：codex/ui08-slave-parameters；基于 1b882ca |
 | [UI09](issues/09-window-trace-query-export.md) | 在所属窗口回溯、查询并导出通信记录 | ready-for-agent | UI03 | 已完成：3c8b3d9；合入 2fa6317；[验收与集成复测](evidence/UI09/integration.md) |
-| [UI10](issues/10-qml-parameter-trends.md) | 用 QWidget 内嵌 QML 展示设备参数趋势 | ready-for-agent | UI06 | 实施中：codex/ui10-qml-trends；基于 6b8cabe |
+| [UI10](issues/10-qml-parameter-trends.md) | 用 QWidget 内嵌 QML 展示设备参数趋势 | ready-for-agent | UI06 | 已完成：c008399；合入 640ce33；[验收与集成复测](evidence/UI10/integration.md) |
 | [UI11](issues/11-window-workspace-recovery.md) | 保存并恢复多窗口工作区和插件配置 | ready-for-agent | UI03、UI06、UI08 | 未启动 |
 | [UI12](issues/12-plugin-ui-contract-validation.md) | 通过独立示例插件验证表格与编辑页扩展 | ready-for-agent | UI03、UI07 | 实施中：codex/ui12-plugin-ui-contract；基于 1b882ca |
 | [UI13](issues/13-rtu-ui-acceptance-migration.md) | 验收 RTU 新界面完整流程并完成旧入口迁移 | ready-for-agent | UI09、UI10、UI11、UI12 | 未启动 |

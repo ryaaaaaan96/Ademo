@@ -1,0 +1,50 @@
+[1/94] Automatic MOC for target debugger_host
+[2/92] Automatic MOC for target serial_plugin
+[3/90] Automatic MOC for target trace_fixture_plugin
+[4/88] Automatic MOC for target incompatible_plugin
+[5/86] Automatic MOC for target debugger_widgets
+[6/86] Automatic RCC for src/trends.qrc
+[7/86] Building CXX object CMakeFiles/debugger_widgets.dir/src/confirmation.cpp.obj
+[8/86] Building CXX object CMakeFiles/debugger_widgets.dir/debugger_widgets_autogen/mocs_compilation.cpp.obj
+[9/86] Building CXX object CMakeFiles/debugger_widgets.dir/debugger_widgets_autogen/UVLADIE3JM/qrc_trends.cpp.obj
+[10/86] Building CXX object CMakeFiles/debugger_widgets.dir/src/parameter_table.cpp.obj
+[11/86] Building CXX object CMakeFiles/debugger_widgets.dir/src/file_editor.cpp.obj
+[12/86] Building CXX object CMakeFiles/debugger_widgets.dir/src/trend_window.cpp.obj
+[13/86] Linking CXX static library libdebugger_widgets.a
+[14/86] Automatic MOC for target modbus_plugin
+[15/86] Building CXX object CMakeFiles/modbus_plugin.dir/modbus_plugin_autogen/mocs_compilation.cpp.obj
+[16/86] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/parameter_definition.cpp.obj
+[17/86] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/master_trends.cpp.obj
+[18/86] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/modbus.cpp.obj
+[19/86] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/master_parameters.cpp.obj
+[20/86] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/parameter_read_scope.cpp.obj
+[21/86] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/parameter_file_editor.cpp.obj
+[22/86] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/write_pdu.cpp.obj
+[23/86] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/rtu_session.cpp.obj
+[24/86] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/rtu_slave.cpp.obj
+[25/86] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_view.cpp.obj
+[26/86] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_edit.cpp.obj
+[27/86] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_edit_view.cpp.obj
+[28/86] Linking CXX shared module bin\plugins\libmodbus_plugin.dll
+[29/86] Automatic MOC for target multi_protocol_debugger
+[30/84] Automatic MOC for target trace_tests
+[31/82] Automatic MOC for target parameter_file_editor_tests
+[32/80] Automatic MOC for target parameter_poll_tests
+[33/78] Automatic MOC for target window_trace_tests
+[34/76] Automatic MOC for target parameter_write_tests
+[35/74] Automatic MOC for target parameter_definition_tests
+[36/72] Automatic MOC for target parameter_window_tests
+[37/70] Automatic MOC for target session_recovery_tests
+[38/68] Automatic MOC for target slave_edit_tests
+[39/66] Automatic MOC for target session_tests
+[40/64] Automatic MOC for target rtu_read_tests
+[41/62] Automatic MOC for target rtu_poll_tests
+[42/60] Automatic MOC for target rtu_write_tests
+[43/58] Automatic MOC for target rtu_slave_tests
+[44/56] Automatic MOC for target parameter_trend_tests
+[45/56] Building CXX object CMakeFiles/parameter_trend_tests.dir/parameter_trend_tests_autogen/mocs_compilation.cpp.obj
+[46/56] Automatic MOC for target rtu_slave_write_tests
+[47/54] Automatic MOC for target workspace_tests
+[48/52] Automatic MOC for target recording_tests
+[49/50] Building CXX object CMakeFiles/parameter_trend_tests.dir/tests/parameter_trend_tests.cpp.obj
+[50/50] Linking CXX executable bin\parameter_trend_tests.exe
