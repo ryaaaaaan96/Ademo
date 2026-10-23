@@ -280,6 +280,36 @@ private slots:
         QTest::mouseClick(window.findChild<QPushButton *>("stop"), Qt::LeftButton);
         const auto count = wire.writes.size(); QTest::qWait(600); QCOMPARE(wire.writes.size(), count);
     }
+    void expiredManualResultDoesNotDisableWidgetsOrPolling() {
+        Harness h(catalog); QVERIFY(h.session.configureTrace({256, 256, 1}));
+        std::unique_ptr<QWidget> view(catalog->createView("modbus.rtu", nullptr, h.session.access()));
+        auto *read = view->findChild<QPushButton *>("readHolding");
+        auto *write = view->findChild<QPushButton *>("writeDevice");
+        auto *result = view->findChild<QLabel *>("readResult");
+        const QJsonObject settings{{"polls", QJsonArray{task(1, 1000)}}, {"extraReadRetries", 0}};
+        QVERIFY(h.start(settings)); h.advance(1750); QCOMPARE(h.wire.writes.size(), 1);
+        h.sent(h.wire.writes.last().first); h.reply("010302000a3843"); QTest::qWait(60);
+        QTRY_VERIFY2(read->isEnabled(), qPrintable(result->text())); QTest::mouseClick(read, Qt::LeftButton);
+        QVERIFY(!read->isEnabled()); QVERIFY(!write->isEnabled());
+        h.advance(1750); h.sent(h.wire.writes.last().first); h.reply("010302000a3843"); QTest::qWait(60);
+        const auto manualId = h.session.queryTrace().operations.last().request.id;
+        QVERIFY(result->text().contains(QString("#%1").arg(manualId)));
+        h.advance(1000000); h.advance(1750); QCOMPARE(h.session.operation(manualId).request.id, quint64(0));
+        QTest::qWait(60); QTRY_VERIFY(read->isEnabled()); QTRY_VERIFY(write->isEnabled());
+        QTRY_VERIFY(result->text().contains(QStringLiteral("已过期")));
+        const auto pollId = h.session.queryTrace().operations.last().request.id;
+        h.sent(h.wire.writes.last().first); h.reply("010302000a3843"); QTest::qWait(60);
+        QTRY_VERIFY(result->text().contains(QString("#%1").arg(pollId)));
+        QTest::mouseClick(read, Qt::LeftButton); QVERIFY(!read->isEnabled()); QVERIFY(!write->isEnabled());
+        h.advance(1750); h.sent(h.wire.writes.last().first); h.reply("010302000a3843"); QTest::qWait(60);
+        QTest::mouseClick(write, Qt::LeftButton); QVERIFY(!read->isEnabled()); QVERIFY(!write->isEnabled());
+        h.advance(1750); const auto sent = h.wire.writes.last(); h.sent(sent.first);
+        h.wire.events.received(sent.second); h.advance(1750); QTest::qWait(60);
+        QCOMPARE(h.session.queryTrace().operations.last().update.state, QString("success"));
+        h.session.stop(); QVERIFY(h.start(settings)); h.advance(1750);
+        h.sent(h.wire.writes.last().first); h.reply("010302000a3843"); QTest::qWait(60);
+        QVERIFY(read->isEnabled()); QVERIFY(write->isEnabled());
+    }
     void retryAndPassiveTokensShareOneAllocatorAcrossRuns() {
         Harness h(catalog); QVERIFY(h.start({{"responseTimeoutMs", 10}, {"retryIntervalMs", 1}}));
         h.session.submit("read-holding", readOne);

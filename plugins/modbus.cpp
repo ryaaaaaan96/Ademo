@@ -217,19 +217,28 @@ private:
     }
     void refresh() {
         const bool running = access_.running && access_.running() && (!access_.config || access_.config().role == "master");
+        const auto canSelectResult = [this] {
+            const auto current = access_.operation ? access_.operation(operationId_) : OperationSnapshot{};
+            return !current.request.id || current.finished;
+        };
         if (access_.messages) for (const auto &message : access_.messages(0)) {
             if (message.id <= observedMessageId_ || !message.fields.value("operationResult").toBool()) continue;
             observedMessageId_ = message.id;
             if (message.status == "success" && !message.fields.value("values").toArray().isEmpty()
                 && !message.fields.value("freshnessUncertain").toBool()) observe(message.fields);
-            if (message.operationId && (!operationId_ || access_.operation(operationId_).finished)) operationId_ = message.operationId;
-            if (message.fields.value("freshnessUncertain").toBool() && (!operationId_ || access_.operation(operationId_).finished))
+            if (message.operationId && canSelectResult()) operationId_ = message.operationId;
+            if (message.fields.value("freshnessUncertain").toBool() && canSelectResult())
                 operationId_ = message.fields.value("candidateOperationId").toString().toULongLong();
         }
         const auto operation = access_.operation ? access_.operation(operationId_) : OperationSnapshot{};
-        read_->setEnabled(running && (!operationId_ || operation.finished));
-        writeButton_->setEnabled(running && (!operationId_ || operation.finished));
+        read_->setEnabled(running && (!operation.request.id || operation.finished));
+        writeButton_->setEnabled(running && (!operation.request.id || operation.finished));
         if (!operationId_) return;
+        if (!operation.request.id) {
+            result_->setText(QStringLiteral("操作 #%1 已超过保留上限，结果已过期；可继续提交操作。").arg(operationId_));
+            details_->setPlainText(QStringLiteral("操作快照已过期；不会将缺失快照解释为仍在进行。"));
+            return;
+        }
         QStringList values;
         const auto registers = operation.update.result.value("values").toArray();
         const int start = operation.request.parameters.value("start").toInt();

@@ -1,0 +1,5 @@
+c6f23d82bdeda95efe61e81f0ad1b8b9deaca69a9a824726c6a6629985dd3fc9  build/qt-llvm-debug/bin/rtu_poll_tests.exe
+9fc49c023a251f8a74db6a2b02096a6b3eaef3a8140fa7b622859ef0bd0e3dfd  build/qt-llvm-debug/bin/plugins/libmodbus_plugin.dll
+a72e05a0056c0f049e5e11b7a58c5abdfb6bc428dfacc73b22713fd39f63c63a  .scratch/multi-protocol-debugger/evidence/operation-cache-reviewfix/build.log
+9354f0c84cdd823b311aba2bbd79d3bc56546a44b7dca86278a1ae62ee556549  .scratch/multi-protocol-debugger/evidence/operation-cache-reviewfix/ctest.log
+6d744b94c80d98dbf8c2741e693774ae368ce45eac1fcb8a528051db4fce2e17  .scratch/multi-protocol-debugger/evidence/operation-cache-reviewfix/poll-results.txt

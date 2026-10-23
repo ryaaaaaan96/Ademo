@@ -39,3 +39,7 @@ Blocked by: [02 完成一次 RTU 保持寄存器读取](02-rtu-first-register-re
 ### 2026-10-22：11 实施验收
 
 独立 worktree/分支基于 abb5169，复用 01/02 及已确认工具链。完成通用回溯 Widgets、按操作/消息/UTC 查询、精确字节区间、可配置有界缓存、缺失来源标记和并发上限为 4 的后台 CSV/JSONL 快照导出，SDK 显式升级为 3。Debug/Release 各 3/3 CTest、59 项检查通过，包含原 49 项回归和新增 10 项（含初始化/清理），详见 [验收记录](../evidence/11/acceptance.md)。真实硬件和持续慢磁盘未验证，12/13 边界保持；分诊状态不用于表示完成。整体独立审查在集成阶段记录。
+
+### 2026-10-23：整体审查修复操作缓存淘汰后的界面状态
+
+已关闭 P2：缺失操作快照不再被当作未完成，UI 提示过期并继续接受手动读写、跟踪后续轮询；真实在途操作仍禁用重复提交。公开 Widgets 回归覆盖 operations=1 的手动读→轮询淘汰→继续读写和 stop/restart，Debug 定向 1/1 CTest、17 项 Qt 检查通过。见 [修复证据](../evidence/operation-cache-reviewfix/acceptance.md)，最终双配置由集成分支统一执行。
