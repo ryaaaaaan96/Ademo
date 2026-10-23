@@ -114,6 +114,12 @@ private:
     bool activated_ = false;
     qint64 reconnectDueUs_ = -1;
     std::function<bool()> discardGuard_;
+    struct ViewState {
+        QPointer<QObject> owner;
+        std::function<LocalState()> state;
+        std::function<bool()> resolve;
+    };
+    QMap<QObject *, ViewState> viewStates_;
     bool resolvingUnsaved_ = false;
     EndpointFactory endpointFactory_;
     std::function<qint64()> clock_;

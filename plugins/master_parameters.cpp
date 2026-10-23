@@ -14,6 +14,8 @@
 #include <QSpinBox>
 #include <QTimer>
 #include <QVBoxLayout>
+#include <QRegularExpression>
+#include <QMessageBox>
 
 namespace debugger {
 namespace {
@@ -26,6 +28,9 @@ struct Row {
     QString value = QStringLiteral("未读取");
     QString updated;
     quint64 operation = 0;
+    quint64 writeOperation = 0, editRevision = 0, submittedRevision = 0;
+    std::optional<QString> pending;
+    QString writeResult, inputError;
     QString name, type, displayUnit, description, group;
     QString id() const { return QString("%1/%2/%3").arg(unit).arg(areas[area]).arg(address); }
 };
@@ -90,7 +95,17 @@ public:
             if (valid && unit >= 1 && unit <= 247 && device_->findData(QString::number(unit)) < 0)
                 device_->addItem(QStringLiteral("设备 %1").arg(unit), QString::number(unit));
         }
-        connect(device_, &QComboBox::currentIndexChanged, this, [this] { rebuildGroups(); });
+        selectedDevice_ = selectedDevice();
+        connect(device_, &QComboBox::currentIndexChanged, this, [this] {
+            const auto next = selectedDevice();
+            QPointer<MasterParameters> alive(this);
+            const bool resolved = next == selectedDevice_ || resolvePending(selectedDevice_);
+            if (!alive) return;
+            if (!resolved) {
+                const QSignalBlocker blocker(device_); device_->setCurrentIndex(device_->findData(selectedDevice_)); return;
+            }
+            selectedDevice_ = next; rebuildGroups();
+        });
         connect(group_, &QComboBox::currentIndexChanged, this, [this] { showDevice(); });
         connect(add_, &QPushButton::clicked, this, [this] {
             if (address_->value() + count_->value() > 65536) {
@@ -111,7 +126,10 @@ public:
             auto stored = config.value("parameterRows").toArray();
             for (const auto &row : additions) stored.append(storedRow(row));
             config["parameterRows"] = stored;
-            if (!access_.configure || !access_.configure(config)) {
+            QPointer<MasterParameters> alive(this);
+            const bool configured = access_.configure && access_.configure(config);
+            if (!alive) return;
+            if (!configured) {
                 status_->setText(QStringLiteral("当前无法修改参数配置，请先停止会话并处理未保存内容。")); return;
             }
             for (const auto &row : additions) append(row);
@@ -119,9 +137,17 @@ public:
             const int defaultGroup = group_->findData(QString()); if (defaultGroup >= 0) group_->setCurrentIndex(defaultGroup);
             status_->setText(QStringLiteral("已添加 %1 个地址参数，未发送设备命令").arg(additions.size()));
         });
+        table_->onEdit = [this](const QString &id, const QString &column, const QString &text) {
+            if (column != "value") return;
+            for (auto &row : rows_) if (row.id() == id && (row.area == 0 || row.area == 2)) {
+                row.pending = text; row.inputError.clear(); ++row.editRevision; ++pendingRevision_; refresh(); return;
+            }
+        };
         table_->onAction = [this](const QString &id, const QString &action) {
-            if (action != "read" || !access_.submit) return;
+            if (!access_.submit) return;
             for (auto &row : rows_) if (row.id() == id) {
+                if (action == "set") { write(row); refresh(); return; }
+                if (action != "read") return;
                 row.operation = access_.submit(readActions[row.area], {{"unit", row.unit}, {"start", row.address}, {"count", 1}});
                 if (!row.operation) status_->setText(QStringLiteral("操作容量已满，本次读取未提交。"));
                 refresh(); return;
@@ -129,6 +155,8 @@ public:
         };
         auto *timer = new QTimer(this); timer->setInterval(50);
         connect(timer, &QTimer::timeout, this, [this] { refresh(); }); timer->start();
+        if (access_.registerViewState) access_.registerViewState(this,
+            [this] { return LocalState{false, hasPending(), loading_, {}}; }, [this] { return resolvePending(); });
         rebuildGroups(); refresh();
     }
     QList<ParameterDevice> devices() const override {
@@ -139,9 +167,49 @@ public:
     QString selectedDevice() const override { return device_->currentData().toString(); }
     bool selectDevice(const QString &id) override {
         const int index = device_->findData(id); if (index < 0) return false;
-        device_->setCurrentIndex(index); return true;
+        QPointer<MasterParameters> alive(this);
+        device_->setCurrentIndex(index); return alive && selectedDevice() == id;
     }
 private:
+    bool hasPending(const QString &device = {}) const {
+        for (const auto &row : rows_) if (row.pending && (device.isEmpty() || QString::number(row.unit) == device)) return true;
+        return false;
+    }
+    bool resolvePending(const QString &device = {}) {
+        if (!hasPending(device)) return true;
+        const auto revision = pendingRevision_;
+        QPointer<MasterParameters> alive(this);
+        const auto decision = QMessageBox::warning(this, QStringLiteral("待提交设备值"),
+            QStringLiteral("存在尚未确认的待提交值。放弃只清除界面草稿，不撤销已发送的写入，也不删除通信结果。"),
+            QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Cancel);
+        if (!alive || decision != QMessageBox::Discard || revision != pendingRevision_) return false;
+        for (auto &row : rows_) if (device.isEmpty() || QString::number(row.unit) == device) row.pending.reset();
+        refresh(); return true;
+    }
+    void write(Row &row) {
+        if (!row.pending || (row.area != 0 && row.area != 2) || !access_.running || !access_.running()) return;
+        const auto previous = access_.operation ? access_.operation(row.writeOperation) : OperationSnapshot{};
+        if (previous.request.id && !previous.finished) return;
+        const auto text = row.pending->trimmed();
+        row.inputError.clear();
+        QJsonValue value;
+        if (row.area == 0) {
+            if (text != "true" && text != "false" && text != "0" && text != "1") {
+                row.inputError = QStringLiteral("无效输入：线圈只接受 true/false 或 0/1，未发送"); return;
+            }
+            value = text == "true" || text == "1";
+        } else {
+            bool valid = false; const int number = text.toInt(&valid);
+            if (!valid || !QRegularExpression("^[0-9]+$").match(text).hasMatch() || number < 0 || number > 65535) {
+                row.inputError = QStringLiteral("无效输入：寄存器只接受 0..65535 整数，未发送"); return;
+            }
+            value = number;
+        }
+        row.writeOperation = access_.submit(row.area == 0 ? "write-single-coil" : "write-single-register",
+            {{"unit", row.unit}, {"start", row.address}, {"value", value}});
+        row.submittedRevision = row.editRevision;
+        row.writeResult = row.writeOperation ? QStringLiteral("写入已提交，等待设备确认") : QStringLiteral("写入未提交：操作容量已满");
+    }
     QJsonObject storedRow(const Row &row) const {
         return {{"unit", row.unit}, {"area", areas[row.area]}, {"address", row.address}, {"name", row.name},
             {"type", row.type}, {"displayUnit", row.displayUnit}, {"description", row.description}, {"group", row.group}};
@@ -182,13 +250,21 @@ private:
         QJsonArray stored; for (const auto &row : replacement) stored.append(storedRow(row));
         config["parameterRows"] = stored;
         auto sources = config.value("parameterFiles").toObject(); sources[QString::number(unit)] = path; config["parameterFiles"] = sources;
-        if (!access_.configure || !access_.configure(config)) {
+        QPointer<MasterParameters> alive(this);
+        const bool configured = access_.configure && access_.configure(config);
+        if (!alive) return;
+        if (!configured) {
             status_->setText(QStringLiteral("未应用：请先停止会话并处理未保存内容；原参数保留。")); return;
         }
+        // configure 可能经过模态修改保护；其他设备须取确认后的实时状态，不能复活旧草稿或覆盖新观测。
+        QList<Row> current;
+        for (const auto &row : rows_) if (row.unit != unit) current.append(row);
+        for (const auto &row : replacement) if (row.unit == unit) current.append(row);
+        replacement = std::move(current);
         rows_.clear(); operationStatuses_.clear(); const QSignalBlocker blocker(device_); device_->clear();
         for (const auto &row : replacement) append(row);
         if (device_->findData(QString::number(unit)) < 0) device_->addItem(QStringLiteral("设备 %1").arg(unit), QString::number(unit));
-        selectDevice(QString::number(unit)); rebuildGroups();
+        selectDevice(QString::number(unit)); selectedDevice_ = selectedDevice(); rebuildGroups();
         status_->setText(QStringLiteral("已应用 %1 个参数到设备 %2；未发送设备命令").arg(parameters.size()).arg(unit));
     }
     void rebuildGroups() {
@@ -208,11 +284,20 @@ private:
     ParameterRow presentation(const Row &row) const {
         const auto op = access_.operation ? access_.operation(row.operation) : OperationSnapshot{};
         const bool running = access_.running && access_.running() && access_.config && access_.config().role == "master";
-        return {row.id(), {{"name", row.name.isEmpty() ? QStringLiteral("PDU %1").arg(row.address) : row.name},
+        ParameterRow result{row.id(), {{"name", row.name.isEmpty() ? QStringLiteral("PDU %1").arg(row.address) : row.name},
             {"type", row.type.isEmpty() ? (row.area < 2 ? "bool" : "uint16") : row.type},
-            {"description", row.description.isEmpty() ? area_->itemText(row.area) : row.description}, {"value", row.value},
+            {"description", row.description.isEmpty() ? area_->itemText(row.area) : row.description}, {"value", row.pending.value_or(row.value)},
             {"unit", row.displayUnit}, {"updated", row.updated}},
             {{"read", QStringLiteral("读取"), running && (!op.request.id || op.finished)}}};
+        if (row.area == 0 || row.area == 2) {
+            result.editableCells.insert("value");
+            const auto write = access_.operation ? access_.operation(row.writeOperation) : OperationSnapshot{};
+            result.actions.append({"set", QStringLiteral("设置"), running && row.pending.has_value() && (!write.request.id || write.finished)});
+        }
+        if (row.pending) result.pendingCells.insert("value");
+        result.tooltips["value"] = (row.pending ? QStringLiteral("待提交；") : QString())
+            + QStringLiteral("最近读回：%1；%2；%3").arg(row.value, row.writeResult, row.inputError);
+        return result;
     }
     void showDevice() {
         QList<ParameterRow> visible;
@@ -237,7 +322,20 @@ private:
                 row.updated = message.observedUtc.toLocalTime().toString("HH:mm:ss.zzz");
             }
         }
-        for (const auto &row : rows_) {
+        for (auto &row : rows_) {
+            if (row.writeOperation && access_.operation) {
+                const auto write = access_.operation(row.writeOperation);
+                row.writeResult = write.request.id ? write.update.state + " · " + write.update.detail
+                                                  : QStringLiteral("写入记录已过期；请核对设备后决定是否再次设置");
+                if (write.update.result.value("uncertain").toBool()) row.writeResult.prepend(QStringLiteral("结果不确定 · "));
+                if (write.finished && write.update.state == "success" && row.submittedRevision == row.editRevision) row.pending.reset();
+            }
+            const auto writeStatus = row.inputError.isEmpty() ? row.writeResult : row.inputError;
+            if (!writeStatus.isEmpty() && operationStatuses_.value("write:" + row.id()) != writeStatus) {
+                operationStatuses_["write:" + row.id()] = writeStatus;
+                if (QString::number(row.unit) == selectedDevice())
+                    status_->setText(QStringLiteral("设备 %1 · PDU %2 · %3").arg(row.unit).arg(row.address).arg(writeStatus));
+            }
             table_->updateRow(presentation(row));
             if (!row.operation || !access_.operation) continue;
             const auto operation = access_.operation(row.operation);
@@ -254,6 +352,8 @@ private:
     QList<Row> rows_;
     QMap<QString, QString> operationStatuses_;
     quint64 lastMessage_ = 0;
+    quint64 pendingRevision_ = 0;
+    QString selectedDevice_;
     bool loading_ = false;
     QComboBox *device_, *area_, *group_;
     QLineEdit *path_;
