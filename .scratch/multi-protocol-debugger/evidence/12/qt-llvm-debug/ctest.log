@@ -1,0 +1,94 @@
+UpdateCTestConfiguration  from :C:/Users/81966/Documents/Ademo/.worktrees/rtu-records/DartConfiguration.tcl
+UpdateCTestConfiguration  from :C:/Users/81966/Documents/Ademo/.worktrees/rtu-records/build/qt-llvm-debug/DartConfiguration.tcl
+Test project C:/Users/81966/Documents/Ademo/.worktrees/rtu-records/build/qt-llvm-debug
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 1
+    Start 1: slave_edit_import_save
+
+1: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-records\build\qt-llvm-debug\bin\slave_edit_tests.exe "-o" "edit-results.txt,txt"
+1: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-records/build/qt-llvm-debug
+1: Environment variables: 
+1:  QT_QPA_PLATFORM=windows
+1: Test timeout computed to be: 30
+1/9 Test #1: slave_edit_import_save ...........   Passed    4.77 sec
+test 2
+    Start 2: session_lifecycle
+
+2: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-records\build\qt-llvm-debug\bin\session_tests.exe "-o" "test-results.txt,txt"
+2: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-records/build/qt-llvm-debug
+2: Environment variables: 
+2:  QT_QPA_PLATFORM=windows
+2: Test timeout computed to be: 30
+2/9 Test #2: session_lifecycle ................   Passed    3.70 sec
+test 3
+    Start 3: rtu_first_read
+
+3: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-records\build\qt-llvm-debug\bin\rtu_read_tests.exe "-o" "read-results.txt,txt"
+3: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-records/build/qt-llvm-debug
+3: Environment variables: 
+3:  QT_QPA_PLATFORM=windows
+3: Test timeout computed to be: 30
+3/9 Test #3: rtu_first_read ...................   Passed    5.96 sec
+test 4
+    Start 4: rtu_polling
+
+4: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-records\build\qt-llvm-debug\bin\rtu_poll_tests.exe "-o" "poll-results.txt,txt"
+4: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-records/build/qt-llvm-debug
+4: Environment variables: 
+4:  QT_QPA_PLATFORM=windows
+4: Test timeout computed to be: 30
+4/9 Test #4: rtu_polling ......................   Passed    5.86 sec
+test 5
+    Start 5: rtu_explicit_write
+
+5: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-records\build\qt-llvm-debug\bin\rtu_write_tests.exe "-o" "write-results.txt,txt"
+5: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-records/build/qt-llvm-debug
+5: Environment variables: 
+5:  QT_QPA_PLATFORM=windows
+5: Test timeout computed to be: 30
+5/9 Test #5: rtu_explicit_write ...............   Passed   10.35 sec
+test 6
+    Start 6: rtu_slave_json_read
+
+6: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-records\build\qt-llvm-debug\bin\rtu_slave_tests.exe "-o" "slave-results.txt,txt"
+6: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-records/build/qt-llvm-debug
+6: Environment variables: 
+6:  QT_QPA_PLATFORM=windows
+6: Test timeout computed to be: 30
+6/9 Test #6: rtu_slave_json_read ..............   Passed    6.75 sec
+test 7
+    Start 7: rtu_slave_write
+
+7: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-records\build\qt-llvm-debug\bin\rtu_slave_write_tests.exe "-o" "slave-write-results.txt,txt"
+7: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-records/build/qt-llvm-debug
+7: Environment variables: 
+7:  QT_QPA_PLATFORM=windows
+7: Test timeout computed to be: 30
+7/9 Test #7: rtu_slave_write ..................   Passed    5.86 sec
+test 8
+    Start 8: trace_query_export
+
+8: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-records\build\qt-llvm-debug\bin\trace_tests.exe "-o" "trace-results.txt,txt"
+8: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-records/build/qt-llvm-debug
+8: Environment variables: 
+8:  QT_QPA_PLATFORM=windows
+8: Test timeout computed to be: 30
+8/9 Test #8: trace_query_export ...............   Passed    5.51 sec
+test 9
+    Start 9: bounded_disk_recording
+
+9: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-records\build\qt-llvm-debug\bin\recording_tests.exe "-o" "recording-results.txt,txt"
+9: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-records/build/qt-llvm-debug
+9: Environment variables: 
+9:  QT_QPA_PLATFORM=windows
+9: Test timeout computed to be: 60
+9/9 Test #9: bounded_disk_recording ...........   Passed    8.12 sec
+
+100% tests passed, 0 tests failed out of 9
+
+Total Test time (real) =  56.91 sec
