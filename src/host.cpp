@@ -48,7 +48,8 @@ void PluginCatalog::discover(const QString &directory)
     for (const auto &file : QDir(directory).entryInfoList({"*.dll"}, QDir::Files, QDir::Name)) {
         auto loader = std::make_unique<QPluginLoader>(file.absoluteFilePath());
         loader->setLoadHints(QLibrary::ResolveAllSymbolsHint);
-        auto *object = loader->instance();
+        // instance() 对已共享加载的 DLL 可能跳过本 loader 的引用计数；必须先获取自己的加载租约。
+        auto *object = loader->load() ? loader->instance() : nullptr;
         if (!object) {
             diagnostics_ << file.fileName() + ": " + loader->errorString();
             continue;
