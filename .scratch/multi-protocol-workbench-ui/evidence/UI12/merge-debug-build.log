@@ -1,0 +1,19 @@
+[1/28] Automatic MOC for target debugger_widgets
+[2/26] Automatic MOC for target serial_plugin
+[3/24] Automatic MOC for target debugger_host
+[4/23] Automatic MOC for target modbus_plugin
+[5/21] Automatic MOC for target incompatible_plugin
+[6/19] Automatic MOC for target ui_contract_stale_plugin
+[7/19] Building CXX object CMakeFiles/ui_contract_stale_plugin.dir/ui_contract_stale_plugin_autogen/mocs_compilation.cpp.obj
+[8/19] Automatic MOC for target ui_contract_plugin
+[9/19] Building CXX object CMakeFiles/ui_contract_plugin.dir/ui_contract_plugin_autogen/mocs_compilation.cpp.obj
+[10/19] Building CXX object CMakeFiles/ui_contract_stale_plugin.dir/tests/ui_contract_stale_plugin.cpp.obj
+[11/19] Linking CXX shared module bin\ui-contract-fixtures\libui_contract_stale_plugin.dll
+[12/19] Building CXX object CMakeFiles/debugger_host.dir/src/host.cpp.obj
+[13/19] Building CXX object CMakeFiles/ui_contract_plugin.dir/tests/ui_contract_plugin.cpp.obj
+[14/19] Linking CXX static library libdebugger_host.a
+[15/19] Linking CXX shared module bin\ui-contract-fixtures\libui_contract_plugin.dll
+[16/19] Automatic MOC for target plugin_ui_contract_tests
+[17/19] Building CXX object CMakeFiles/plugin_ui_contract_tests.dir/plugin_ui_contract_tests_autogen/mocs_compilation.cpp.obj
+[18/19] Building CXX object CMakeFiles/plugin_ui_contract_tests.dir/tests/plugin_ui_contract_tests.cpp.obj
+[19/19] Linking CXX executable bin\plugin_ui_contract_tests.exe
