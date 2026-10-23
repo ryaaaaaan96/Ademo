@@ -2,7 +2,7 @@
 
 Status: ready-for-agent
 Stage: RTU 新界面
-Blocked by: [UI09](09-window-trace-query-export.md)、[UI10](10-qml-parameter-trends.md)、[UI11](11-window-workspace-recovery.md)、[UI12](12-plugin-ui-contract-validation.md)、[UI01](01-prototype-layout-and-flow.md)、[UI08](08-slave-runtime-file-workflow.md)
+Blocked by: [UI09](09-window-trace-query-export.md)、[UI10](10-qml-parameter-trends.md)、[UI11](11-window-workspace-recovery.md)、[UI12](12-plugin-ui-contract-validation.md)
 
 依据：[界面规格](../spec.md)、[综合实施索引](../implementation-plan.md)、[已批准拆分](../ticket-breakdown-draft.md)。复用已验收的旧 01–12 与 [Qt/LLVM-MinGW 工具链](../../multi-protocol-debugger/toolchain-environment.md)，不重做协议或传输基线。
 

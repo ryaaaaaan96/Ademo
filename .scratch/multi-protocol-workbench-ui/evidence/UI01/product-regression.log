@@ -1,0 +1,27 @@
+Test project C:/Users/81966/Documents/Ademo/build/qt-llvm-debug
+      Start  1: parallel_sessions_recovery
+ 1/11 Test  #1: parallel_sessions_recovery .......   Passed    1.18 sec
+      Start  2: slave_edit_import_save
+ 2/11 Test  #2: slave_edit_import_save ...........   Passed    1.65 sec
+      Start  3: session_lifecycle
+ 3/11 Test  #3: session_lifecycle ................   Passed    1.17 sec
+      Start  4: rtu_first_read
+ 4/11 Test  #4: rtu_first_read ...................   Passed    2.02 sec
+      Start  5: rtu_polling
+ 5/11 Test  #5: rtu_polling ......................   Passed    1.76 sec
+      Start  6: rtu_explicit_write
+ 6/11 Test  #6: rtu_explicit_write ...............   Passed    3.18 sec
+      Start  7: rtu_slave_json_read
+ 7/11 Test  #7: rtu_slave_json_read ..............   Passed    2.19 sec
+      Start  8: rtu_slave_write
+ 8/11 Test  #8: rtu_slave_write ..................   Passed    2.42 sec
+      Start  9: trace_query_export
+ 9/11 Test  #9: trace_query_export ...............   Passed    0.82 sec
+      Start 10: workspace_roundtrip
+10/11 Test #10: workspace_roundtrip ..............   Passed    4.85 sec
+      Start 11: bounded_disk_recording
+11/11 Test #11: bounded_disk_recording ...........   Passed    6.31 sec
+
+100% tests passed, 0 tests failed out of 11
+
+Total Test time (real) =  27.58 sec

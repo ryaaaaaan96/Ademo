@@ -2,7 +2,7 @@
 
 Status: ready-for-agent
 Stage: RTU 新界面
-Blocked by: [UI05](05-inline-pending-value-write.md)、[UI04](04-parameter-json-groups-read.md)
+Blocked by: [UI05](05-inline-pending-value-write.md)
 
 依据：[界面规格](../spec.md)、[综合实施索引](../implementation-plan.md)、[已批准拆分](../ticket-breakdown-draft.md)。复用已验收的旧 01–12 与 [Qt/LLVM-MinGW 工具链](../../multi-protocol-debugger/toolchain-environment.md)，不重做协议或传输基线。
 

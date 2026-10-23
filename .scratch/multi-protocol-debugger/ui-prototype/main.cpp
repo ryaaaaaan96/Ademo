@@ -477,6 +477,9 @@ void SessionPane::generateRows() {
 }
 bool SessionPane::saveRuntime(int device) {
     if (!slave) return true;
+    if (device < 0 || device >= devices.size()) {
+        notice->setText("请先添加设备，再保存模拟运行值。"); return false;
+    }
     auto &d = devices[device];
     if (fileDirty && editorDevice == device) { notice->setText("请先处理文件编辑页的未保存修改，再保存运行值。"); return false; }
     const auto path = QFileDialog::getSaveFileName(this, "保存模拟运行值", d.path, "JSON (*.json)"); if (path.isEmpty()) return false;
@@ -696,6 +699,11 @@ int main(int argc, char **argv) {
     if (app.arguments().contains("--capture")) {
         const auto output = runtimeDir() + "/captures"; QDir().mkpath(output);
         QTimer::singleShot(450, &window, [&window, output] {
+            SessionPane emptySlave("新建空从站", "Modbus RTU", "COM9", true);
+            emptySlave.resize(780, 820); emptySlave.show();
+            for (auto *action : emptySlave.findChildren<QPushButton *>())
+                if (action->text() == "保存运行值到文件") action->click();
+            emptySlave.grab().save(output + "/05-empty-slave-save.png");
             auto *master = window.docks[0]->pane; auto *slave = window.docks[1]->pane;
             master->start(); slave->start(); master->read(master->visibleRows);
             auto &p = master->devices[0].parameters[2]; p.draft = "230"; p.pending = true; p.status = "待提交"; master->refreshValues();
