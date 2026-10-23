@@ -261,6 +261,55 @@ private slots:
         QVERIFY(bytes.contains("\"state\":\"transport-error\"")); QVERIFY(bytes.contains("\"uncertain\":true"));
         QVERIFY(bytes.contains("\"recovery\":{\"autoReconnect\":true,\"intervalMs\":20,\"restorePolling\":true}"));
     }
+    void stoppedWritesKeepUncertaintyInOperationAndArchive_data() {
+        QTest::addColumn<bool>("locallySent");
+        QTest::newRow("submitted-awaiting-local-completion") << false;
+        QTest::newRow("local-completion-awaiting-device") << true;
+    }
+    void stoppedWritesKeepUncertaintyInOperationAndArchive() {
+        QFETCH(bool, locallySent);
+        QTemporaryDir directory; Wire wire; qint64 time = 0;
+        DebugSession session(catalog(true), nullptr, wire.factory(), [&] { return time; });
+        const auto selected = config("modbus.rtu");
+        QVERIFY(session.start(selected)); QCoreApplication::processEvents(); QVERIFY(session.startRecording(options(directory.path())));
+        const auto op = session.submit("write-single-register", {{"unit", 1}, {"start", 0}, {"value", 7}});
+        const auto queued = session.submit("write-single-register", {{"unit", 1}, {"start", 1}, {"value", 8}});
+        time += 1750; session.poll(); QCOMPARE(wire.writes.size(), 1);
+        if (locallySent) { wire.events.sent(wire.writes.last().first, true, {}); QCoreApplication::processEvents(); }
+        session.stop();
+        const auto stoppedWrite = session.operation(op);
+        QVERIFY(stoppedWrite.finished); QCOMPARE(stoppedWrite.update.state, "cancelled"); QVERIFY(stoppedWrite.sendAccepted);
+        QCOMPARE(stoppedWrite.localSent, locallySent);
+        QVERIFY(stoppedWrite.update.result.value("uncertain").toBool());
+        QVERIFY(stoppedWrite.update.detail.contains(QStringLiteral("结果不确定")));
+        QVERIFY(stoppedWrite.update.detail.contains(QStringLiteral("不自动重试"))); // 保留协议专用终态。
+        QVERIFY(!session.operation(queued).sendAccepted); QVERIFY(!session.operation(queued).update.result.value("uncertain").toBool());
+        QVERIFY(session.start(selected)); QCoreApplication::processEvents(); time += 10000000; session.poll();
+        QCOMPARE(wire.writes.size(), 1); // 新运行不补发当前写入或原排队写入。
+        session.stop(); auto flushed = session.stopRecording(); QTRY_VERIFY(ready(flushed)); QCOMPARE(flushed.get().state, "stopped");
+        auto query = queryArchive(directory.path(), session.sessionId(), {op}); QTRY_VERIFY(ready(query)); QVERIFY(query.get().ok);
+        const auto archived = query.get().snapshot; QCOMPARE(archived.operations.size(), 1);
+        QCOMPARE(archived.operations.first().update.state, "cancelled");
+        QCOMPARE(archived.operations.first().update.result, stoppedWrite.update.result);
+        QCOMPARE(archived.operations.first().update.detail, stoppedWrite.update.detail);
+        auto exported = exportSnapshot([archived] { return archived; }, directory.filePath("stopped-write.jsonl"), "jsonl");
+        QTRY_VERIFY(ready(exported)); QVERIFY(exported.get().ok);
+        const auto bytes = fileBytes(directory.filePath("stopped-write.jsonl"));
+        QVERIFY(bytes.contains("\"state\":\"cancelled\"")); QVERIFY(bytes.contains("\"uncertain\":true"));
+        QVERIFY(bytes.contains(stoppedWrite.update.detail.toUtf8()));
+    }
+    void hostStopFallbackKeepsSubmittedOperationUncertain() {
+        QTemporaryDir directory; Wire wire; DebugSession session(catalog(), nullptr, wire.factory());
+        QVERIFY(session.start(config())); QCoreApplication::processEvents(); QVERIFY(session.startRecording(options(directory.path())));
+        const auto op = session.submit("two-attempts", {}); QCOMPARE(wire.writes.size(), 2);
+        session.stop(); const auto operation = session.operation(op);
+        QVERIFY(operation.finished); QCOMPARE(operation.update.state, "cancelled"); QVERIFY(operation.sendAccepted);
+        QVERIFY(operation.update.result.value("uncertain").toBool());
+        QVERIFY(operation.update.detail.contains(QStringLiteral("结果不确定")));
+        auto flushed = session.stopRecording(); QTRY_VERIFY(ready(flushed));
+        auto query = queryArchive(directory.path(), session.sessionId(), {op}); QTRY_VERIFY(ready(query)); QVERIFY(query.get().ok);
+        QCOMPARE(query.get().snapshot.operations.first().update.result, operation.update.result);
+    }
     void deletedAndCorruptSegmentsAreExplicit() {
         QTemporaryDir directory; QCOMPARE(archiveChild(directory.path()), 0);
         const auto index = QJsonDocument::fromJson(fileBytes(directory.filePath("manifest.json"))).object();

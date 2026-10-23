@@ -116,14 +116,18 @@ void DebugSession::retire(bool retainLocal)
     reconnectDueUs_ = -1;
     pollTimer_.stop();
     sendAttempts_.clear();
+    // 协议先发布终态，保留已提交写入的结果不确定等领域信息。
+    if (protocol_ && !preparing_) protocol_->stop();
     for (auto &operation : operations_) {
         if (!operation.finished && !(keep && operation.localOnly)) {
             operation.finished = true;
-            operation.update = {operation.request.id, "cancelled", QStringLiteral("会话已停止，操作已取消"), {}};
+            auto result = operation.update.result;
+            result["uncertain"] = operation.sendAccepted;
+            operation.update = {operation.request.id, "cancelled", QStringLiteral("会话已停止，操作已取消")
+                + (operation.sendAccepted ? QStringLiteral("；已提交的操作未获确认，结果不确定，不会自动补发") : QString()), std::move(result)};
             recordOperation(operation);
         }
     }
-    if (protocol_ && !preparing_) protocol_->stop();
     preparing_ = false;
     passiveSends_.clear();
     passiveDeadlines_.clear();

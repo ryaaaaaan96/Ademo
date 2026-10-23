@@ -47,3 +47,7 @@ Blocked by: [05 多设备轮询与会话级读取重试](05-rtu-polling-read-ret
 合并已验收的 09（95ff916）与 SDK7，生产组合修复为 8bd8c60。断线直接结束的网络操作也持久化 transport-error/uncertain；session 配置记录包含 recovery，并在启动/修改时追加。查询和导出保留最后可用配置，不将不同时间的配置伪装成每条操作的历史快照。
 
 只读专项审查的两个 P2——初始化失败后后台 dirty 循环、操作查询中过早按消息所属 ID 过滤——均已修复并由 master 源码复核关闭。新增三项公开行为组合回归，最终双配置各 10/10 CTest、218 项 QtTest、0 失败/跳过，哈希重算一致。详见 [09/12 独立组合证据](../evidence/integration09-12/acceptance.md)；原 12 证据保留，没有启动 13 或改动当前任务索引。
+
+### 2026-10-23：停止未确认操作的归档终态补强
+
+修复04/08/12交互：协议stop可先发布领域取消终态，避免被宿主过早finished吞掉；宿主fallback也显式recordOperation并保留已提交操作的不确定信息。新增公开会话→停止→重启不补发→归档查询→JSONL导出回归，两种本地发送阶段都保留cancelled、uncertain及明确说明；另验证无协议终态时的宿主fallback归档。定向Debug含原08后台保存跨停止保护共5/5 CTest、98项通过，0失败/跳过。见[停止终态修复证据](../evidence/stop-uncertain-reviewfix/acceptance.md)，最终全量双配置由集成统一执行，原验收历史不改写。
