@@ -1,18 +1,9 @@
 #include "rtu_session.h"
+#include "rtu_wire.h"
 #include <QJsonArray>
 
 namespace debugger {
 namespace {
-quint16 crc16(const QByteArray &bytes)
-{
-    quint16 crc = 0xffff;
-    for (const auto byte : bytes) {
-        crc ^= static_cast<quint8>(byte);
-        for (int bit = 0; bit < 8; ++bit)
-            crc = (crc & 1) ? (crc >> 1) ^ 0xa001 : crc >> 1;
-    }
-    return crc;
-}
 void appendWord(QByteArray &bytes, int word)
 {
     bytes.append(char(word >> 8));
@@ -32,8 +23,9 @@ QString RtuSession::prepare(const SessionConfig &config)
         return QStringLiteral("RTU 使用 11 位字符：无校验需 2 个停止位，有校验需 1 个停止位");
     const int baud = config.endpoint.value("baud").toString().toInt();
     if (baud <= 0) return QStringLiteral("无效波特率");
-    interCharacterUs_ = baud > 19200 ? 750 : (16500000LL + baud - 1) / baud;
-    interFrameUs_ = baud > 19200 ? 1750 : (38500000LL + baud - 1) / baud;
+    const auto timing = rtuwire::frameTiming(baud);
+    interCharacterUs_ = timing.interCharacterUs;
+    interFrameUs_ = timing.interFrameUs;
     const int timeout = config.protocol.contains("responseTimeoutMs")
         ? config.protocol.value("responseTimeoutMs").toInt(-1) : 1000;
     if (timeout < 1 || timeout > 60000) return QStringLiteral("应答超时必须为 1..60000 ms");
@@ -265,7 +257,7 @@ void RtuSession::finishFrame()
     if (oversizedFrame_) message.detail = QStringLiteral("RTU 帧超过 256 字节");
     else if (brokenFrame_) message.detail = QStringLiteral("帧内间隙超过 t1.5，丢弃不完整 RTU 帧");
     else if (buffer_.size() < 5) message.detail = QStringLiteral("RTU 响应长度不足");
-    else if (crc16(buffer_) != 0) message.detail = QStringLiteral("CRC 校验失败");
+    else if (rtuwire::crc16(buffer_) != 0) message.detail = QStringLiteral("CRC 校验失败");
     else {
         const auto unit = quint8(buffer_[0]);
         const auto function = quint8(buffer_[1]);
@@ -427,7 +419,7 @@ void RtuSession::tick()
             appendWord(request, start_);
             appendWord(request, count_);
         }
-        const auto crc = crc16(request);
+        const auto crc = rtuwire::crc16(request);
         request.append(char(crc & 0xff));
         request.append(char(crc >> 8));
         phase_ = Phase::Sending;

@@ -1,0 +1,15 @@
+e0c942723eaff1e0e226c8aadb409ba0b8af9b8d82c89b8544c96be6776582b2  build/qt-llvm-debug/bin/rtu_read_tests.exe
+cba58a52498c0e20f11e4702cd0ee838e5504185dd85331c6a577063197d6453  build/qt-llvm-debug/bin/rtu_poll_tests.exe
+194e45662879b1628cdb42b642fe6179865820a3bcf05e12d6413c7c6a4c0cb1  build/qt-llvm-debug/bin/rtu_write_tests.exe
+1298eeb4542c48f73631f23a50b7b0c5a4ff9b11c8eeb560f0dbbaf77ac601ef  build/qt-llvm-debug/bin/rtu_slave_tests.exe
+ccce283b3f931655525d43f201e4c46b2fec8396fac34aec2dfcec8ea8b7bacf  build/qt-llvm-debug/bin/rtu_slave_write_tests.exe
+12d1aca051d5586c83983f969bd6d0df2ded4aa539b29f74dd521df10ef8f743  build/qt-llvm-debug/bin/plugins/libmodbus_plugin.dll
+aeff208794f2bb312ad41ef7811ef651ced720580d0ee99c75a8ab4b0cc318ad  build/qt-llvm-debug/bin/plugins/libserial_plugin.dll
+77f7492a35c89aeaa6c7e5b3ba918049f7d5adc6a73816a613279b77b2b8cbb6  .scratch/multi-protocol-debugger/evidence/rtu-wire-refactor/acceptance.md
+2c00a75ad8a344180293c481f5439a091bfe6274ee684f541efb557a6060aa0b  .scratch/multi-protocol-debugger/evidence/rtu-wire-refactor/build.log
+21670216842c9014ac643dc6de28590d359e7e78a2b4918623cb92b7963e0e20  .scratch/multi-protocol-debugger/evidence/rtu-wire-refactor/ctest.log
+8bcca06ee7887a4b908acd926fee86416fd4ebafa378425637c5372a30848992  .scratch/multi-protocol-debugger/evidence/rtu-wire-refactor/poll-results.txt
+923ea0b99d36a9f47ac59fc5ae77a10b832b908e03bca5e5792733ce63590f21  .scratch/multi-protocol-debugger/evidence/rtu-wire-refactor/read-results.txt
+532bc65fb4f02755e88e25783d69c22446736dccac9184640d78b9da23af0bcc  .scratch/multi-protocol-debugger/evidence/rtu-wire-refactor/slave-results.txt
+c80d2666f1d6eb540072e94dc1e613360d430d1b8eac62f4d410ee98e0467fa2  .scratch/multi-protocol-debugger/evidence/rtu-wire-refactor/slave-write-results.txt
+512c99192aa25dff6121cbd3142d5f74a028c8e993881520bd2f55c8437a5f00  .scratch/multi-protocol-debugger/evidence/rtu-wire-refactor/write-results.txt
