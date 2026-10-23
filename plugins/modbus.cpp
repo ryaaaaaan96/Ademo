@@ -314,6 +314,16 @@ public:
         return createMasterParameterView(std::move(access), parent);
     }
     QJsonObject relocateConfiguration(QJsonObject config, const QString &fromBase, const QString &toBase) const override {
+        const auto relocate = [&fromBase, &toBase](const QString &path) {
+            const auto absolute = QDir::cleanPath(QDir::isAbsolutePath(path) ? path : QDir(fromBase).absoluteFilePath(path));
+            return toBase.isEmpty() ? absolute : QDir(toBase).relativeFilePath(absolute);
+        };
+        if (config.value("parameterFiles").isObject()) {
+            auto sources = config.value("parameterFiles").toObject();
+            for (auto it = sources.begin(); it != sources.end(); ++it)
+                if (it.value().isString() && !it.value().toString().isEmpty()) it.value() = relocate(it.value().toString());
+            config["parameterFiles"] = sources;
+        }
         if (!config.value("devices").isArray()) return config;
         auto devices = config.value("devices").toArray();
         for (int i = 0; i < devices.size(); ++i) {
@@ -321,8 +331,7 @@ public:
             auto device = devices[i].toObject();
             const auto path = device.value("path");
             if (!path.isString() || path.toString().isEmpty()) continue;
-            const auto absolute = QDir::cleanPath(QDir::isAbsolutePath(path.toString()) ? path.toString() : QDir(fromBase).absoluteFilePath(path.toString()));
-            device["path"] = toBase.isEmpty() ? absolute : QDir(toBase).relativeFilePath(absolute);
+            device["path"] = relocate(path.toString());
             devices[i] = device;
         }
         config["devices"] = devices;

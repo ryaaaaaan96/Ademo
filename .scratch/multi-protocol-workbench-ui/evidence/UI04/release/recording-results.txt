@@ -1,0 +1,31 @@
+********* Start testing of RecordingTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : RecordingTests::initTestCase()
+PASS   : RecordingTests::crossProcessRestartKeepsIdentitiesAndRelations()
+PASS   : RecordingTests::fullQueueKeepsIndependentLossAndLateSources()
+PASS   : RecordingTests::rotationBoundsDiskAndMarksExpiredSources()
+PASS   : RecordingTests::byteQuotaRejectsWithoutBlockingProtocolInput()
+QINFO  : RecordingTests::pollingAndExportContinueWithBlockedDisk() controlled-poll 334 sends in 166 ms; dropped 3362
+PASS   : RecordingTests::pollingAndExportContinueWithBlockedDisk()
+PASS   : RecordingTests::metadataPersistedAfterCompletionAndStop()
+PASS   : RecordingTests::lockedOrInvalidDirectoryOnlyDisablesRecording()
+PASS   : RecordingTests::initializationFailuresReleaseBackgroundCapacity()
+PASS   : RecordingTests::queuedOperationsKeepSameLiveAndArchivedMessages()
+PASS   : RecordingTests::disconnectedWriteAndRecoveryPolicySurviveArchive()
+PASS   : RecordingTests::stoppedWritesKeepUncertaintyInOperationAndArchive(submitted-awaiting-local-completion)
+PASS   : RecordingTests::stoppedWritesKeepUncertaintyInOperationAndArchive(local-completion-awaiting-device)
+PASS   : RecordingTests::hostStopFallbackKeepsSubmittedOperationUncertain()
+PASS   : RecordingTests::deletedAndCorruptSegmentsAreExplicit()
+PASS   : RecordingTests::invalidIndexNumbersNeverLookComplete(segment-garbage)
+PASS   : RecordingTests::invalidIndexNumbersNeverLookComplete(segment-negative)
+PASS   : RecordingTests::invalidIndexNumbersNeverLookComplete(segment-missing)
+PASS   : RecordingTests::invalidIndexNumbersNeverLookComplete(loss-garbage)
+PASS   : RecordingTests::invalidIndexNumbersNeverLookComplete(loss-negative)
+PASS   : RecordingTests::invalidIndexNumbersNeverLookComplete(rotation-overflow)
+PASS   : RecordingTests::invalidIndexNumbersNeverLookComplete(rotation-number-type)
+PASS   : RecordingTests::orphanRotationKeepsIndexReadable()
+PASS   : RecordingTests::localOnlyFlagSurvivesArchive()
+PASS   : RecordingTests::widgetRecordingAndArchiveExport()
+PASS   : RecordingTests::cleanupTestCase()
+Totals: 26 passed, 0 failed, 0 skipped, 0 blacklisted, 6428ms
+********* Finished testing of RecordingTests *********
