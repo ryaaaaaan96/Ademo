@@ -86,12 +86,13 @@ public:
         *editingRow = -1; QStyledItemDelegate::destroyEditor(editor, index);
     }
 };
-class PlotDialog : public QDialog {
+class PlotWindow : public QMainWindow {
 public:
     QQuickWidget *quick; QLabel *state; QVector<int> rows; int deviceIndex;
-    PlotDialog(const QString &title, int device, QWidget *parent) : QDialog(parent), deviceIndex(device) {
+    PlotWindow(const QString &title, int device, QWidget *parent) : QMainWindow(parent, Qt::Window), deviceIndex(device) {
         setAttribute(Qt::WA_DeleteOnClose); setWindowTitle(title + " · 趋势 / 模拟数据"); resize(860, 480);
-        auto *layout = new QVBoxLayout(this); auto *bar = new QHBoxLayout;
+        auto *content = new QWidget; setCentralWidget(content);
+        auto *layout = new QVBoxLayout(content); auto *bar = new QHBoxLayout;
         state = new QLabel("等待参数更新；打开曲线不会自动启动轮询"); bar->addWidget(state, 1);
         auto *pause = new QPushButton("暂停显示"); pause->setCheckable(true); bar->addWidget(pause);
         button("清空", bar, [this] { if (quick->rootObject()) QMetaObject::invokeMethod(quick->rootObject(), "clearSamples"); });
@@ -133,7 +134,7 @@ public:
     QComboBox *deviceBox, *groups, *pollScope, *outcome; QSpinBox *period;
     QPushButton *startButton, *pollButton; QLabel *sessionState, *endpointSummary, *notice, *editorTarget, *fileState, *recordSummary;
     QTabWidget *pages; QTableWidget *table, *editor; QPlainTextEdit *records;
-    QTimer pollTimer; QHash<int, QVector<int>> polling; QVector<QPointer<PlotDialog>> plots;
+    QTimer pollTimer; QHash<int, QVector<int>> polling; QVector<QPointer<PlotWindow>> plots;
     QVector<int> visibleRows; std::function<void()> changed;
 
     SessionPane(QString name, QString proto, QString port, bool isSlave, QWidget *parent = nullptr)
@@ -335,8 +336,8 @@ public:
     }
     void openPlot(QVector<int> rows) {
         if (rows.isEmpty()) { notice->setText("选中一行或多行，再点击绘图。最多四条曲线。"); return; }
-        PlotDialog *plot = nullptr; for (auto candidate : plots) if (candidate && candidate->deviceIndex == selected) plot = candidate;
-        if (!plot) { plot = new PlotDialog(sessionName + " / " + devices[selected].name, selected, this); plots.append(plot); }
+        PlotWindow *plot = nullptr; for (auto candidate : plots) if (candidate && candidate->deviceIndex == selected) plot = candidate;
+        if (!plot) { plot = new PlotWindow(sessionName + " / " + devices[selected].name, selected, this); plots.append(plot); }
         plot->addRows(rows, devices[selected]); plot->show(); plot->raise();
     }
 
@@ -528,48 +529,66 @@ void SessionPane::addDeviceDialog() {
     fileState->setText("新设备尚无文件：打开已有配置，或生成地址行后保存并应用。");
 }
 
-class SessionDock : public QDockWidget {
+class SessionWindow : public QMainWindow {
 public:
     SessionPane *pane;
-    QToolButton *minimizeButton, *fullScreenButton;
-    bool fullScreen = false, wasFloating = false;
-    QRect previousGeometry;
-    SessionDock(SessionPane *p, QWidget *parent) : QDockWidget(p->sessionName, parent), pane(p) {
-        auto *scroll = new QScrollArea(this); scroll->setWidgetResizable(true); scroll->setFrameShape(QFrame::NoFrame);
-        scroll->setWidget(pane); setWidget(scroll);
-        setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-        setMinimumSize(420, 320); setAllowedAreas(Qt::AllDockWidgetAreas);
-        auto *title = new QWidget(this); title->setObjectName("sessionTitle");
-        auto *bar = new QHBoxLayout(title); bar->setContentsMargins(8, 4, 4, 4);
-        bar->addWidget(new QLabel(pane->sessionName)); bar->addStretch();
-        auto control = [this, bar](const QString &text, const QString &tip) {
-            auto *b = new QToolButton(this); b->setText(text); b->setToolTip(tip); b->setAccessibleName(tip); bar->addWidget(b); return b;
-        };
-        minimizeButton = control("最小化", "最小化会话（通信继续，点击左侧会话恢复）");
-        fullScreenButton = control("全屏", "全屏显示会话 / 还原");
-        auto *floatingButton = control("浮动", "浮动 / 停靠会话");
-        auto *closeButton = control("关闭", "关闭会话（停止通信）");
-        setTitleBarWidget(title);
-        connect(minimizeButton, &QToolButton::clicked, this, [this] { restorePresentation(); hide(); });
-        connect(fullScreenButton, &QToolButton::clicked, this, [this] {
-            if (fullScreen) { restorePresentation(); return; }
-            wasFloating = isFloating(); previousGeometry = geometry(); fullScreen = true;
-            setFloating(true); showFullScreen(); fullScreenButton->setText("还原");
-        });
-        connect(floatingButton, &QToolButton::clicked, this, [this] { restorePresentation(); setFloating(!isFloating()); });
-        connect(closeButton, &QToolButton::clicked, this, [this] { close(); });
-        auto *escape = new QShortcut(QKeySequence(Qt::Key_Escape), this);
-        connect(escape, &QShortcut::activated, this, [this] { restorePresentation(); });
-    }
-    void restorePresentation() {
-        if (!fullScreen) return;
-        fullScreen = false; showNormal(); setFloating(wasFloating);
-        if (wasFloating) setGeometry(previousGeometry);
-        fullScreenButton->setText("全屏");
+    std::function<void()> closed;
+    SessionWindow(SessionPane *p, QWidget *parent) : QMainWindow(parent), pane(p) {
+        setWindowTitle(pane->sessionName + " · 模拟数据");
+        auto *scroll = new QScrollArea; scroll->setWidgetResizable(true); scroll->setFrameShape(QFrame::NoFrame);
+        scroll->setWidget(pane); setCentralWidget(scroll); setMinimumSize(420, 320);
     }
     void closeEvent(QCloseEvent *event) override {
         if (!pane->canClose()) { event->ignore(); return; }
-        restorePresentation();
+        QMainWindow::closeEvent(event); if (closed) closed();
+    }
+};
+class SessionDock : public QDockWidget {
+public:
+    SessionPane *pane; SessionWindow *sessionWindow;
+    QWidget *container; QVBoxLayout *containerLayout;
+    bool detached = false, changing = false;
+    std::function<void()> presentationChanged;
+    SessionDock(SessionPane *p, QWidget *parent) : QDockWidget(p->sessionName, parent), pane(p) {
+        container = new QWidget(this); containerLayout = new QVBoxLayout(container); containerLayout->setContentsMargins(0, 0, 0, 0);
+        sessionWindow = new SessionWindow(pane, container); sessionWindow->setWindowFlags(Qt::Widget);
+        containerLayout->addWidget(sessionWindow); setWidget(container);
+        setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+        setMinimumSize(420, 320); setAllowedAreas(Qt::AllDockWidgetAreas);
+        sessionWindow->closed = [this] { if (presentationChanged) presentationChanged(); };
+        auto *dockAction = sessionWindow->menuBar()->addAction("停靠到工作台");
+        connect(dockAction, &QAction::triggered, this, [this] { attach(); });
+        connect(this, &QDockWidget::topLevelChanged, this, [this](bool floating) {
+            if (floating && !changing) QTimer::singleShot(0, this, [this] { if (QDockWidget::isFloating()) detach(); });
+        });
+    }
+    ~SessionDock() override { delete sessionWindow; }
+    bool sessionHidden() const { return detached ? sessionWindow->isHidden() : isHidden(); }
+    void showSession() {
+        if (detached) {
+            if (sessionWindow->isMinimized()) sessionWindow->showNormal(); else sessionWindow->show();
+            sessionWindow->raise(); sessionWindow->activateWindow();
+        } else { show(); raise(); }
+    }
+    void hideSession() { if (detached) sessionWindow->hide(); else hide(); }
+    void detach() {
+        if (detached) return;
+        changing = true; QDockWidget::setFloating(false);
+        containerLayout->removeWidget(sessionWindow);
+        sessionWindow->setParent(parentWidget(), Qt::Window);
+        detached = true; hide(); sessionWindow->show(); changing = false;
+        if (presentationChanged) presentationChanged();
+    }
+    void attach() {
+        if (!detached) return;
+        const bool visible = !sessionWindow->isHidden();
+        sessionWindow->showNormal(); sessionWindow->hide();
+        sessionWindow->setParent(container, Qt::Widget); containerLayout->addWidget(sessionWindow);
+        detached = false; sessionWindow->show(); setVisible(visible); if (visible) raise();
+        if (presentationChanged) presentationChanged();
+    }
+    void closeEvent(QCloseEvent *event) override {
+        if (!pane->canClose()) { event->ignore(); return; }
         QDockWidget::closeEvent(event);
     }
 };
@@ -597,20 +616,20 @@ public:
         connect(tree, &QTreeWidget::itemClicked, this, [this](QTreeWidgetItem *item) {
             const int index = item->data(0, Qt::UserRole).toInt(); if (index < 0 || index >= docks.size()) return;
             const int device = item->data(0, Qt::UserRole + 1).toInt();
-            auto *dock = docks[index]; dock->show(); dock->raise();
+            auto *dock = docks[index]; dock->showSession();
             if (device >= 0) dock->pane->deviceBox->setCurrentIndex(device);
         });
         layoutLabel = new QLabel("布局 A · 左右对照"); statusBar()->addWidget(layoutLabel);
-        statusBar()->addPermanentWidget(new QLabel("拖动窗口标题可浮动 / 停靠；关闭停止通信，配置保留。"));
+        statusBar()->addPermanentWidget(new QLabel("独立窗口使用系统标题栏；菜单可停靠，关闭停止通信、配置保留。"));
         addSample("电源调试", "Modbus RTU", "COM3", false);
         addSample("从站模拟", "Modbus RTU", "COM4", true);
-        QTimer::singleShot(100, this, [this] { arrange(0); });
+        QTimer::singleShot(100, this, [this] { arrange(2); });
     }
     SessionDock *addPane(SessionPane *pane, const QString &id = {}) {
         auto *dock = new SessionDock(pane, this); dock->setObjectName(id.isEmpty() ? QString("session_%1").arg(nextId++) : id);
         addDockWidget(Qt::RightDockWidgetArea, dock);
         if (!docks.isEmpty()) splitDockWidget(docks.last(), dock, Qt::Horizontal);
-        docks.append(dock); pane->changed = [this] { refreshTree(); };
+        docks.append(dock); pane->changed = [this] { refreshTree(); }; dock->presentationChanged = [this] { refreshTree(); };
         connect(dock, &QDockWidget::visibilityChanged, this, [this] { refreshTree(); });
         refreshTree(); return dock;
     }
@@ -634,13 +653,13 @@ public:
     }
     void arrange(int variant) {
         layoutIndex = variant; const QStringList labels = {"布局 A · 左右对照", "布局 B · 上下对照", "布局 C · 独立浮窗"}; layoutLabel->setText(labels[variant]);
-        for (auto *dock : docks) { dock->restorePresentation(); dock->setFloating(false); addDockWidget(Qt::RightDockWidgetArea, dock); }
+        for (auto *dock : docks) { dock->attach(); dock->setFloating(false); addDockWidget(Qt::RightDockWidgetArea, dock); }
         if (variant < 2) {
             for (int i = 1; i < docks.size(); ++i) splitDockWidget(docks[i - 1], docks[i], variant == 0 ? Qt::Horizontal : Qt::Vertical);
-            QList<QDockWidget *> list; QList<int> sizes; for (auto *dock : docks) if (!dock->isHidden()) { list << dock; sizes << 600; }
+            QList<QDockWidget *> list; QList<int> sizes; for (auto *dock : docks) if (!dock->sessionHidden()) { list << dock; sizes << 600; }
             if (!list.isEmpty()) resizeDocks(list, sizes, variant == 0 ? Qt::Horizontal : Qt::Vertical);
         } else {
-            int offset = 0; for (auto *dock : docks) if (!dock->isHidden()) { dock->setFloating(true); dock->resize(780, 820); dock->move(pos() + QPoint(50 + offset, 90 + offset)); offset += 100; }
+            int offset = 0; for (auto *dock : docks) if (!dock->sessionHidden()) { dock->detach(); dock->sessionWindow->resize(780, 820); dock->sessionWindow->move(pos() + QPoint(50 + offset, 90 + offset)); offset += 100; }
         }
         resizeDocks({navigation}, {190}, Qt::Horizontal);
     }
@@ -655,7 +674,8 @@ public:
         connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept); connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
         if (dialog.exec() != QDialog::Accepted) return;
         auto *pane = new SessionPane(name->text(), protocol->currentText(), endpoint->text(), role->currentIndex() == 1);
-        auto *dock = addPane(pane); dock->show(); arrange(0);
+        auto *dock = addPane(pane); dock->detach(); dock->sessionWindow->resize(780, 820);
+        dock->sessionWindow->move(pos() + QPoint(80, 100));
         if (protocol->currentIndex()) { pane->table->horizontalHeaderItem(0)->setText("参数 / 命令"); pane->table->showColumn(2); pane->notice->setText("示例插件复用表格并显示说明列；没有实现任何 UPP 报文。"); }
     }
     void saveWorkspace() {
@@ -663,7 +683,7 @@ public:
         for (auto *dock : docks) {
             auto *p = dock->pane; QJsonArray devices;
             for (const auto &device : p->devices) { auto json = deviceJson(device); json["path"] = device.path; devices.append(json); }
-            sessions.append(QJsonObject{{"id", dock->objectName()}, {"name", p->sessionName}, {"protocol", p->protocol}, {"endpoint", p->endpoint}, {"slave", p->slave}, {"devices", devices}, {"visible", !dock->isHidden()}});
+            sessions.append(QJsonObject{{"id", dock->objectName()}, {"name", p->sessionName}, {"protocol", p->protocol}, {"endpoint", p->endpoint}, {"slave", p->slave}, {"devices", devices}, {"visible", !dock->sessionHidden()}, {"detached", dock->detached}, {"windowGeometry", QString::fromLatin1(dock->sessionWindow->saveGeometry().toBase64())}});
         }
         const bool ok = writeJson(runtimeDir() + "/workspace.json", {{"sessions", sessions}, {"layout", QString::fromLatin1(saveState().toBase64())}, {"geometry", QString::fromLatin1(saveGeometry().toBase64())}});
         statusBar()->showMessage(ok ? "原型工作区已保存到 runtime/workspace.json；未保存的参数文件不在此操作中保存。" : "工作区保存失败", 8000);
@@ -672,14 +692,16 @@ public:
         QFile file(runtimeDir() + "/workspace.json"); if (!file.open(QIODevice::ReadOnly)) { statusBar()->showMessage("请先保存原型工作区。", 5000); return; }
         const auto object = QJsonDocument::fromJson(file.readAll()).object(); if (!object.value("sessions").isArray()) return;
         for (auto *dock : docks) if (!dock->pane->canClose()) return;
-        const auto old = docks; docks.clear(); for (auto *dock : old) { removeDockWidget(dock); dock->hide(); dock->deleteLater(); }
+        const auto old = docks; docks.clear(); for (auto *dock : old) { removeDockWidget(dock); dock->hideSession(); dock->hide(); dock->deleteLater(); }
         for (auto entry : object.value("sessions").toArray()) {
             const auto s = entry.toObject(); auto *pane = new SessionPane(s["name"].toString(), s["protocol"].toString(), s["endpoint"].toString(), s["slave"].toBool());
             for (auto dv : s["devices"].toArray()) {
                 const auto data = dv.toObject(); Device d; d.name = data["deviceName"].toString(); d.id = data["deviceId"].toInt(); d.path = data["path"].toString(); QString error;
                 if (parseDevice(data, d, error)) { for (auto &p : d.parameters) if (pane->slave) p.current = p.initial; pane->addDevice(d); }
             }
-            auto *dock = addPane(pane, s["id"].toString()); dock->setVisible(s["visible"].toBool()); ++nextId;
+            auto *dock = addPane(pane, s["id"].toString());
+            if (s["detached"].toBool()) { dock->detach(); dock->sessionWindow->restoreGeometry(QByteArray::fromBase64(s["windowGeometry"].toString().toLatin1())); }
+            if (s["visible"].toBool()) dock->showSession(); else dock->hideSession(); ++nextId;
         }
         restoreGeometry(QByteArray::fromBase64(object["geometry"].toString().toLatin1())); restoreState(QByteArray::fromBase64(object["layout"].toString().toLatin1()));
         refreshTree(); statusBar()->showMessage("工作区已恢复；所有会话保持停止，请手动启动。", 8000);
@@ -701,7 +723,6 @@ QLabel#prototypeBadge { color: #80dbcc; }
 QDockWidget { font-weight: 600; }
 QDockWidget::title { background: #d7e4ef; padding: 8px; text-align: left; }
 QDockWidget > QWidget { background: #f8fafc; }
-QWidget#sessionTitle { background: #d7e4ef; }
 QTabWidget::pane { border: 1px solid #d7e1eb; background: white; }
 QTabBar::tab { padding: 9px 20px; background: #e9eff5; border-bottom: 2px solid transparent; }
 QTabBar::tab:selected { background: white; color: #087d73; border-bottom: 2px solid #139d90; }
@@ -737,6 +758,7 @@ int main(int argc, char **argv) {
             for (auto *action : emptySlave.findChildren<QPushButton *>())
                 if (action->text() == "保存运行值到文件") action->click();
             emptySlave.grab().save(output + "/05-empty-slave-save.png");
+            window.arrange(0);
             auto *master = window.docks[0]->pane; auto *slave = window.docks[1]->pane;
             master->start(); slave->start(); master->read(master->visibleRows);
             auto &p = master->devices[0].parameters[2]; p.draft = "230"; p.pending = true; p.status = "待提交"; master->refreshValues();
@@ -744,18 +766,18 @@ int main(int argc, char **argv) {
             master->pages->setCurrentIndex(1); window.grab().save(output + "/02-file-editor.png");
             master->pages->setCurrentIndex(0); master->openPlot({0, 1});
             for (int i = 0; i < 65; ++i) master->read(master->visibleRows);
-            auto *dock = window.docks[0];
-            master->togglePolling();
-            dock->fullScreenButton->click();
-            if (!dock->isFullScreen() || !master->running || !master->pollTimer.isActive()) qFatal("Fullscreen interrupted session");
-            dock->grab().save(output + "/06-fullscreen-session.png");
-            dock->fullScreenButton->click();
-            if (dock->isFloating() || dock->isFullScreen()) qFatal("Docked fullscreen restore failed");
-            dock->minimizeButton->click();
-            if (!dock->isHidden() || !master->running || !master->pollTimer.isActive() || !slave->running) qFatal("Minimize interrupted session");
-            window.grab().save(output + "/07-minimized-session.png");
+            auto *dock = window.docks[0]; master->togglePolling(); dock->detach();
+            auto *native = dock->sessionWindow;
+            const auto controls = Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint;
+            if ((native->windowFlags() & controls) != controls) qFatal("Session lacks native window controls");
+            native->showMaximized();
+            if (!native->isMaximized() || !master->running || !master->pollTimer.isActive()) qFatal("Maximize interrupted session");
+            native->showNormal(); native->showMinimized();
+            if (!native->isMinimized() || !master->running || !master->pollTimer.isActive() || !slave->running) qFatal("Minimize interrupted session");
             window.tree->itemClicked(window.tree->topLevelItem(0), 0);
-            if (dock->isHidden() || !master->running) qFatal("Navigation restore failed");
+            if (native->isMinimized() || native->isHidden() || !master->running) qFatal("Navigation restore failed");
+            dock->attach();
+            if (dock->detached || dock->isHidden() || !master->running) qFatal("Dock restore failed");
             master->togglePolling();
         });
         QTimer::singleShot(1500, &window, [&window, output] {
@@ -764,13 +786,34 @@ int main(int argc, char **argv) {
             window.arrange(2);
         });
         QTimer::singleShot(2000, &window, [&window, output, &app] {
-            window.docks[0]->grab().save(output + "/04-floating-session.png");
-            auto *dock = window.docks[0]; const auto before = dock->geometry();
-            dock->fullScreenButton->click(); dock->fullScreenButton->click();
-            if (!dock->isFloating() || dock->geometry() != before) qFatal("Floating fullscreen restore failed");
+            auto *dock = window.docks[0]; auto *native = dock->sessionWindow;
+            const auto before = native->geometry(); native->showMaximized(); native->showNormal();
+            if (!dock->detached || native->geometry() != before) qFatal("Native maximize restore failed");
+            auto *slaveDock = window.docks[1]; const int deviceCount = slaveDock->pane->devices.size();
+            slaveDock->sessionWindow->close();
+            if (slaveDock->pane->running || !slaveDock->sessionHidden() || !dock->pane->running) qFatal("Native close affected wrong session");
+            slaveDock->showSession();
+            if (slaveDock->pane->running || slaveDock->sessionHidden() || slaveDock->pane->devices.size() != deviceCount) qFatal("Closed session restore failed");
+            native->raise(); native->activateWindow();
+        });
+        QTimer::singleShot(2300, &window, [&window, output] {
+            auto *native = window.docks[0]->sessionWindow;
+            native->grab().save(output + "/09-qmainwindow-session-content.png");
+            auto *plot = window.docks[0]->pane->plots[0].data();
+            const auto controls = Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint;
+            if ((plot->windowFlags() & controls) != controls) qFatal("Plot lacks native window controls");
+            plot->showMaximized(); if (!plot->isMaximized()) qFatal("Plot maximize failed");
+            plot->showNormal(); plot->showMinimized(); if (!plot->isMinimized()) qFatal("Plot minimize failed");
+            if (!window.docks[0]->pane->running) qFatal("Plot window state interrupted session");
+            plot->showNormal(); plot->raise(); plot->activateWindow();
+        });
+        QTimer::singleShot(2600, &window, [&window, output, &app] {
+            auto *plot = window.docks[0]->pane->plots[0].data();
+            plot->grab().save(output + "/10-qmainwindow-plot-content.png");
             QFile result(output + "/capture-result.txt"); if (!result.open(QIODevice::WriteOnly)) { app.exit(3); return; }
             auto *pane = window.docks[0]->pane;
             bool ready = !pane->plots.isEmpty() && pane->plots[0] && pane->plots[0]->quick->status() == QQuickWidget::Ready;
+            plot->close(); if (!pane->running) qFatal("Plot close interrupted session");
             result.write(ready ? "QQuickWidget Ready; captures completed. No hardware used.\n" : "QML load failed.\n"); result.close();
             app.exit(ready ? 0 : 2);
         });
