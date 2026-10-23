@@ -1,0 +1,28 @@
+[1/29] Automatic MOC for target debugger_host
+[2/28] Automatic MOC for target incompatible_plugin
+[3/28] Building CXX object CMakeFiles/incompatible_plugin.dir/incompatible_plugin_autogen/mocs_compilation.cpp.obj
+[4/28] Building CXX object CMakeFiles/debugger_host.dir/src/workspace.cpp.obj
+[5/28] Building CXX object CMakeFiles/incompatible_plugin.dir/tests/incompatible_plugin.cpp.obj
+[6/28] Linking CXX static library libdebugger_host.a
+[7/28] Linking CXX shared module bin\fixtures\libincompatible_plugin.dll
+[8/28] Automatic MOC for target slave_parameter_tests
+[9/28] Automatic MOC for target parameter_file_editor_tests
+[10/28] Automatic MOC for target parameter_write_tests
+[11/28] Building CXX object CMakeFiles/slave_parameter_tests.dir/slave_parameter_tests_autogen/mocs_compilation.cpp.obj
+[12/28] Automatic MOC for target workspace_tests
+[13/28] Building CXX object CMakeFiles/parameter_file_editor_tests.dir/parameter_file_editor_tests_autogen/mocs_compilation.cpp.obj
+[14/28] Automatic MOC for target session_recovery_tests
+[15/28] Building CXX object CMakeFiles/parameter_write_tests.dir/parameter_write_tests_autogen/mocs_compilation.cpp.obj
+[16/28] Building CXX object CMakeFiles/slave_parameter_tests.dir/tests/slave_parameter_tests.cpp.obj
+[17/28] Building CXX object CMakeFiles/session_recovery_tests.dir/session_recovery_tests_autogen/mocs_compilation.cpp.obj
+[18/28] Building CXX object CMakeFiles/parameter_file_editor_tests.dir/tests/parameter_file_editor_tests.cpp.obj
+[19/28] Building CXX object CMakeFiles/workspace_tests.dir/workspace_tests_autogen/mocs_compilation.cpp.obj
+[20/28] Building CXX object CMakeFiles/parameter_write_tests.dir/tests/parameter_write_tests.cpp.obj
+[21/28] Linking CXX executable bin\workspace_layout_tests.exe
+[22/28] Linking CXX executable bin\slave_parameter_tests.exe
+[23/28] Linking CXX executable bin\parameter_file_editor_tests.exe
+[24/28] Linking CXX executable bin\parameter_write_tests.exe
+[25/28] Building CXX object CMakeFiles/workspace_tests.dir/tests/workspace_tests.cpp.obj
+[26/28] Linking CXX executable bin\workspace_tests.exe
+[27/28] Building CXX object CMakeFiles/session_recovery_tests.dir/tests/session_recovery_tests.cpp.obj
+[28/28] Linking CXX executable bin\session_recovery_tests.exe

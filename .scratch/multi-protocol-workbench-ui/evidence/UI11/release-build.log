@@ -1,0 +1,74 @@
+[1/74] Automatic MOC for target serial_plugin
+[2/74] Automatic MOC for target debugger_host
+[3/74] Automatic MOC for target debugger_widgets
+[4/74] Automatic RCC for src/trends.qrc
+[5/74] Automatic MOC for target incompatible_plugin
+[6/74] Building CXX object CMakeFiles/debugger_host.dir/debugger_host_autogen/mocs_compilation.cpp.obj
+[7/74] Building CXX object CMakeFiles/debugger_widgets.dir/debugger_widgets_autogen/mocs_compilation.cpp.obj
+[8/74] Building CXX object CMakeFiles/debugger_widgets.dir/src/parameter_table.cpp.obj
+[9/74] Building CXX object CMakeFiles/debugger_widgets.dir/src/confirmation.cpp.obj
+[10/74] Building CXX object CMakeFiles/debugger_widgets.dir/debugger_widgets_autogen/UVLADIE3JM/qrc_trends.cpp.obj
+[11/74] Building CXX object CMakeFiles/debugger_widgets.dir/src/file_editor.cpp.obj
+[12/74] Building CXX object CMakeFiles/debugger_host.dir/src/session_recovery.cpp.obj
+[13/74] Building CXX object CMakeFiles/debugger_widgets.dir/src/trend_window.cpp.obj
+[14/74] Linking CXX static library libdebugger_widgets.a
+[15/74] Building CXX object CMakeFiles/debugger_host.dir/src/workspace.cpp.obj
+[16/74] Automatic MOC for target modbus_plugin
+[17/74] Building CXX object CMakeFiles/debugger_host.dir/src/session_window.cpp.obj
+[18/74] Building CXX object CMakeFiles/debugger_host.dir/src/workbench.cpp.obj
+[19/74] Building CXX object CMakeFiles/debugger_host.dir/src/host.cpp.obj
+[20/74] Building CXX object CMakeFiles/debugger_host.dir/src/trace_query.cpp.obj
+[21/74] Building CXX object CMakeFiles/debugger_host.dir/src/session_records.cpp.obj
+[22/74] Building CXX object CMakeFiles/debugger_host.dir/src/trace_panel.cpp.obj
+[23/74] Building CXX object CMakeFiles/debugger_host.dir/src/trace_codec.cpp.obj
+[24/74] Building CXX object CMakeFiles/debugger_host.dir/src/archive_format.cpp.obj
+[25/74] Building CXX object CMakeFiles/debugger_host.dir/src/recording.cpp.obj
+[26/74] Building CXX object CMakeFiles/modbus_plugin.dir/modbus_plugin_autogen/mocs_compilation.cpp.obj
+[27/74] Building CXX object CMakeFiles/debugger_host.dir/src/archive_query.cpp.obj
+[28/74] Building CXX object CMakeFiles/debugger_host.dir/src/recording_panel.cpp.obj
+[29/74] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/modbus.cpp.obj
+[30/74] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/master_trends.cpp.obj
+[31/74] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/parameter_definition.cpp.obj
+[32/74] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/parameter_read_scope.cpp.obj
+[33/74] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/parameter_file_editor.cpp.obj
+[34/74] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/master_parameters.cpp.obj
+[35/74] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_file_editor.cpp.obj
+[36/74] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/rtu_session.cpp.obj
+[37/74] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/write_pdu.cpp.obj
+[38/74] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_parameters.cpp.obj
+[39/74] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/rtu_slave.cpp.obj
+[40/74] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_view.cpp.obj
+[41/74] Building CXX object CMakeFiles/serial_plugin.dir/serial_plugin_autogen/mocs_compilation.cpp.obj
+[42/74] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_edit.cpp.obj
+[43/74] Building CXX object CMakeFiles/incompatible_plugin.dir/incompatible_plugin_autogen/mocs_compilation.cpp.obj
+[44/74] Building CXX object CMakeFiles/serial_plugin.dir/plugins/serial.cpp.obj
+[45/74] Linking CXX static library libdebugger_host.a
+[46/74] Linking CXX shared module bin\plugins\libserial_plugin.dll
+[47/74] Building CXX object CMakeFiles/incompatible_plugin.dir/tests/incompatible_plugin.cpp.obj
+[48/74] Linking CXX shared module bin\fixtures\libincompatible_plugin.dll
+[49/74] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_edit_view.cpp.obj
+[50/74] Linking CXX shared module bin\plugins\libmodbus_plugin.dll
+[51/74] Automatic MOC for target workspace_layout_tests
+[52/74] Automatic MOC for target slave_parameter_tests
+[53/74] Automatic MOC for target parameter_file_editor_tests
+[54/74] Automatic MOC for target parameter_write_tests
+[55/74] Automatic MOC for target workspace_tests
+[56/74] Building CXX object CMakeFiles/workspace_layout_tests.dir/workspace_layout_tests_autogen/mocs_compilation.cpp.obj
+[57/74] Building CXX object CMakeFiles/slave_parameter_tests.dir/slave_parameter_tests_autogen/mocs_compilation.cpp.obj
+[58/74] Automatic MOC for target session_recovery_tests
+[59/74] Building CXX object CMakeFiles/parameter_file_editor_tests.dir/parameter_file_editor_tests_autogen/mocs_compilation.cpp.obj
+[60/74] Building CXX object CMakeFiles/workspace_layout_tests.dir/tests/workspace_layout_tests.cpp.obj
+[61/74] Building CXX object CMakeFiles/parameter_write_tests.dir/parameter_write_tests_autogen/mocs_compilation.cpp.obj
+[62/74] Building CXX object CMakeFiles/slave_parameter_tests.dir/tests/slave_parameter_tests.cpp.obj
+[63/74] Building CXX object CMakeFiles/parameter_file_editor_tests.dir/tests/parameter_file_editor_tests.cpp.obj
+[64/74] Building CXX object CMakeFiles/session_recovery_tests.dir/session_recovery_tests_autogen/mocs_compilation.cpp.obj
+[65/74] Building CXX object CMakeFiles/workspace_tests.dir/workspace_tests_autogen/mocs_compilation.cpp.obj
+[66/74] Building CXX object CMakeFiles/parameter_write_tests.dir/tests/parameter_write_tests.cpp.obj
+[67/74] Linking CXX executable bin\workspace_layout_tests.exe
+[68/74] Linking CXX executable bin\slave_parameter_tests.exe
+[69/74] Linking CXX executable bin\parameter_file_editor_tests.exe
+[70/74] Linking CXX executable bin\parameter_write_tests.exe
+[71/74] Building CXX object CMakeFiles/workspace_tests.dir/tests/workspace_tests.cpp.obj
+[72/74] Linking CXX executable bin\workspace_tests.exe
+[73/74] Building CXX object CMakeFiles/session_recovery_tests.dir/tests/session_recovery_tests.cpp.obj
+[74/74] Linking CXX executable bin\session_recovery_tests.exe
