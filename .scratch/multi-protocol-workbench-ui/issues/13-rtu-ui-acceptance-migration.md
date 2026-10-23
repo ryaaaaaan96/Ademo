@@ -43,3 +43,7 @@ Blocked by: [UI09](09-window-trace-query-export.md)、[UI10](10-qml-parameter-tr
 ### 2026-10-23：集成目录双配置自动验收
 
 实施提交 `36daaba` 通过 `0040f55` 合入集成分支。主目录 Debug/Release 全目标配套构建后，完整串行 Windows CTest 各22/22通过，Qt Test各355通过、0失败/跳过；详见 [集成记录](../evidence/UI13/integration.md)。保留旧实例与 Release DLL占用的首次失败/恢复证据。软件迁移/自动验收完成；整体审查发现的问题仍待统一修复和最终复验，用户正式产品操作确认仍待完成，以上待办不提前勾选。旧13–19状态保持。
+
+### 2026-10-23：整体审查问题集中修复
+
+Standards 审查确认的参数加载模态销毁后刷新（P1）和来源选择器未登记 busy（P2）已在独立分支 `codex/ui-review-fixes` 集中修复；关联审计另复现并修复待提交确认内重入配置的第二层确认。三个公开 Qt 行为回归均先红后绿，Debug/Release Windows 相关四套各 54 项通过、无失败或跳过，见 [审查修复验收](../evidence/UI13/review-fixes/acceptance.md)。提交前已同步集成 `17dcd7e`。主集成后整体复审和全量复测由主代理继续记录，用户正式操作确认仍保留待办；旧13–19未启动。

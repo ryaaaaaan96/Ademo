@@ -103,10 +103,13 @@ public:
             QPointer<MasterParameters> alive(this);
             QPointer<QFileDialog> dialog = new QFileDialog(this, QStringLiteral("选择参数定义（选择不应用）"), path_->text(), "JSON (*.json)");
             dialog->setFileMode(QFileDialog::ExistingFile);
+            ++modalDepth_;
             const int result = dialog->exec();
             const auto path = dialog && result == QDialog::Accepted ? dialog->selectedFiles().value(0) : QString();
             if (dialog) delete dialog;
-            if (alive && !path.isEmpty()) path_->setText(path);
+            if (!alive) return;
+            --modalDepth_;
+            if (!path.isEmpty()) path_->setText(path);
         });
         connect(load_, &QPushButton::clicked, this, [this] { loadFile(); });
         auto *readControls = new QHBoxLayout;
@@ -235,7 +238,7 @@ public:
         auto *timer = new QTimer(this); timer->setInterval(50);
         connect(timer, &QTimer::timeout, this, [this] { refresh(); }); timer->start();
         if (access_.registerViewState) access_.registerViewState(this,
-            [this] { return LocalState{false, hasPending(), loading_, {}}; }, [this] { return resolvePending(); });
+            [this] { return LocalState{false, hasPending(), loading_ || modalDepth_ > 0, {}}; }, [this] { return resolvePending(); });
         fileEditor_ = new FileEditorPage(access_, createParameterFileEditor(nullptr),
             [this](const QString &target, const QJsonObject &document, const QString &path) {
                 const auto result = parseParameterDefinition(document);
@@ -327,12 +330,16 @@ private:
     }
     bool resolvePending(const QString &device = {}) {
         if (!hasPending(device)) return true;
+        const auto lifetime = access_.lifetime;
         const auto revision = pendingRevision_;
         QPointer<MasterParameters> alive(this);
+        ++modalDepth_;
         const auto decision = showConfirmation(this, QMessageBox::Warning, QStringLiteral("待提交设备值"),
             QStringLiteral("存在尚未确认的待提交值。放弃只清除界面草稿，不撤销已发送的写入，也不删除通信结果。"),
             QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Cancel);
-        if (!alive || decision != QMessageBox::Discard || revision != pendingRevision_) return false;
+        if (!alive) return false;
+        --modalDepth_;
+        if (decision != QMessageBox::Discard || revision != pendingRevision_) return false;
         for (auto &row : rows_) if (device.isEmpty() || QString::number(row.unit) == device) row.pending.reset();
         refresh(); return true;
     }
@@ -385,11 +392,13 @@ private:
                                                         : parseParameterDefinition(value);
             if (!result.error.isEmpty()) self->status_->setText(result.error);
             else self->applyDefinition(unit, path, result.parameters);
-            self->refresh();
+            if (self) self->refresh();
         });
         if (!accepted) { loading_ = false; refresh(); status_->setText(QStringLiteral("后台文件任务繁忙，请稍后重试；原参数保留。")); }
     }
     bool applyDefinition(int unit, const QString &path, const QList<ParameterDefinition> &parameters) {
+        const auto lifetime = access_.lifetime;
+        const auto configure = access_.configure;
         QList<Row> replacement;
         for (const auto &row : rows_) if (row.unit != unit) replacement.append(row);
         for (const auto &p : parameters) {
@@ -402,7 +411,7 @@ private:
         config["parameterRows"] = stored;
         auto sources = config.value("parameterFiles").toObject(); sources[QString::number(unit)] = path; config["parameterFiles"] = sources;
         QPointer<MasterParameters> alive(this);
-        const bool configured = access_.configure && access_.configure(config);
+        const bool configured = configure && configure(config);
         if (!alive) return false;
         if (!configured) {
             status_->setText(QStringLiteral("未应用：请先停止会话并处理未保存内容；原参数保留。")); return false;
@@ -525,6 +534,7 @@ private:
     quint64 deviceSelectionRevision_ = 0;
     QString selectedDevice_;
     bool loading_ = false;
+    int modalDepth_ = 0;
     QComboBox *device_, *area_, *group_;
     QLineEdit *path_;
     QSpinBox *unit_, *address_, *count_;

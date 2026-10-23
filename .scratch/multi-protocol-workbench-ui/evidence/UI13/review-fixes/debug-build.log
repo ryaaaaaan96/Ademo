@@ -1,0 +1,15 @@
+[1/16] Automatic MOC for target modbus_plugin
+[2/15] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/master_parameters.cpp.obj
+[3/15] Linking CXX shared module bin\plugins\libmodbus_plugin.dll
+[4/15] Automatic MOC for target workspace_layout_tests
+[5/15] Automatic MOC for target parameter_write_tests
+[6/15] Automatic MOC for target parameter_file_editor_tests
+[7/15] Building CXX object CMakeFiles/workspace_layout_tests.dir/workspace_layout_tests_autogen/mocs_compilation.cpp.obj
+[8/15] Building CXX object CMakeFiles/parameter_file_editor_tests.dir/parameter_file_editor_tests_autogen/mocs_compilation.cpp.obj
+[9/15] Building CXX object CMakeFiles/parameter_write_tests.dir/parameter_write_tests_autogen/mocs_compilation.cpp.obj
+[10/15] Building CXX object CMakeFiles/workspace_layout_tests.dir/tests/workspace_layout_tests.cpp.obj
+[11/15] Building CXX object CMakeFiles/parameter_write_tests.dir/tests/parameter_write_tests.cpp.obj
+[12/15] Building CXX object CMakeFiles/parameter_file_editor_tests.dir/tests/parameter_file_editor_tests.cpp.obj
+[13/15] Linking CXX executable bin\workspace_layout_tests.exe
+[14/15] Linking CXX executable bin\parameter_write_tests.exe
+[15/15] Linking CXX executable bin\parameter_file_editor_tests.exe

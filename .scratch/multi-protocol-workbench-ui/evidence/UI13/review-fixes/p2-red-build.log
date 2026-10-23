@@ -1,0 +1,3 @@
+[1/4] Automatic MOC for target parameter_definition_tests
+[2/3] Building CXX object CMakeFiles/parameter_definition_tests.dir/tests/parameter_definition_tests.cpp.obj
+[3/3] Linking CXX executable bin\parameter_definition_tests.exe
