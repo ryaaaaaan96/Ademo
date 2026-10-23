@@ -1,0 +1,83 @@
+[HANDLER_OUTPUT] 
+Test project C:/Users/81966/Documents/Ademo/build/worktrees/ui07/build/qt-llvm-release
+
+      Start  1: parameter_file_edit_save_apply
+ 1/17 Test  #1: parameter_file_edit_save_apply ...   Passed    6.56 sec
+      Start  2: parameter_group_polling
+ 2/17 Test  #2: parameter_group_polling ..........   Passed    3.70 sec
+      Start  3: window_trace_workflow
+ 3/17 Test  #3: window_trace_workflow ............   Passed    7.19 sec
+      Start  4: parameter_pending_write
+ 4/17 Test  #4: parameter_pending_write ..........   Passed    4.14 sec
+      Start  5: parameter_definition_read
+ 5/17 Test  #5: parameter_definition_read ........   Passed    3.41 sec
+      Start  6: parameter_window_read
+ 6/17 Test  #6: parameter_window_read ............   Passed    2.72 sec
+      Start  7: parallel_sessions_recovery
+ 7/17 Test  #7: parallel_sessions_recovery .......   Passed    4.67 sec
+      Start  8: slave_edit_import_save
+ 8/17 Test  #8: slave_edit_import_save ...........   Passed    3.80 sec
+      Start  9: session_lifecycle
+ 9/17 Test  #9: session_lifecycle ................   Passed    4.25 sec
+      Start 10: rtu_first_read
+10/17 Test #10: rtu_first_read ...................   Passed    4.48 sec
+      Start 11: rtu_polling
+11/17 Test #11: rtu_polling ......................   Passed    3.13 sec
+      Start 12: rtu_explicit_write
+12/17 Test #12: rtu_explicit_write ...............   Passed    5.28 sec
+      Start 13: rtu_slave_json_read
+13/17 Test #13: rtu_slave_json_read ..............   Passed    3.41 sec
+      Start 14: rtu_slave_write
+14/17 Test #14: rtu_slave_write ..................   Passed    3.44 sec
+      Start 15: trace_query_export
+15/17 Test #15: trace_query_export ...............   Passed    2.98 sec
+      Start 16: workspace_roundtrip
+16/17 Test #16: workspace_roundtrip ..............***Exception: SegFault  4.11 sec
+A crash occurred in C:\Users\81966\Documents\Ademo\build\worktrees\ui07\build\qt-llvm-release\bin\workspace_tests.exe.
+While testing protocolSwitchGuardCanDestroyWindow
+Function time: 147ms Total time: 2478ms
+
+Exception address: 0x00007FFDC507DD39
+Exception code   : 0xc0000005
+Nearby symbol    : ZN7QObject11qt_metacallEN11QMetaObject4CallEiPPv
+
+Stack:
+#  1: ZN5QTest12CrashHandler19WindowsFaultHandlerC2Ev() - 0x00007FFDFC6630E0
+#  2: UnhandledExceptionFilter() - 0x00007FFE74DCF2F0
+#  3: strncpy() - 0x00007FFE77AC8110
+#  4: _C_specific_handler() - 0x00007FFE77A84B00
+#  5: _chkstk() - 0x00007FFE77AC6410
+#  6: RtlWow64GetCurrentMachine() - 0x00007FFE77A23A10
+#  7: KiUserExceptionDispatcher() - 0x00007FFE77AC5DC0
+#  8: ZN7QObject11qt_metacallEN11QMetaObject4CallEiPPv() - 0x00007FFDC507BCE0
+#  9: ZN9QComboBoxC1ER16QComboBoxPrivateP7QWidget() - 0x00007FFDC5B47140
+# 10: ZNK9QComboBox5countEv() - 0x00007FFDC5B42CC0
+# 11: ZN9QComboBox15setCurrentIndexEi() - 0x00007FFDC5B42390
+# 12: Unable to obtain symbol
+# 13: ZN18QMetaMethodInvoker10invokeImplE11QMetaMethodPvN2Qt14ConnectionTypeExPKPKvPKPKcPKPKN9QtPrivate18QMetaTypeInterfaceE() - 0x00007FFDC5029E30
+# 14: ZN11QMetaMethod10invokeImplES_PvN2Qt14ConnectionTypeExPKPKvPKPKcPKPKN9QtPrivate18QMetaTypeInterfaceE() - 0x00007FFDC5030160
+# 15: ZN5QTest16qtest_qParseArgsEiPPcb() - 0x00007FFDFC6367A0
+# 16: ZN5QTest16qtest_qParseArgsEiPPcb() - 0x00007FFDFC6367A0
+# 17: ZN5QTest16qtest_qParseArgsEiPPcb() - 0x00007FFDFC6367A0
+# 18: ZN5QTest15toPrettyUnicodeE11QStringView() - 0x00007FFDFC6386E0
+# 19: ZN5QTest4qRunEv() - 0x00007FFDFC638FC0
+# 20: ZN5QTest5qExecEP7QObjectiPPc() - 0x00007FFDFC638E00
+# 21: Unable to obtain symbol
+# 22: Unable to obtain symbol
+# 23: Unable to obtain symbol
+# 24: BaseThreadInitThunk() - 0x00007FFE76D4DD90
+# 25: RtlUserThreadStart() - 0x00007FFE779DEE20
+
+
+      Start 17: bounded_disk_recording
+17/17 Test #17: bounded_disk_recording ...........   Passed    7.99 sec
+
+94% tests passed, 1 tests failed out of 17
+
+Total Test time (real) =  75.31 sec
+
+The following tests FAILED:
+	 16 - workspace_roundtrip (SEGFAULT)
+[ERROR_MESSAGE] 
+Errors while running CTest
+
