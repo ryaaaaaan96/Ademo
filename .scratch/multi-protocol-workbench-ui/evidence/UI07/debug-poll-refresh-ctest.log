@@ -1,0 +1,16 @@
+[HANDLER_OUTPUT] 
+Test project C:/Users/81966/Documents/Ademo/build/worktrees/ui07/build/qt-llvm-debug
+
+    Start 2: parameter_group_polling
+1/1 Test #2: parameter_group_polling ..........***Failed    7.22 sec
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   7.24 sec
+
+The following tests FAILED:
+	  2 - parameter_group_polling (Failed)
+[ERROR_MESSAGE] 
+Errors while running CTest
+

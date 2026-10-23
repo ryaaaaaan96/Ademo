@@ -1,0 +1,8 @@
+********* Start testing of ParameterFileEditorTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : ParameterFileEditorTests::initTestCase()
+FAIL!  : ParameterFileEditorTests::publicViewAccessKeepsPluginCodeAliveUntilCallbacksUnwind() '!observed.expired()' returned FALSE. (公开视图访问对象须在同步应用回调展开期间保留DLL)
+C:/Users/81966/Documents/Ademo/build/worktrees/ui07/tests/parameter_file_editor_tests.cpp(237) : failure location
+PASS   : ParameterFileEditorTests::cleanupTestCase()
+Totals: 2 passed, 1 failed, 0 skipped, 0 blacklisted, 2184ms
+********* Finished testing of ParameterFileEditorTests *********

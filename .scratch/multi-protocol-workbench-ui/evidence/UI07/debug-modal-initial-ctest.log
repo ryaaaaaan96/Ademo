@@ -1,0 +1,32 @@
+[HANDLER_OUTPUT] 
+Test project C:/Users/81966/Documents/Ademo/build/worktrees/ui07/build/qt-llvm-debug
+
+    Start  1: parameter_file_edit_save_apply
+1/9 Test  #1: parameter_file_edit_save_apply ...   Passed    8.03 sec
+    Start  2: parameter_group_polling
+2/9 Test  #2: parameter_group_polling ..........   Passed    4.00 sec
+    Start  3: window_trace_workflow
+3/9 Test  #3: window_trace_workflow ............   Passed    5.19 sec
+    Start  4: parameter_pending_write
+4/9 Test  #4: parameter_pending_write ..........   Passed    4.18 sec
+    Start  5: parameter_definition_read
+5/9 Test  #5: parameter_definition_read ........   Passed    3.91 sec
+    Start  6: parameter_window_read
+6/9 Test  #6: parameter_window_read ............***Failed    2.02 sec
+
+    Start  7: parallel_sessions_recovery
+7/9 Test  #7: parallel_sessions_recovery .......   Passed    5.23 sec
+    Start  8: slave_edit_import_save
+8/9 Test  #8: slave_edit_import_save ...........   Passed    3.94 sec
+    Start 16: workspace_roundtrip
+9/9 Test #16: workspace_roundtrip ..............   Passed    5.13 sec
+
+89% tests passed, 1 tests failed out of 9
+
+Total Test time (real) =  41.66 sec
+
+The following tests FAILED:
+	  6 - parameter_window_read (Failed)
+[ERROR_MESSAGE] 
+Errors while running CTest
+

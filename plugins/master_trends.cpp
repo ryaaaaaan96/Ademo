@@ -10,7 +10,11 @@ QWidget *openParameterTrends(const SessionAccess &access, const QList<ModbusTren
     auto *owner = view; while (owner->parentWidget()) owner = owner->parentWidget();
     auto *window = new TrendWindow(definitions, owner);
     window->setWindowTitle(QStringLiteral("设备 %1 · 参数趋势").arg(parameters.first().unit));
-    QObject::connect(view, &QObject::destroyed, window, [window] { delete window; });
+    QObject::connect(view, &QObject::destroyed, window, [window, lease = access.lifetime] {
+        // 窗口销毁会释放计时器/适配器闭包；返回插件栈前仍持有 SDK12 租约。
+        const auto lifetime = lease;
+        delete window;
+    });
     auto cursor = std::make_shared<quint64>(0);
     QObject::connect(window, &TrendWindow::cleared, window, [access, cursor] {
         if (access.messages) for (const auto &message : access.messages(0)) *cursor = qMax(*cursor, message.id);

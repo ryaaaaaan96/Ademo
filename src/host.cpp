@@ -27,6 +27,13 @@ struct ViewJob {
     std::function<void(QJsonObject)> completion;
     ~ViewJob() { localJobSlots.release(); }
 };
+struct ViewCodeLease {
+    std::shared_ptr<PluginCatalog> catalog;
+    ~ViewCodeLease() {
+        // 最后一个局部租约可能在 DLL 回调尾部释放，必须让其返回指令也先退出 DLL。
+        QTimer::singleShot(0, QCoreApplication::instance(), [keep = std::move(catalog)] {});
+    }
+};
 }
 PluginCatalog::~PluginCatalog()
 {
@@ -491,6 +498,7 @@ std::optional<TraceRecord> DebugSession::trace(quint64 id) const
 SessionAccess DebugSession::access()
 {
     QPointer<DebugSession> self(this);
+    auto lifetime = std::make_shared<ViewCodeLease>(); lifetime->catalog = catalog_;
     return {[self](QString action, QJsonObject parameters) { return self ? self->submit(action, parameters) : 0; },
             [self](quint64 id) { return self ? self->operation(id) : OperationSnapshot{}; },
             [self](quint64 id) { return self ? self->traces(id) : QList<TraceRecord>{}; },
@@ -522,7 +530,7 @@ SessionAccess DebugSession::access()
                 if (!registered) QObject::connect(owner, &QObject::destroyed, self, [self, owner] {
                     if (self) self->viewStates_.remove(owner);
                 });
-            }};
+            }, std::move(lifetime)};
 }
 bool DebugSession::configure(QJsonObject protocol)
 {

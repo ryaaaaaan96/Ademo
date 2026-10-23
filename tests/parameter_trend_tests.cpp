@@ -252,6 +252,21 @@ private slots:
         QVERIFY(!workbench->isSessionFloating(index)); QCOMPARE(qml->status(), QQuickWidget::Ready); QVERIFY(!qml->grabFramebuffer().isNull());
         workbench.reset(); QVERIFY(window.isNull()); QVERIFY(qml.isNull());
     }
+    void plotDestructionCanReleaseTheLastCatalogLease() {
+        auto ownedCatalog = std::make_shared<PluginCatalog>();
+        ownedCatalog->discover(QCoreApplication::applicationDirPath() + "/plugins");
+        std::weak_ptr<PluginCatalog> released = ownedCatalog;
+        auto workbench = std::make_unique<Workbench>(ownedCatalog); workbench->resize(1300, 900); workbench->show();
+        const int index = workbench->addSession(configuration(), QStringLiteral("最后租约")); workbench->selectSession(index);
+        auto *view = workbench->parameterView(index); accessible<QTableWidget>(*view, QStringLiteral("参数表"))->selectAll();
+        QTest::mouseClick(button(*view, QStringLiteral("绘制选中参数")), Qt::LeftButton); QTRY_VERIFY(trendWindow());
+        QPointer<QMainWindow> window = trendWindow();
+        QTRY_COMPARE(window->findChild<QQuickWidget *>()->status(), QQuickWidget::Ready);
+        ownedCatalog.reset(); catalog.reset();
+        workbench.reset(); QVERIFY(window.isNull()); QTRY_VERIFY(released.expired());
+        catalog = std::make_shared<PluginCatalog>(); catalog->discover(QCoreApplication::applicationDirPath() + "/plugins");
+        QVERIFY(catalog->protocol("modbus.rtu"));
+    }
 };
 QTEST_MAIN(ParameterTrendTests)
 #include "parameter_trend_tests.moc"
