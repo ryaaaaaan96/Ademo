@@ -45,13 +45,14 @@ void changeCell(QTableWidget &table, int row, const QString &header, const QStri
     }
     QFAIL("必须能够通过真实单元格编辑器输入");
 }
-void answerNext(QMessageBox::StandardButton choice) {
+std::shared_ptr<bool> answerNext(QMessageBox::StandardButton choice) {
+    auto answered=std::make_shared<bool>(false);
     auto *timer = new QTimer(qApp); timer->setInterval(5);
-    QObject::connect(timer, &QTimer::timeout, timer, [timer, choice] {
+    QObject::connect(timer, &QTimer::timeout, timer, [timer, choice, answered] {
         if (auto *box = qobject_cast<QMessageBox *>(QApplication::activeModalWidget())) {
-            box->button(choice)->click(); timer->stop(); timer->deleteLater();
+            *answered=true; box->button(choice)->click(); timer->stop(); timer->deleteLater();
         }
-    }); timer->start();
+    }); timer->start(); return answered;
 }
 }
 class SlaveParameterTests : public QObject {
@@ -83,9 +84,12 @@ private slots:
         QTRY_COMPARE(holding(h.session), 42); QCOMPARE(holding(h.session,18),111); QVERIFY(h.wire.writes.isEmpty());
         changeCell(*table,0,QStringLiteral("值"),"65536");
         QTRY_VERIFY(accessible<QLabel>(*view,QStringLiteral("模拟值操作状态"))->text().contains("0..65535")); QCOMPARE(holding(h.session),42);
+        QTRY_COMPARE(table->item(0,3)->text(),QString("42"));
         changeCell(*table,0,QStringLiteral("值"),"99",Qt::Key_Escape); QCOMPARE(holding(h.session),42);
         h.receive(QByteArray::fromHex("1103006b00037687")); h.advance(1750);
         QCOMPARE(h.wire.writes.last().second.first(9).toHex(), "110306002a00000064"); h.complete();
+        const auto evidence=qEnvironmentVariable("DEBUGGER_EVIDENCE_DIR");
+        if(!evidence.isEmpty()) { QDir().mkpath(evidence); QVERIFY(view->grab().save(evidence+"/slave-runtime-parameters.png")); }
         h.session.stop(); QCoreApplication::processEvents();
         changeCell(*table, 0, QStringLiteral("值"), "43"); QTRY_COMPARE(holding(h.session), 43);
         QVERIFY(device(h.session)["dirty"].toBool());
@@ -103,6 +107,8 @@ private slots:
         button(*view,QStringLiteral("保存文件"))->click();
         QTRY_VERIFY(QFile::exists(path));
         auto *apply = button(*view,QStringLiteral("应用到目标设备")); QTRY_VERIFY(apply->isEnabled());
+        const auto evidence=qEnvironmentVariable("DEBUGGER_EVIDENCE_DIR");
+        if(!evidence.isEmpty()) { QDir().mkpath(evidence); QVERIFY(view->grab().save(evidence+"/slave-file-editor.png")); }
         QCOMPARE(holding(h.session),42); QVERIFY(h.wire.writes.isEmpty());
         answerNext(QMessageBox::Cancel); QTest::mouseClick(apply,Qt::LeftButton); QCOMPARE(holding(h.session),42);
         answerNext(QMessageBox::Discard); QTest::mouseClick(apply,Qt::LeftButton); QTRY_COMPARE(holding(h.session),777);
@@ -135,8 +141,8 @@ private slots:
         auto *view=window.parameterView(index); QPointer<ParameterView> old(view);
         QComboBox *role=nullptr;
         for(auto *combo:window.sessionView(index)->findChildren<QComboBox *>()) if(combo->accessibleName()==QStringLiteral("会话角色")) role=combo;
-        QVERIFY(role); answerNext(QMessageBox::Cancel); role->setCurrentIndex(role->findData("master"));
-        QTest::qWait(50); QCOMPARE(role->currentData().toString(),QString("slave")); QCOMPARE(window.parameterView(index),view); QCOMPARE(holding(*session),42);
+        QVERIFY(role); const auto cancelled=answerNext(QMessageBox::Cancel); role->setCurrentIndex(role->findData("master"));
+        QTRY_VERIFY(*cancelled); QTRY_COMPARE(role->currentData().toString(),QString("slave")); QCOMPARE(window.parameterView(index),view); QCOMPARE(holding(*session),42);
         answerNext(QMessageBox::Discard); role->setCurrentIndex(role->findData("master")); QTRY_VERIFY(old.isNull());
         QCOMPARE(window.sessionConfiguration(index).role,QString("master")); QVERIFY(!session->hasUnsavedOrBusy()); QCOMPARE(session->state(),SessionState::Stopped);
         QVERIFY(window.parameterView(index));

@@ -1,0 +1,30 @@
+Test project C:/Users/81966/Documents/Ademo/build/worktrees/ui08/build/qt-llvm-release
+    Start  1: slave_parameter_workflow
+1/9 Test  #1: slave_parameter_workflow .........   Passed    5.17 sec
+    Start  3: parameter_file_edit_save_apply
+2/9 Test  #3: parameter_file_edit_save_apply ...   Passed    3.25 sec
+    Start  4: parameter_group_polling
+3/9 Test  #4: parameter_group_polling ..........   Passed    2.68 sec
+    Start  6: parameter_pending_write
+4/9 Test  #6: parameter_pending_write ..........   Passed    3.63 sec
+    Start  9: parallel_sessions_recovery
+5/9 Test  #9: parallel_sessions_recovery .......   Passed    5.00 sec
+    Start 10: slave_edit_import_save
+6/9 Test #10: slave_edit_import_save ...........   Passed    2.87 sec
+    Start 15: rtu_slave_json_read
+7/9 Test #15: rtu_slave_json_read ..............***Timeout  30.04 sec
+
+    Start 16: rtu_slave_write
+8/9 Test #16: rtu_slave_write ..................***Failed   18.41 sec
+
+    Start 18: workspace_roundtrip
+9/9 Test #18: workspace_roundtrip ..............   Passed    5.79 sec
+
+78% tests passed, 2 tests failed out of 9
+
+Total Test time (real) =  76.86 sec
+
+The following tests FAILED:
+	 15 - rtu_slave_json_read (Timeout)
+	 16 - rtu_slave_write (Failed)
+Errors while running CTest

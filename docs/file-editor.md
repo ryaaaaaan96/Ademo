@@ -8,6 +8,10 @@ UI07 提供 `debugger_widgets` 中的 `FileEditorPage` 和 `FileDocumentEditor`�
 
 公共组件以独立 owner 注册 `registerViewState`，复用四任务上限的 `background`，读取/序列化文件上限 1 MiB；任务仅捕获值，GUI 完成回调检查 QPointer。`QSaveFile` 保证写入失败不截断原文件，编辑 revision 确保迟到保存不清除新修改。保存、打开、新建、另存与应用是独立动作，覆盖文件有确认提示。后续 UI08/UI12 可在插件中复用相同组件，提供各自格式的 editor 与 apply；不得把协议字段下沉到宿主。
 
+UI08 增加可选 `FileEditorPage::Options`：默认 `maximumBytes` 仍为 1 MiB，从站明确使用原文件能力的 4 MiB。`canSave(path)` 由插件检查目标文件与其他设备绑定及自身文件任务的冲突，覆盖确认返回后再次检查。公共页只展示返回的拒绝原因，不解释设备或协议。保存使用紧凑 JSON，保留所有字段值。`isBusy()` 供所在插件协调运行值文件操作；文件草稿仍由页面自身守卫管理。
+
+通用 `ParameterTable::onEdit` 保留主站逐键维护待提交值的行为；UI08 增加 `onCommit`，只在完整编辑提交后排队触发，Escape 不触发。从站使用后者校验完整值后更新模拟数据，避免无效输入的中间数字先变为运行值。程序刷新表格不会调用该提交入口。
+
 文件页的选择器、覆盖确认和草稿确认也计入 busy，已发起的后台工作区读取不能在这些模态阶段替换页面。每次退出模态循环先检查 QPointer，再恢复状态；不使用引用页面成员的局部回滚对象。对话框使用堆对象并用 QPointer 清理，以允许父视图在模态循环中销毁。
 
 需要确认框的插件可复用 `debugger/confirmation.h` 的 `showConfirmation`（链接 debugger_widgets）。调用方仍须先持有 lifetime、返回后检查自身存活，并注册适当 busy 状态；此函数不管理会话。Qt 下拉框信号可能继续访问 sender，应先退出信号发送栈再进入可能销毁整个视图的守卫。主站原生设备选择先恢复旧显示并排队选择；公开 `ParameterView::selectDevice` 仍同步执行守卫，成功后无信号更新下拉框，保留 bool 成功/取消契约。

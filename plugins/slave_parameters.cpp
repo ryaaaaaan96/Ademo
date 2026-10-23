@@ -131,7 +131,9 @@ private:
         if(!configured) { status_->setText(QStringLiteral("需停止会话并处理未保存修改，绑定未改变")); return; }
         const auto id=QString::number(unit);
         if(device_->findData(id)<0) { const QSignalBlocker blocker(device_); device_->addItem(QStringLiteral("设备 %1").arg(unit),id); }
-        selectDevice(id); refresh(); status_->setText(QStringLiteral("设备绑定已更新；仍需有效外部文件才能启动。"));
+        selectDevice(id);
+        if(!alive) return;
+        refresh(); status_->setText(QStringLiteral("设备绑定已更新；仍需有效外部文件才能启动。"));
     }
     QJsonObject runtimeDevice(const QString &id = {}) const {
         if (access_.snapshot) for (const auto &value : access_.snapshot()["devices"].toArray())
