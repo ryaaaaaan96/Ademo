@@ -1,0 +1,9 @@
+Test project C:/Users/81966/Documents/Ademo/build/qt-llvm-debug
+    Start 1: parameter_definition_read
+1/2 Test #1: parameter_definition_read ........   Passed    7.75 sec
+    Start 2: parameter_window_read
+2/2 Test #2: parameter_window_read ............   Passed    4.19 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =  11.96 sec

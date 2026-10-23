@@ -108,6 +108,8 @@ struct SessionAccess {
     std::function<bool(QJsonObject)> configure;
     std::function<QJsonObject()> snapshot;
     std::function<void(std::function<bool()>)> setDiscardGuard;
+    // 视图文件任务：可在会话未启动时使用；只在线程间传值，宿主保留 DLL 租约。
+    std::function<bool(std::function<QJsonObject()>, std::function<void(QJsonObject)>)> background;
 };
 struct ParameterDevice { QString id; QString name; };
 class ParameterView : public QWidget {
@@ -174,7 +176,7 @@ public:
     virtual QJsonObject relocateConfiguration(QJsonObject config, const QString &, const QString &) const { return config; }
 };
 }
-#define DebuggerProtocolIid "org.ademo.debugger.Protocol/9.0"
-#define DebuggerTransportIid "org.ademo.debugger.Transport/9.0"
+#define DebuggerProtocolIid "org.ademo.debugger.Protocol/10.0"
+#define DebuggerTransportIid "org.ademo.debugger.Transport/10.0"
 Q_DECLARE_INTERFACE(debugger::ProtocolPlugin, DebuggerProtocolIid)
 Q_DECLARE_INTERFACE(debugger::TransportPlugin, DebuggerTransportIid)

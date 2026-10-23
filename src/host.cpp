@@ -21,6 +21,12 @@ struct LocalJob {
     std::shared_ptr<ProtocolSession> protocol;
     ~LocalJob() { localJobSlots.release(); }
 };
+struct ViewJob {
+    std::shared_ptr<PluginCatalog> catalog; // 最后释放，任务和完成函数也可能包含 DLL 代码。
+    std::function<QJsonObject()> work;
+    std::function<void(QJsonObject)> completion;
+    ~ViewJob() { localJobSlots.release(); }
+};
 }
 PluginCatalog::~PluginCatalog()
 {
@@ -493,7 +499,22 @@ SessionAccess DebugSession::access()
             [self] { return self ? self->config() : SessionConfig{}; },
             [self](QJsonObject config) { return self && self->configure(std::move(config)); },
             [self] { return self ? self->snapshot() : QJsonObject{}; },
-            [self](std::function<bool()> guard) { if (self) self->discardGuard_ = std::move(guard); }};
+            [self](std::function<bool()> guard) { if (self) self->discardGuard_ = std::move(guard); },
+            [self](std::function<QJsonObject()> work, std::function<void(QJsonObject)> completion) {
+                if (!self || !work || !completion || !localJobSlots.tryAcquire()) return false;
+                auto job = std::make_shared<ViewJob>(); job->catalog = self->catalog_;
+                job->work = std::move(work); job->completion = std::move(completion);
+                QThreadPool::globalInstance()->start([self, job] {
+                    QJsonObject result;
+                    try { result = job->work(); }
+                    catch (const std::exception &error) { result = {{"error", QString::fromUtf8(error.what())}}; }
+                    catch (...) { result = {{"error", QStringLiteral("后台文件任务失败")}}; }
+                    QMetaObject::invokeMethod(QCoreApplication::instance(), [self, job, result] {
+                        if (self) job->completion(result);
+                    }, Qt::QueuedConnection);
+                });
+                return true;
+            }};
 }
 bool DebugSession::configure(QJsonObject protocol)
 {
