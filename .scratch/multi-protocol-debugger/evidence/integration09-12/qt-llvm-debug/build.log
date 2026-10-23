@@ -1,0 +1,15 @@
+[1/40] Automatic MOC for target serial_plugin
+[2/38] Automatic MOC for target modbus_plugin
+[3/36] Automatic MOC for target trace_fixture_plugin
+[4/34] Automatic MOC for target incompatible_plugin
+[5/32] Automatic MOC for target rtu_read_tests
+[6/30] Automatic MOC for target rtu_poll_tests
+[7/28] Automatic MOC for target slave_edit_tests
+[8/26] Automatic MOC for target rtu_slave_write_tests
+[9/24] Automatic MOC for target rtu_write_tests
+[10/22] Automatic MOC for target session_tests
+[11/20] Automatic MOC for target rtu_slave_tests
+[12/18] Automatic MOC for target trace_tests
+[13/16] Automatic MOC for target recording_tests
+[14/15] Building CXX object CMakeFiles/recording_tests.dir/tests/recording_tests.cpp.obj
+[15/15] Linking CXX executable bin\recording_tests.exe

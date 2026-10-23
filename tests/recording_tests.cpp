@@ -224,9 +224,10 @@ private slots:
         time += 1750; session.poll(); wire.events.sent(wire.writes.last().first, true, {}); QCoreApplication::processEvents();
         wire.receive(QByteArray::fromHex("010302000a3843")); time += 1750; session.poll(); QCoreApplication::processEvents();
         QCOMPARE(session.operation(first).update.state, "success");
-        const auto live = session.queryTrace({second}); QVERIFY(!live.messages.isEmpty());
-        QCOMPARE(live.messages.first().operationId, first);
-        session.stop(); auto stopped = session.stopRecording(); QTRY_VERIFY(ready(stopped));
+        const auto observed = session.queryTrace({second}); QVERIFY(!observed.messages.isEmpty());
+        QCOMPARE(observed.messages.first().operationId, first);
+        session.stop(); const auto live = session.queryTrace({second}); // 同一截止点，包含停止产生的取消消息。
+        auto stopped = session.stopRecording(); QTRY_VERIFY(ready(stopped));
         auto query = queryArchive(directory.path(), session.sessionId(), {second}); QTRY_VERIFY(ready(query)); QVERIFY(query.get().ok);
         const auto archived = query.get().snapshot; QCOMPARE(archived.messages.size(), live.messages.size());
         for (qsizetype i = 0; i < live.messages.size(); ++i) {
