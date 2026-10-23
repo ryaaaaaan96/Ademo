@@ -1,0 +1,108 @@
+[1/108] Automatic MOC for target debugger_widgets
+[2/108] Building CXX object CMakeFiles/debugger_widgets.dir/debugger_widgets_autogen/mocs_compilation.cpp.obj
+[3/108] Automatic MOC for target serial_plugin
+[4/108] Automatic MOC for target debugger_host
+[5/108] Automatic MOC for target trace_fixture_plugin
+[6/108] Building CXX object CMakeFiles/debugger_widgets.dir/src/parameter_table.cpp.obj
+[7/108] Building CXX object CMakeFiles/debugger_host.dir/debugger_host_autogen/mocs_compilation.cpp.obj
+[8/108] Linking CXX static library libdebugger_widgets.a
+[9/108] Automatic MOC for target modbus_plugin
+[10/108] Building CXX object CMakeFiles/debugger_host.dir/src/session_recovery.cpp.obj
+[11/108] Building CXX object CMakeFiles/debugger_host.dir/src/workspace.cpp.obj
+[12/108] Building CXX object CMakeFiles/debugger_host.dir/src/session_window.cpp.obj
+[13/108] Building CXX object CMakeFiles/debugger_host.dir/src/host.cpp.obj
+[14/108] Building CXX object CMakeFiles/debugger_host.dir/src/workbench.cpp.obj
+[15/108] Building CXX object CMakeFiles/debugger_host.dir/src/trace_query.cpp.obj
+[16/108] Building CXX object CMakeFiles/debugger_host.dir/src/trace_codec.cpp.obj
+[17/108] Building CXX object CMakeFiles/debugger_host.dir/src/trace_panel.cpp.obj
+[18/108] Building CXX object CMakeFiles/debugger_host.dir/src/recording.cpp.obj
+[19/108] Building CXX object CMakeFiles/debugger_host.dir/src/archive_format.cpp.obj
+[20/108] Building CXX object CMakeFiles/modbus_plugin.dir/modbus_plugin_autogen/mocs_compilation.cpp.obj
+[21/108] Building CXX object CMakeFiles/debugger_host.dir/src/archive_query.cpp.obj
+[22/108] Building CXX object CMakeFiles/debugger_host.dir/src/recording_panel.cpp.obj
+[23/108] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/modbus.cpp.obj
+[24/108] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/parameter_definition.cpp.obj
+[25/108] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/parameter_read_scope.cpp.obj
+[26/108] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/master_parameters.cpp.obj
+[27/108] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/write_pdu.cpp.obj
+[28/108] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/rtu_session.cpp.obj
+[29/108] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/rtu_slave.cpp.obj
+[30/108] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_view.cpp.obj
+[31/108] Building CXX object CMakeFiles/serial_plugin.dir/serial_plugin_autogen/mocs_compilation.cpp.obj
+[32/108] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_edit.cpp.obj
+[33/108] Building CXX object CMakeFiles/trace_fixture_plugin.dir/trace_fixture_plugin_autogen/mocs_compilation.cpp.obj
+[34/108] Building CXX object CMakeFiles/serial_plugin.dir/plugins/serial.cpp.obj
+[35/108] Linking CXX static library libdebugger_host.a
+[36/108] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_edit_view.cpp.obj
+[37/108] Linking CXX shared module bin\plugins\libserial_plugin.dll
+[38/108] Linking CXX shared module bin\plugins\libmodbus_plugin.dll
+[39/108] Automatic MOC for target multi_protocol_debugger
+[40/108] Building CXX object CMakeFiles/trace_fixture_plugin.dir/tests/trace_fixture_plugin.cpp.obj
+[41/108] Automatic MOC for target incompatible_plugin
+[42/108] Building CXX object CMakeFiles/incompatible_plugin.dir/incompatible_plugin_autogen/mocs_compilation.cpp.obj
+[43/108] Linking CXX shared module bin\trace-fixtures\libtrace_fixture_plugin.dll
+[44/108] Automatic MOC for target parameter_poll_tests
+[45/108] Automatic MOC for target trace_tests
+[46/108] Building CXX object CMakeFiles/trace_tests.dir/trace_tests_autogen/mocs_compilation.cpp.obj
+[47/108] Building CXX object CMakeFiles/incompatible_plugin.dir/tests/incompatible_plugin.cpp.obj
+[48/108] Automatic MOC for target parameter_write_tests
+[49/108] Linking CXX shared module bin\fixtures\libincompatible_plugin.dll
+[50/108] Automatic MOC for target parameter_definition_tests
+[51/108] Automatic MOC for target parameter_window_tests
+[52/108] Automatic MOC for target slave_edit_tests
+[53/108] Automatic MOC for target session_recovery_tests
+[54/108] Building CXX object CMakeFiles/trace_tests.dir/tests/trace_tests.cpp.obj
+[55/108] Linking CXX executable bin\trace_tests.exe
+[56/108] Automatic MOC for target session_tests
+[57/108] Automatic MOC for target rtu_read_tests
+[58/108] Automatic MOC for target rtu_poll_tests
+[59/108] Automatic MOC for target rtu_write_tests
+[60/108] Automatic MOC for target rtu_slave_write_tests
+[61/108] Automatic MOC for target rtu_slave_tests
+[62/108] Building CXX object CMakeFiles/multi_protocol_debugger.dir/multi_protocol_debugger_autogen/mocs_compilation.cpp.obj
+[63/108] Automatic MOC for target workspace_tests
+[64/108] Building CXX object CMakeFiles/parameter_poll_tests.dir/parameter_poll_tests_autogen/mocs_compilation.cpp.obj
+[65/108] Automatic MOC for target recording_tests
+[66/108] Building CXX object CMakeFiles/parameter_write_tests.dir/parameter_write_tests_autogen/mocs_compilation.cpp.obj
+[67/108] Building CXX object CMakeFiles/multi_protocol_debugger.dir/src/main.cpp.obj
+[68/108] Building CXX object CMakeFiles/parameter_definition_tests.dir/parameter_definition_tests_autogen/mocs_compilation.cpp.obj
+[69/108] Building CXX object CMakeFiles/parameter_poll_tests.dir/tests/parameter_poll_tests.cpp.obj
+[70/108] Building CXX object CMakeFiles/parameter_window_tests.dir/parameter_window_tests_autogen/mocs_compilation.cpp.obj
+[71/108] Building CXX object CMakeFiles/parameter_write_tests.dir/tests/parameter_write_tests.cpp.obj
+[72/108] Building CXX object CMakeFiles/session_recovery_tests.dir/session_recovery_tests_autogen/mocs_compilation.cpp.obj
+[73/108] Building CXX object CMakeFiles/parameter_definition_tests.dir/tests/parameter_definition_tests.cpp.obj
+[74/108] Building CXX object CMakeFiles/slave_edit_tests.dir/slave_edit_tests_autogen/mocs_compilation.cpp.obj
+[75/108] Building CXX object CMakeFiles/parameter_window_tests.dir/tests/parameter_window_tests.cpp.obj
+[76/108] Building CXX object CMakeFiles/session_tests.dir/session_tests_autogen/mocs_compilation.cpp.obj
+[77/108] Building CXX object CMakeFiles/slave_edit_tests.dir/tests/slave_edit_tests.cpp.obj
+[78/108] Building CXX object CMakeFiles/rtu_read_tests.dir/rtu_read_tests_autogen/mocs_compilation.cpp.obj
+[79/108] Building CXX object CMakeFiles/session_tests.dir/tests/session_tests.cpp.obj
+[80/108] Building CXX object CMakeFiles/rtu_poll_tests.dir/rtu_poll_tests_autogen/mocs_compilation.cpp.obj
+[81/108] Building CXX object CMakeFiles/session_recovery_tests.dir/tests/session_recovery_tests.cpp.obj
+[82/108] Building CXX object CMakeFiles/rtu_write_tests.dir/rtu_write_tests_autogen/mocs_compilation.cpp.obj
+[83/108] Building CXX object CMakeFiles/rtu_read_tests.dir/tests/rtu_read_tests.cpp.obj
+[84/108] Building CXX object CMakeFiles/rtu_slave_tests.dir/rtu_slave_tests_autogen/mocs_compilation.cpp.obj
+[85/108] Building CXX object CMakeFiles/rtu_write_tests.dir/tests/rtu_write_tests.cpp.obj
+[86/108] Building CXX object CMakeFiles/rtu_slave_write_tests.dir/rtu_slave_write_tests_autogen/mocs_compilation.cpp.obj
+[87/108] Building CXX object CMakeFiles/rtu_poll_tests.dir/tests/rtu_poll_tests.cpp.obj
+[88/108] Building CXX object CMakeFiles/workspace_tests.dir/workspace_tests_autogen/mocs_compilation.cpp.obj
+[89/108] Building CXX object CMakeFiles/rtu_slave_write_tests.dir/tests/rtu_slave_write_tests.cpp.obj
+[90/108] Building CXX object CMakeFiles/recording_tests.dir/recording_tests_autogen/mocs_compilation.cpp.obj
+[91/108] Building CXX object CMakeFiles/rtu_slave_tests.dir/tests/rtu_slave_tests.cpp.obj
+[92/108] Linking CXX executable bin\multi_protocol_debugger.exe
+[93/108] Linking CXX executable bin\parameter_poll_tests.exe
+[94/108] Linking CXX executable bin\parameter_write_tests.exe
+[95/108] Linking CXX executable bin\parameter_definition_tests.exe
+[96/108] Linking CXX executable bin\parameter_window_tests.exe
+[97/108] Building CXX object CMakeFiles/workspace_tests.dir/tests/workspace_tests.cpp.obj
+[98/108] Linking CXX executable bin\session_recovery_tests.exe
+[99/108] Linking CXX executable bin\slave_edit_tests.exe
+[100/108] Linking CXX executable bin\rtu_read_tests.exe
+[101/108] Linking CXX executable bin\session_tests.exe
+[102/108] Linking CXX executable bin\rtu_poll_tests.exe
+[103/108] Linking CXX executable bin\rtu_write_tests.exe
+[104/108] Linking CXX executable bin\rtu_slave_tests.exe
+[105/108] Linking CXX executable bin\rtu_slave_write_tests.exe
+[106/108] Linking CXX executable bin\workspace_tests.exe
+[107/108] Building CXX object CMakeFiles/recording_tests.dir/tests/recording_tests.cpp.obj
+[108/108] Linking CXX executable bin\recording_tests.exe
