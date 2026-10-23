@@ -43,3 +43,7 @@ Blocked by: [02 完成一次 RTU 保持寄存器读取](02-rtu-first-register-re
 ### 2026-10-23：整体审查的缩容有界性修复
 
 整体 Standards 审查确认 configureTrace 缩容淘汰 finished 操作时遗漏发送尝试表清理。现与 submit 普通淘汰统一，删除操作前同步移除对应发送尝试；停止/恢复整体清理路径也已核对。新增公开双路径回归，真实 Modbus 本地发送超时后淘汰并交付旧回调，验证只产生旧令牌诊断，不污染新操作或伪造发送证据。修复前缩容失败、普通淘汰通过；修复后必要 Debug 3/3 CTest、51 项通过，0 失败/跳过。见[独立修复验收与哈希](../evidence/trace-eviction-reviewfix/acceptance.md)；未跑全量/Release，最终组合验证由集成执行，原验收证据保留。
+
+### 2026-10-23：整体审查修复操作缓存淘汰后的界面状态
+
+已关闭 P2：缺失操作快照不再被当作未完成，UI 提示过期并继续接受手动读写、跟踪后续轮询；真实在途操作仍禁用重复提交。公开 Widgets 回归覆盖 operations=1 的手动读→轮询淘汰→继续读写和 stop/restart，Debug 定向 1/1 CTest、17 项 Qt 检查通过。见 [修复证据](../evidence/operation-cache-reviewfix/acceptance.md)，最终双配置由集成分支统一执行。

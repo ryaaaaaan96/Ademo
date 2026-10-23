@@ -68,7 +68,12 @@ bool RtuSlave::validReplacement(int unit, const QJsonObject &document, QString &
 void RtuSlave::publishBindings() {
     if (!services_.publishConfiguration) return;
     QJsonArray bindings;
-    for (const auto &device : devices_) bindings.append(QJsonObject{{"unit", device.unit}, {"path", device.path}});
+    for (const auto &entry : configuration_.value("devices").toArray()) {
+        auto binding = entry.toObject();
+        const auto unit = binding.value("unit").toInt();
+        if (devices_.contains(unit)) binding["path"] = devices_.value(unit).path;
+        bindings.append(binding);
+    }
     configuration_["devices"] = bindings;
     services_.publishConfiguration(configuration_);
 }

@@ -1,0 +1,5 @@
+bfc7c37289fafc1b0403595a4958a0c434d493f5f5a23d11335cc9cab9554fbe  build/qt-llvm-debug/bin/slave_edit_tests.exe
+25ebd0785bb3fe5168fb1c04585eb5df36383f7be838e8517ce780b8616a80d7  build/qt-llvm-debug/bin/plugins/libmodbus_plugin.dll
+c19347f7b2611bff64517f1dd287a1e100a7c061bbbda1c3da80adccfa3bd81e  .scratch/multi-protocol-debugger/evidence/binding-extensions-reviewfix/build.log
+03cb1fe2c844731ecfdb5b4e22c8d99e1199d2304379087bc2708ae0af2b5daa  .scratch/multi-protocol-debugger/evidence/binding-extensions-reviewfix/ctest.log
+74e2590158eaee8378402bc12e1e0788eb5dfbd0711d28a2e1eb62cac0a9cade  .scratch/multi-protocol-debugger/evidence/binding-extensions-reviewfix/edit-results.txt

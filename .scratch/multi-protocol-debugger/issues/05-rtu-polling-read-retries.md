@@ -47,3 +47,7 @@ Debug/Release 均完整 CTest 5/5 通过，生命周期13、四区读取43、写
 ### 2026-10-22：与06的SDK5集成回归
 
 保留原独立05验收，05/06共享SDK冲突合并为SDK5 union；重试和被动应答统一发送令牌分配、保留后台文件准备与快照，补跨角色/运行令牌及被动期限回归。Debug/Release均6/6通过、每配置147项检查。详见 [05/06集成证据](../evidence/integration05-06/acceptance.md)，不覆盖独立05/06日志。
+
+### 2026-10-23：整体审查修复操作缓存淘汰后的界面状态
+
+已关闭 P2：缺失操作快照不再被当作未完成，UI 提示过期并继续接受手动读写、跟踪后续轮询；真实在途操作仍禁用重复提交。公开 Widgets 回归覆盖 operations=1 的手动读→轮询淘汰→继续读写和 stop/restart，Debug 定向 1/1 CTest、17 项 Qt 检查通过。见 [修复证据](../evidence/operation-cache-reviewfix/acceptance.md)，最终双配置由集成分支统一执行。

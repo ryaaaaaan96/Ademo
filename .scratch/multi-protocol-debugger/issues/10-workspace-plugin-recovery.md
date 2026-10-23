@@ -41,3 +41,7 @@ Blocked by: [08 运行中编辑、导入和保存从站数据](08-slave-live-edi
 已完成工作区 Widgets 打开/保存、公开异步 API、有界后台文件 I/O、QSaveFile、完整结构验证及 dirty 全部确认后的无事件泵复查。恢复只加载配置不通信；配置、布局、未知字段和缺插件 referenceBase 往返保留；修复插件并以新 catalog 启动后可按原基准恢复外部设备文件。主体通过 SDK 8 纯配置重定位钩子协作，不硬编码 Modbus 字段。
 
 Debug/Release 最终均 11/11 CTest 目标、每配置 234 项检查通过。实际 DLL 测试覆盖缺失、不兼容、无效 DLL 加载失败与原因；公开会话在文件任务挂起时仍完成读取，Widgets 证据覆盖配置保存与缺插件隔离。首次专项审查三项 P2（未知枚举丢失、16→空后新增按钮、确认销毁窗口）及扩查一项协议切换同类 P2 均已修复并新增公开回归，独立只读复核关闭四项。完整命令、截图、散列、审查结果及未覆盖硬件条件见 [验收证据](../evidence/10/acceptance.md)，格式见 [工作区格式](../workspace-format.md)。分诊标签保留，其不代表完成判断；未修改当前实施索引。
+
+### 2026-10-23：整体审查修复设备绑定未知字段保留
+
+已关闭 P2：从站保存/导入成功后按 unit 在原 devices 条目中仅更新 path，保留 vendor/future 等扩展字段、原顺序与未编辑设备，不把运行 snapshot 写入工作区。新增公开 save→import→workspace 保存/加载组合回归，两个设备的完整绑定均保留；Debug 定向 1/1 CTest、10 项 Qt 检查通过，见 [修复证据](../evidence/binding-extensions-reviewfix/acceptance.md)。最终双配置由根集成分支统一执行。

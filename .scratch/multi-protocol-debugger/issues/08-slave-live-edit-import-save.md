@@ -39,3 +39,7 @@ Blocked by: [06 从外部 JSON 启动多设备 RTU 从站并读取](06-rtu-slave
 ### 2026-10-22：经用户确认发布
 
 用户回复“按此发布”，批准 19 项拆分及直接依赖。本项尚未实施；分诊标签不代表完成。原有工作和评论见 [旧版 05](../legacy-issues/05-modbus-rtu-slave-json.md)、[旧版 07](../legacy-issues/07-widgets-and-workspace.md)。工具链已完成证据继续复用。
+
+### 2026-10-23：整体审查修复设备绑定未知字段保留
+
+已关闭 P2：从站保存/导入成功后按 unit 在原 devices 条目中仅更新 path，保留 vendor/future 等扩展字段、原顺序与未编辑设备，不把运行 snapshot 写入工作区。新增公开 save→import→workspace 保存/加载组合回归，两个设备的完整绑定均保留；Debug 定向 1/1 CTest、10 项 Qt 检查通过，见 [修复证据](../evidence/binding-extensions-reviewfix/acceptance.md)。最终双配置由根集成分支统一执行。

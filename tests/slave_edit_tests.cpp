@@ -35,6 +35,29 @@ private slots:
         catalog = std::make_shared<PluginCatalog>(); catalog->discover(QCoreApplication::applicationDirPath() + "/plugins");
         QVERIFY(catalog->protocol("modbus.rtu"));
     }
+    void bindingExtensionsSurviveSaveImportAndWorkspaceRoundTrip() {
+        QTemporaryDir dir; const auto first = dir.filePath("first.json"), second = dir.filePath("second.json");
+        const auto saved = dir.filePath("saved.json"), imported = dir.filePath("import.json"), workspace = dir.filePath("workspace.json");
+        QVERIFY(save(first, document())); QVERIFY(save(second, document(111))); QVERIFY(save(imported, document(777)));
+        const QJsonObject firstBinding{{"unit", 17}, {"path", first}, {"vendor", "first"}, {"future", QJsonObject{{"mode", 9}}}};
+        const QJsonObject secondBinding{{"unit", 18}, {"path", second}, {"vendor", "second"}, {"future", QJsonArray{true, 23}}};
+        Wire wire; Workbench window(catalog, nullptr, wire.factory()); QVERIFY(window.closeSession(0));
+        window.addSession(config({firstBinding, secondBinding})); auto *session = window.session(0);
+        QVERIFY(session->start(window.sessionConfiguration(0))); QTRY_COMPARE(session->state(), SessionState::Running);
+        auto id = session->submit("slave-save", {{"unit", 17}, {"path", saved}});
+        QTRY_VERIFY(session->operation(id).finished); QCOMPARE(session->operation(id).update.state, QString("success"));
+        auto expectedFirst = firstBinding; expectedFirst["path"] = saved;
+        QCOMPARE(session->config().protocol.value("devices").toArray(), QJsonArray({expectedFirst, secondBinding}));
+        id = session->submit("slave-import", {{"unit", 17}, {"path", imported}});
+        QTRY_VERIFY(session->operation(id).finished); QCOMPARE(session->operation(id).update.state, QString("success"));
+        expectedFirst["path"] = imported;
+        const QJsonArray expected{expectedFirst, secondBinding}; QCOMPARE(session->config().protocol.value("devices").toArray(), expected);
+        id = window.saveWorkspace(workspace); QTRY_COMPARE(window.workspaceOperation(id).state, QString("success"));
+        Workbench restored(catalog); id = restored.openWorkspace(workspace); QTRY_COMPARE(restored.workspaceOperation(id).state, QString("success"));
+        QCOMPARE(restored.sessionConfiguration(0).protocol.value("devices").toArray(), expected);
+        QCOMPARE(restored.session(0)->state(), SessionState::Stopped);
+        QVERIFY(!restored.sessionConfiguration(0).protocol.contains("data"));
+    }
     void editAndRangeAreImmediateAndIsolated() {
         Harness h(catalog); QVERIFY(h.session.start(h.makeConfig())); QTRY_COMPARE(h.session.state(), SessionState::Running);
         const auto id = edit(h.session, 42); QCOMPARE(h.session.operation(id).update.state, "success");

@@ -1,0 +1,7 @@
+[1/9] Automatic MOC for target modbus_plugin
+[2/8] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_edit.cpp.obj
+[3/8] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/modbus.cpp.obj
+[4/8] Linking CXX shared module bin\plugins\libmodbus_plugin.dll
+[5/8] Automatic MOC for target slave_edit_tests
+[6/7] Building CXX object CMakeFiles/slave_edit_tests.dir/tests/slave_edit_tests.cpp.obj
+[7/7] Linking CXX executable bin\slave_edit_tests.exe
