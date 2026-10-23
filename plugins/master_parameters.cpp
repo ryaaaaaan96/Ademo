@@ -1,5 +1,6 @@
 #include "master_parameters.h"
 #include "parameter_definition.h"
+#include "parameter_file_editor.h"
 #include "debugger/parameter_table.h"
 #include <QComboBox>
 #include <QFormLayout>
@@ -16,6 +17,7 @@
 #include <QVBoxLayout>
 #include <QRegularExpression>
 #include <QMessageBox>
+#include <QTabWidget>
 
 namespace debugger {
 namespace {
@@ -37,7 +39,11 @@ struct Row {
 class MasterParameters final : public ParameterView {
 public:
     MasterParameters(SessionAccess access, QWidget *parent) : ParameterView(parent), access_(std::move(access)) {
-        auto *layout = new QVBoxLayout(this);
+        auto *outer = new QVBoxLayout(this);
+        auto *pages = new QTabWidget(this); pages->setAccessibleName(QStringLiteral("参数页面"));
+        auto *operations = new QWidget(pages);
+        auto *layout = new QVBoxLayout(operations);
+        pages->addTab(operations, QStringLiteral("参数操作")); outer->addWidget(pages);
         auto *form = new QFormLayout;
         device_ = new QComboBox(this); device_->setAccessibleName(QStringLiteral("当前设备"));
         form->addRow(QStringLiteral("当前设备"), device_);
@@ -99,7 +105,7 @@ public:
         connect(device_, &QComboBox::currentIndexChanged, this, [this] {
             const auto next = selectedDevice();
             QPointer<MasterParameters> alive(this);
-            const bool resolved = next == selectedDevice_ || resolvePending(selectedDevice_);
+            const bool resolved = next == selectedDevice_ || (resolvePending(selectedDevice_) && bindEditor(next));
             if (!alive) return;
             if (!resolved) {
                 const QSignalBlocker blocker(device_); device_->setCurrentIndex(device_->findData(selectedDevice_)); return;
@@ -157,6 +163,14 @@ public:
         connect(timer, &QTimer::timeout, this, [this] { refresh(); }); timer->start();
         if (access_.registerViewState) access_.registerViewState(this,
             [this] { return LocalState{false, hasPending(), loading_, {}}; }, [this] { return resolvePending(); });
+        fileEditor_ = new FileEditorPage(access_, createParameterFileEditor(nullptr),
+            [this](const QString &target, const QJsonObject &document, const QString &path) {
+                const auto result = parseParameterDefinition(document);
+                if (!result.error.isEmpty()) return result.error;
+                return applyDefinition(target.toInt(), path, result.parameters) ? QString()
+                    : QStringLiteral("未应用：请先停止会话并处理未保存内容；原参数保留。");
+            }, pages);
+        pages->addTab(fileEditor_, QStringLiteral("文件编辑")); bindEditor(selectedDevice());
         rebuildGroups(); refresh();
     }
     QList<ParameterDevice> devices() const override {
@@ -171,6 +185,17 @@ public:
         device_->setCurrentIndex(index); return alive && selectedDevice() == id;
     }
 private:
+    bool bindEditor(const QString &id) {
+        if (!fileEditor_) return true;
+        QJsonArray parameters;
+        for (const auto &row : rows_) if (QString::number(row.unit) == id)
+            parameters.append(parameterDefinitionJson({areas[row.area], row.address, row.name,
+                row.type.isEmpty() ? (row.area < 2 ? "bool" : "uint16") : row.type, row.displayUnit, row.description, row.group}));
+        const auto config = access_.config ? access_.config().protocol : QJsonObject{};
+        return fileEditor_->bindTarget(id, QStringLiteral("设备 %1").arg(id),
+            {{"kind", "modbus-parameter-definition"}, {"version", 1}, {"parameters", parameters}},
+            config.value("parameterFiles").toObject().value(id).toString());
+    }
     bool hasPending(const QString &device = {}) const {
         for (const auto &row : rows_) if (row.pending && (device.isEmpty() || QString::number(row.unit) == device)) return true;
         return false;
@@ -239,7 +264,7 @@ private:
         });
         if (!accepted) { loading_ = false; refresh(); status_->setText(QStringLiteral("后台文件任务繁忙，请稍后重试；原参数保留。")); }
     }
-    void applyDefinition(int unit, const QString &path, const QList<ParameterDefinition> &parameters) {
+    bool applyDefinition(int unit, const QString &path, const QList<ParameterDefinition> &parameters) {
         QList<Row> replacement;
         for (const auto &row : rows_) if (row.unit != unit) replacement.append(row);
         for (const auto &p : parameters) {
@@ -253,9 +278,9 @@ private:
         auto sources = config.value("parameterFiles").toObject(); sources[QString::number(unit)] = path; config["parameterFiles"] = sources;
         QPointer<MasterParameters> alive(this);
         const bool configured = access_.configure && access_.configure(config);
-        if (!alive) return;
+        if (!alive) return false;
         if (!configured) {
-            status_->setText(QStringLiteral("未应用：请先停止会话并处理未保存内容；原参数保留。")); return;
+            status_->setText(QStringLiteral("未应用：请先停止会话并处理未保存内容；原参数保留。")); return false;
         }
         // configure 可能经过模态修改保护；其他设备须取确认后的实时状态，不能复活旧草稿或覆盖新观测。
         QList<Row> current;
@@ -266,7 +291,9 @@ private:
         for (const auto &row : replacement) append(row);
         if (device_->findData(QString::number(unit)) < 0) device_->addItem(QStringLiteral("设备 %1").arg(unit), QString::number(unit));
         selectDevice(QString::number(unit)); selectedDevice_ = selectedDevice(); rebuildGroups();
+        bindEditor(selectedDevice_);
         status_->setText(QStringLiteral("已应用 %1 个参数到设备 %2；未发送设备命令").arg(parameters.size()).arg(unit));
+        return true;
     }
     void rebuildGroups() {
         const auto previous = group_->currentData().toString();
@@ -362,6 +389,7 @@ private:
     QPushButton *add_, *load_;
     ParameterTable *table_;
     QLabel *status_;
+    FileEditorPage *fileEditor_ = nullptr;
 };
 }
 ParameterView *createMasterParameterView(SessionAccess access, QWidget *parent) {

@@ -1,0 +1,25 @@
+********* Start testing of ParameterFileEditorTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : ParameterFileEditorTests::initTestCase()
+QWARN  : ParameterFileEditorTests::newOpenAndSaveAsKeepRunningDeclarationSeparate() QFontDatabase: Cannot find font directory C:/Qt/6.12.0/llvm-mingw_64/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+QWARN  : ParameterFileEditorTests::newOpenAndSaveAsKeepRunningDeclarationSeparate() This plugin does not support propagateSizeHints()
+QWARN  : ParameterFileEditorTests::newOpenAndSaveAsKeepRunningDeclarationSeparate() This plugin does not support propagateSizeHints()
+QWARN  : ParameterFileEditorTests::newOpenAndSaveAsKeepRunningDeclarationSeparate() This plugin does not support propagateSizeHints()
+PASS   : ParameterFileEditorTests::newOpenAndSaveAsKeepRunningDeclarationSeparate()
+QWARN  : ParameterFileEditorTests::editingAndSavingOnlyApplyOnExplicitAction() This plugin does not support propagateSizeHints()
+PASS   : ParameterFileEditorTests::editingAndSavingOnlyApplyOnExplicitAction()
+QWARN  : ParameterFileEditorTests::loadedDeviceRebindsFilePageExplicitly() This plugin does not support propagateSizeHints()
+PASS   : ParameterFileEditorTests::loadedDeviceRebindsFilePageExplicitly()
+QWARN  : ParameterFileEditorTests::invalidOpenFailedSaveAndCancelledSwitchKeepDraft() This plugin does not support propagateSizeHints()
+QWARN  : ParameterFileEditorTests::invalidOpenFailedSaveAndCancelledSwitchKeepDraft() This plugin does not support propagateSizeHints()
+QWARN  : ParameterFileEditorTests::invalidOpenFailedSaveAndCancelledSwitchKeepDraft() This plugin does not support propagateSizeHints()
+QWARN  : ParameterFileEditorTests::invalidOpenFailedSaveAndCancelledSwitchKeepDraft() This plugin does not support propagateSizeHints()
+PASS   : ParameterFileEditorTests::invalidOpenFailedSaveAndCancelledSwitchKeepDraft()
+QWARN  : ParameterFileEditorTests::saveSnapshotDoesNotClearNewEditingAndOverwriteCanCancel() This plugin does not support propagateSizeHints()
+QWARN  : ParameterFileEditorTests::saveSnapshotDoesNotClearNewEditingAndOverwriteCanCancel() This plugin does not support propagateSizeHints()
+QWARN  : ParameterFileEditorTests::saveSnapshotDoesNotClearNewEditingAndOverwriteCanCancel() This plugin does not support propagateSizeHints()
+PASS   : ParameterFileEditorTests::saveSnapshotDoesNotClearNewEditingAndOverwriteCanCancel()
+PASS   : ParameterFileEditorTests::cleanupTestCase()
+Totals: 7 passed, 0 failed, 0 skipped, 0 blacklisted, 3317ms
+********* Finished testing of ParameterFileEditorTests *********
