@@ -1,11 +1,11 @@
 1cfc72f8456d7efb798e9a49f432498a1b71aea1e9f976630568e189539b4ff0  .scratch/multi-protocol-debugger/ui-prototype/.gitignore
 408abb53b9399f3f305491ff7525850ad00c6f4998952f0305ea59e66b59ae78  .scratch/multi-protocol-debugger/ui-prototype/打开界面原型.cmd
 79b721814af6073b266278d6e3bf0d267f6cb9b4e866aa28836192a298dce2a9  .scratch/multi-protocol-debugger/ui-prototype/build/debugger_ui_prototype.exe
-629c65e97b9fd5a84bd046a698c0f2d5317c5311606a72bb719bc11e34e7e731  .scratch/multi-protocol-debugger/ui-prototype/build/feedback/debugger_ui_prototype.exe
+4971d4542fb3284ea7271897cbbd804821d4c642a5f0064407c925a6a16a5c71  .scratch/multi-protocol-debugger/ui-prototype/build/feedback/debugger_ui_prototype.exe
 0222962f20edd9c84cfb1a6234d771def273892b84663ce0a4f637f30c5b57ac  .scratch/multi-protocol-debugger/ui-prototype/Chart.qml
-f37f7d5f3d18b5f307c61b92f2dda300b624c73b8f4d399f5bbba59406e33a9d  .scratch/multi-protocol-debugger/ui-prototype/CMakeLists.txt
-86eef994cb1f19f00d6fa38b23d40126216ea2442d78c06c1a1602d9ad401803  .scratch/multi-protocol-debugger/ui-prototype/main.cpp
-ad176671acdf04702ee3c4fc1c89de430cb312603ec0c861c7e42f0824b84577  .scratch/multi-protocol-debugger/ui-prototype/README.md
+d0159cacc65b41024b1cb76502fa8a186df8153fe9c8902267b70ba825f3cd8c  .scratch/multi-protocol-debugger/ui-prototype/CMakeLists.txt
+7cedc1361b0b3cae08b10fdb85cff5b57cb3f6c9bcb35a478661101063ce35eb  .scratch/multi-protocol-debugger/ui-prototype/main.cpp
+5ff8a1d1df5537101f8b634b09b4b0f47f7b6211467de78f2410912bd42b244f  .scratch/multi-protocol-debugger/ui-prototype/README.md
 5f5ce8666913b6e21e7e0e1783b93572f3790b3883b837c4e69a00622db9fa99  .scratch/multi-protocol-debugger/ui-prototype/run.ps1
 a4e0fea4633f6124666240889a115e63c7b942af0f6db8367c880cb372139d86  .scratch/multi-protocol-workbench-ui/evidence/UI01/01-workbench.png
 cd8cb22a7be5c9c728ff72fa38d3ea86824742f4758d19a8ee9064634ee4d9c3  .scratch/multi-protocol-workbench-ui/evidence/UI01/02-file-editor.png
@@ -17,8 +17,11 @@ d5460cc10bc0a3e7d8912b471951cc590f0b60fd072d9ba2b401c7de68c00fbb  .scratch/multi
 52802790a556f94b0968833b473c46b13f0d5f23f70267484dc48b515c198462  .scratch/multi-protocol-workbench-ui/evidence/UI01/08-white-records-controls.png
 d019073e45c6c6427e53829f4405205c84d093caa77fa3969c19b9f30ac381e6  .scratch/multi-protocol-workbench-ui/evidence/UI01/09-qmainwindow-session-content.png
 0058854177a4fa65f4c2c31e9d3b9a226187e890249ad90d45d080ca6624c952  .scratch/multi-protocol-workbench-ui/evidence/UI01/10-qmainwindow-plot-content.png
-6e9da15b0265e4ee7db4cb9c71de9591b1702d9071eaf13cb5a821bf3acc71ec  .scratch/multi-protocol-workbench-ui/evidence/UI01/acceptance.md
+32a81526e05c17de38ea6d26426f82ca8a5984f9b81045eaec99439f871f8aba  .scratch/multi-protocol-workbench-ui/evidence/UI01/11-drag-docked-workbench.png
+08e04a0d2f658bf18b6c4dcae9eeffd96c6c0e6017aabb899733764d54b07ff9  .scratch/multi-protocol-workbench-ui/evidence/UI01/acceptance.md
 8e89bcbff81cadfb959ef9934baafe397fe99e2c56b6d7d9cde80d2a183c24fb  .scratch/multi-protocol-workbench-ui/evidence/UI01/capture-result.txt
+8e89bcbff81cadfb959ef9934baafe397fe99e2c56b6d7d9cde80d2a183c24fb  .scratch/multi-protocol-workbench-ui/evidence/UI01/drag-dock-capture-result.txt
+b9835cce2695771bc13ad472f28512a34f8b968f9fbdaa74eddc93b06be0aebd  .scratch/multi-protocol-workbench-ui/evidence/UI01/drag-dock-qt-messages.log
 33168f380f9a2e9b053446748403f605b71a57252498b236528f0a8911459f0d  .scratch/multi-protocol-workbench-ui/evidence/UI01/native-capture.log
 495b329da2c977f0d62cbdd6e30f547e781fce57b7715f462745fb9fe22ce249  .scratch/multi-protocol-workbench-ui/evidence/UI01/product-regression.log
 4c6bd7271051bad49655713dcb1ffb6e263debaa3c764ec9dab749c1db4656d3  .scratch/multi-protocol-workbench-ui/evidence/UI01/product-regression/edit-results.txt
@@ -33,4 +36,4 @@ efd0525cbf91115b799d10499fdb4d42f20054aa826a7707849a35b7a6b10a3e  .scratch/multi
 aec15d2040d1033cbdaab15d000ad9f3e1ad650163b1a32212d6b55e91f2ec4e  .scratch/multi-protocol-workbench-ui/evidence/UI01/product-regression/workspace-results.txt
 43ff25bdd713435955d05d2089addb636c6e826a2edacf5f1291c065b305b7ca  .scratch/multi-protocol-workbench-ui/evidence/UI01/product-regression/write-results.txt
 8e89bcbff81cadfb959ef9934baafe397fe99e2c56b6d7d9cde80d2a183c24fb  .scratch/multi-protocol-workbench-ui/evidence/UI01/qmainwindow-capture-result.txt
-6c7f0dad7ea82b06a61909a6bd9e1dae1198243f96c10ea54c6640cd811b6970  .scratch/multi-protocol-workbench-ui/evidence/UI01/review.md
+9a4058e5baf43a0f1a25f40f168abce6b41d1e42895e8d6754304c4fb3630d8b  .scratch/multi-protocol-workbench-ui/evidence/UI01/review.md

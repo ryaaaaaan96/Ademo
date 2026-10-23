@@ -6,6 +6,10 @@
 #include <QQmlError>
 #include <cmath>
 #include <functional>
+#ifdef Q_OS_WIN
+#include <QtCore/qt_windows.h>
+#include <dwmapi.h>
+#endif
 
 static QString runtimeDir() {
     const auto path = QDir(QCoreApplication::applicationDirPath()).absoluteFilePath("../runtime");
@@ -135,6 +139,7 @@ public:
     QPushButton *startButton, *pollButton; QLabel *sessionState, *endpointSummary, *notice, *editorTarget, *fileState, *recordSummary;
     QTabWidget *pages; QTableWidget *table, *editor; QPlainTextEdit *records;
     QTimer pollTimer; QHash<int, QVector<int>> polling; QVector<QPointer<PlotWindow>> plots;
+    QPointer<QWidget> plotOwner;
     QVector<int> visibleRows; std::function<void()> changed;
 
     SessionPane(QString name, QString proto, QString port, bool isSlave, QWidget *parent = nullptr)
@@ -197,6 +202,7 @@ public:
         });
         connect(period, &QSpinBox::valueChanged, this, [this](int interval) { pollTimer.setInterval(interval); });
     }
+    ~SessionPane() override { for (auto plot : plots) if (plot) delete plot.data(); }
     void log(const QString &text) { records->appendPlainText(stamp() + "  " + text); }
     QString displayName(const Parameter &p) const { return p.name.isEmpty() ? p.address : p.name; }
     void addDevice(Device device) {
@@ -337,7 +343,7 @@ public:
     void openPlot(QVector<int> rows) {
         if (rows.isEmpty()) { notice->setText("选中一行或多行，再点击绘图。最多四条曲线。"); return; }
         PlotWindow *plot = nullptr; for (auto candidate : plots) if (candidate && candidate->deviceIndex == selected) plot = candidate;
-        if (!plot) { plot = new PlotWindow(sessionName + " / " + devices[selected].name, selected, this); plots.append(plot); }
+        if (!plot) { plot = new PlotWindow(sessionName + " / " + devices[selected].name, selected, plotOwner); plots.append(plot); }
         plot->addRows(rows, devices[selected]); plot->show(); plot->raise();
     }
 
@@ -529,10 +535,34 @@ void SessionPane::addDeviceDialog() {
     fileState->setText("新设备尚无文件：打开已有配置，或生成地址行后保存并应用。");
 }
 
+enum class DockDragPhase { Preview, Drop, Cancel };
 class SessionWindow : public QMainWindow {
 public:
     SessionPane *pane;
     std::function<void()> closed;
+    std::function<void(QPoint, DockDragPhase)> dockDrag;
+#ifdef Q_OS_WIN
+    bool captionMoving = false;
+    QRect dragStartGeometry;
+    bool nativeEvent(const QByteArray &eventType, void *message, qintptr *result) override {
+        const auto *msg = static_cast<MSG *>(message);
+        if (isWindow() && dockDrag) {
+            if (msg->message == WM_ENTERSIZEMOVE) { captionMoving = false; dragStartGeometry = frameGeometry(); }
+            if (msg->message == WM_MOVING) {
+                captionMoving = true; dockDrag(QCursor::pos(), DockDragPhase::Preview);
+            }
+            if (msg->message == WM_EXITSIZEMOVE || msg->message == WM_CANCELMODE) {
+                const bool drop = msg->message == WM_EXITSIZEMOVE && captionMoving
+                    && frameGeometry() != dragStartGeometry && !(GetAsyncKeyState(VK_ESCAPE) & 0x8000);
+                captionMoving = false; const auto position = QCursor::pos();
+                QTimer::singleShot(0, this, [this, position, drop] {
+                    if (dockDrag) dockDrag(position, drop ? DockDragPhase::Drop : DockDragPhase::Cancel);
+                });
+            }
+        }
+        return QMainWindow::nativeEvent(eventType, message, result);
+    }
+#endif
     SessionWindow(SessionPane *p, QWidget *parent) : QMainWindow(parent), pane(p) {
         setWindowTitle(pane->sessionName + " · 模拟数据");
         auto *scroll = new QScrollArea; scroll->setWidgetResizable(true); scroll->setFrameShape(QFrame::NoFrame);
@@ -595,12 +625,18 @@ public:
 class Workbench : public QMainWindow {
 public:
     QVector<SessionDock *> docks; QTreeWidget *tree; QDockWidget *navigation; QLabel *layoutLabel;
+    QLabel *dockPreview;
     int layoutIndex = 0, nextId = 1; bool shuttingDown = false;
     Workbench() {
         setWindowTitle("多协议调试工作台 · 界面原型（模拟数据）");
         const auto available = QGuiApplication::primaryScreen()->availableGeometry();
         resize(qMin(1660, available.width() - 48), qMin(980, available.height() - 64));
         setDockNestingEnabled(true); setDockOptions(QMainWindow::AllowNestedDocks | QMainWindow::AnimatedDocks);
+        auto *emptyArea = new QLabel("拖动会话窗口到此处停靠"); emptyArea->setAlignment(Qt::AlignCenter); setCentralWidget(emptyArea);
+        dockPreview = new QLabel(this, Qt::Tool | Qt::FramelessWindowHint | Qt::WindowTransparentForInput | Qt::WindowDoesNotAcceptFocus);
+        dockPreview->setAttribute(Qt::WA_ShowWithoutActivating); dockPreview->setAttribute(Qt::WA_TranslucentBackground);
+        dockPreview->setAlignment(Qt::AlignCenter);
+        dockPreview->setStyleSheet("background:rgba(75,155,225,100);border:2px solid #2784c5;color:#123b60;font-size:18px;");
         auto *toolbar = addToolBar("工作区"); toolbar->setMovable(false); toolbar->setObjectName("workspaceBar");
         auto *brand = new QLabel("  多协议调试工作台  "); brand->setObjectName("brand"); toolbar->addWidget(brand);
         toolbar->addAction("＋ 新建会话", this, [this] { newSession(); });
@@ -620,18 +656,69 @@ public:
             if (device >= 0) dock->pane->deviceBox->setCurrentIndex(device);
         });
         layoutLabel = new QLabel("布局 A · 左右对照"); statusBar()->addWidget(layoutLabel);
-        statusBar()->addPermanentWidget(new QLabel("独立窗口使用系统标题栏；菜单可停靠，关闭停止通信、配置保留。"));
+        statusBar()->addPermanentWidget(new QLabel("拖动独立会话到工作台，按预览松开可停靠平铺；关闭停止通信、配置保留。"));
         addSample("电源调试", "Modbus RTU", "COM3", false);
         addSample("从站模拟", "Modbus RTU", "COM4", true);
         QTimer::singleShot(100, this, [this] { arrange(2); });
     }
     SessionDock *addPane(SessionPane *pane, const QString &id = {}) {
+        pane->plotOwner = this;
         auto *dock = new SessionDock(pane, this); dock->setObjectName(id.isEmpty() ? QString("session_%1").arg(nextId++) : id);
         addDockWidget(Qt::RightDockWidgetArea, dock);
         if (!docks.isEmpty()) splitDockWidget(docks.last(), dock, Qt::Horizontal);
         docks.append(dock); pane->changed = [this] { refreshTree(); }; dock->presentationChanged = [this] { refreshTree(); };
+        dock->sessionWindow->dockDrag = [this, dock](QPoint position, DockDragPhase phase) { dragSession(dock, position, phase); };
         connect(dock, &QDockWidget::visibilityChanged, this, [this] { refreshTree(); });
         refreshTree(); return dock;
+    }
+    void dragSession(SessionDock *source, QPoint globalPosition, DockDragPhase phase) {
+        if (phase == DockDragPhase::Cancel || !source->detached || source->sessionWindow->isHidden() || source->sessionWindow->isMinimized()
+            || !isVisible() || isMinimized() || QApplication::activeModalWidget()) {
+            dockPreview->hide(); return;
+        }
+        const auto position = mapFromGlobal(globalPosition);
+        const QRect area = rect().adjusted(navigation->geometry().right() + 8, findChild<QToolBar *>("workspaceBar")->height() + 4, -8, -statusBar()->height() - 4);
+        if (!area.contains(position)) { dockPreview->hide(); return; }
+#ifdef Q_OS_WIN
+        const auto host = reinterpret_cast<HWND>(winId());
+        RECT client; POINT origin{0, 0};
+        if (!GetClientRect(host, &client) || !ClientToScreen(host, &origin)) { dockPreview->hide(); return; }
+        const POINT point{origin.x + MulDiv(position.x(), client.right, width()), origin.y + MulDiv(position.y(), client.bottom, height())};
+        HWND hit = nullptr;
+        for (auto candidate = GetTopWindow(nullptr); candidate; candidate = GetWindow(candidate, GW_HWNDNEXT)) {
+            if (candidate == reinterpret_cast<HWND>(source->sessionWindow->winId()) || candidate == reinterpret_cast<HWND>(dockPreview->winId())
+                || !IsWindowVisible(candidate) || IsIconic(candidate) || (GetWindowLongPtr(candidate, GWL_EXSTYLE) & WS_EX_TRANSPARENT)) continue;
+            DWORD cloaked = 0; DwmGetWindowAttribute(candidate, DWMWA_CLOAKED, &cloaked, sizeof(cloaked));
+            RECT bounds;
+            if (!cloaked && GetWindowRect(candidate, &bounds) && PtInRect(&bounds, point)) { hit = candidate; break; }
+        }
+        if (hit != host) { dockPreview->hide(); return; }
+#endif
+        SessionDock *anchor = nullptr;
+        for (auto *candidate : docks)
+            if (candidate != source && !candidate->detached && !candidate->isHidden() && candidate->geometry().contains(position)) { anchor = candidate; break; }
+        QRect preview = anchor ? anchor->geometry().intersected(area) : area;
+        int edge = 0;
+        if (anchor) {
+            const double distances[] = {double(position.x() - preview.left()) / preview.width(), double(preview.right() - position.x()) / preview.width(),
+                double(position.y() - preview.top()) / preview.height(), double(preview.bottom() - position.y()) / preview.height()};
+            for (int i = 1; i < 4; ++i) if (distances[i] < distances[edge]) edge = i;
+            if (edge < 2) { const int width = preview.width() / 2; if (edge == 1) preview.setLeft(preview.right() - width + 1); else preview.setWidth(width); }
+            else { const int height = preview.height() / 2; if (edge == 3) preview.setTop(preview.bottom() - height + 1); else preview.setHeight(height); }
+        }
+        if (phase == DockDragPhase::Preview) {
+            const QStringList labels = {"松开后靠左平铺", "松开后靠右平铺", "松开后靠上平铺", "松开后靠下平铺"};
+            dockPreview->setText(anchor ? labels[edge] : "松开后停靠到工作台");
+            dockPreview->setGeometry(QRect(mapToGlobal(preview.topLeft()), preview.size())); dockPreview->show(); dockPreview->raise(); return;
+        }
+        dockPreview->hide(); source->attach();
+        if (anchor) {
+            const auto orientation = edge < 2 ? Qt::Horizontal : Qt::Vertical;
+            splitDockWidget(anchor, source, orientation);
+            if (edge == 0 || edge == 2) splitDockWidget(source, anchor, orientation);
+            resizeDocks({source, anchor}, {400, 400}, orientation);
+        } else addDockWidget(Qt::RightDockWidgetArea, source);
+        layoutLabel->setText("自定义布局 · 拖动停靠");
     }
     void addSample(QString name, QString protocol, QString endpoint, bool slave) {
         auto *pane = new SessionPane(name, protocol, endpoint, slave);
@@ -640,6 +727,9 @@ public:
         addPane(pane);
     }
     void refreshTree() {
+        bool hasDockedSession = false;
+        for (auto *dock : docks) if (!dock->detached && !dock->isHidden()) { hasDockedSession = true; break; }
+        centralWidget()->setVisible(!hasDockedSession);
         tree->clear();
         for (int i = 0; i < docks.size(); ++i) {
             auto *pane = docks[i]->pane;
@@ -652,6 +742,7 @@ public:
         }
     }
     void arrange(int variant) {
+        dockPreview->hide();
         layoutIndex = variant; const QStringList labels = {"布局 A · 左右对照", "布局 B · 上下对照", "布局 C · 独立浮窗"}; layoutLabel->setText(labels[variant]);
         for (auto *dock : docks) { dock->attach(); dock->setFloating(false); addDockWidget(Qt::RightDockWidgetArea, dock); }
         if (variant < 2) {
@@ -707,6 +798,7 @@ public:
         refreshTree(); statusBar()->showMessage("工作区已恢复；所有会话保持停止，请手动启动。", 8000);
     }
     void closeEvent(QCloseEvent *event) override {
+        dockPreview->hide();
         if (!shuttingDown) for (auto *dock : docks) if (!dock->pane->canClose()) { event->ignore(); return; }
         shuttingDown = true; QMainWindow::closeEvent(event);
     }
@@ -752,6 +844,11 @@ int main(int argc, char **argv) {
     Workbench window; window.show();
     if (app.arguments().contains("--capture")) {
         const auto output = runtimeDir() + "/captures"; QDir().mkpath(output);
+        QFile captureLog(output + "/qt-messages.log"); if (!captureLog.open(QIODevice::WriteOnly | QIODevice::Truncate)) return 3; captureLog.close();
+        qInstallMessageHandler([](QtMsgType, const QMessageLogContext &, const QString &message) {
+            QFile log(runtimeDir() + "/captures/qt-messages.log");
+            if (log.open(QIODevice::WriteOnly | QIODevice::Append)) { log.write(message.toUtf8()); log.write("\n"); }
+        });
         QTimer::singleShot(450, &window, [&window, output] {
             SessionPane emptySlave("新建空从站", "Modbus RTU", "COM9", true);
             emptySlave.resize(780, 820); emptySlave.show();
@@ -778,6 +875,50 @@ int main(int argc, char **argv) {
             if (native->isMinimized() || native->isHidden() || !master->running) qFatal("Navigation restore failed");
             dock->attach();
             if (dock->detached || dock->isHidden() || !master->running) qFatal("Dock restore failed");
+            const auto dockOptions = window.dockOptions(); window.setDockOptions(QMainWindow::AllowNestedDocks);
+            for (auto plot : master->plots) if (plot) plot->hide();
+            window.raise();
+            for (int edge = 0; edge < 4; ++edge) {
+                dock->detach(); window.layout()->activate();
+                const auto target = window.docks[1]->geometry();
+                const QPoint points[] = {QPoint(target.left() + 12, target.center().y()), QPoint(target.right() - 12, target.center().y()),
+                    QPoint(target.center().x(), target.top() + 12), QPoint(target.center().x(), target.bottom() - 12)};
+                const auto dropPosition = window.mapToGlobal(points[edge]);
+                if (edge == 0) {
+                    QMainWindow blocker(&window, Qt::Window); blocker.setGeometry(QRect(dropPosition - QPoint(40, 40), QSize(160, 160)));
+                    blocker.show(); blocker.raise();
+                    native->dockDrag(dropPosition, DockDragPhase::Preview);
+                    if (window.dockPreview->isVisible()) qFatal("Covered workbench accepted hover");
+                    native->dockDrag(dropPosition, DockDragPhase::Drop);
+                    if (!dock->detached) qFatal("Covered workbench accepted drop");
+                    blocker.hide(); native->raise();
+                }
+                native->dockDrag(dropPosition, DockDragPhase::Preview);
+                if (!window.dockPreview->isVisible() || !dock->detached) qFatal("Hover preview failed");
+                native->dockDrag(dropPosition, DockDragPhase::Cancel);
+                if (window.dockPreview->isVisible() || !dock->detached) qFatal("Dock drag cancellation failed");
+                native->dockDrag(dropPosition, DockDragPhase::Preview);
+                native->dockDrag(window.mapToGlobal(QPoint(-10, -10)), DockDragPhase::Drop);
+                if (window.dockPreview->isVisible() || !dock->detached) qFatal("Outside drop docked session");
+                native->dockDrag(dropPosition, DockDragPhase::Drop); window.layout()->activate();
+                if (dock->detached || dock->isHidden() || !master->running || !master->pollTimer.isActive()
+                    || !slave->running || !master->devices[0].parameters[2].pending) qFatal("Drag dock changed session state");
+                const auto sourceCenter = dock->geometry().center(), targetCenter = window.docks[1]->geometry().center();
+                const bool positioned = edge == 0 ? sourceCenter.x() < targetCenter.x() : edge == 1 ? sourceCenter.x() > targetCenter.x()
+                    : edge == 2 ? sourceCenter.y() < targetCenter.y() : sourceCenter.y() > targetCenter.y();
+                if (!positioned) qFatal("Drag dock direction mismatch");
+            }
+            window.grab().save(output + "/11-drag-docked-workbench.png");
+            dock->detach(); window.docks[1]->detach(); window.layout()->activate();
+            window.docks[1]->sessionWindow->move(window.screen()->availableGeometry().topRight() - QPoint(100, 0));
+            const auto emptyDropPosition = window.centralWidget()->mapToGlobal(window.centralWidget()->rect().center());
+            window.raise(); native->raise(); native->dockDrag(emptyDropPosition, DockDragPhase::Preview);
+            if (!window.dockPreview->isVisible()) qFatal("Empty workbench hover failed");
+            native->dockDrag(emptyDropPosition, DockDragPhase::Drop);
+            if (dock->detached || !master->running || !master->pollTimer.isActive()) qFatal("Empty workbench drop failed");
+            window.docks[1]->attach();
+            window.setDockOptions(dockOptions);
+            for (auto plot : master->plots) if (plot) plot->show();
             master->togglePolling();
         });
         QTimer::singleShot(1500, &window, [&window, output] {
