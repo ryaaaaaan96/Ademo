@@ -249,6 +249,7 @@ void DiskRecorder::State::run()
                         if (!safeSegment(name)) { fail(QStringLiteral("归档分段路径无效")); healthy = false; break; }
                         const QFileInfo info(directory.filePath(name));
                         if (!info.exists()) { archiveGap = true; continue; }
+                        if (quint64(info.size()) != number(segment.value("size"))) archiveGap = true;
                         segment["size"] = QString::number(info.size()); segments.append(segment); retained += info.size();
                         nextSegment = qMax(nextSegment, name.mid(8, 20).toULongLong() + 1);
                     }

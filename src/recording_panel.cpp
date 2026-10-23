@@ -3,7 +3,6 @@
 #include <QFileDialog>
 #include <QFormLayout>
 #include <QGroupBox>
-#include <QJsonDocument>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPlainTextEdit>
@@ -113,9 +112,17 @@ RecordingPanel::RecordingPanel(DebugSession &session, QWidget *parent) : QWidget
                 output->setPlainText(QStringLiteral("可用历史会话 %1 个；请选择 UUID 后查询。\n").arg(value.sessions.size()) + value.error);
             } else {
                 *result = std::make_shared<ArchiveResult>(value); exportButton->setEnabled(true);
-                QString text = QStringLiteral("历史会话 %1：原始 %2 / 消息 %3 / 操作 %4\n%5\n")
-                    .arg(value.snapshot.sessionId).arg(value.snapshot.records.size()).arg(value.snapshot.messages.size()).arg(value.snapshot.operations.size())
-                    .arg(QString::fromUtf8(QJsonDocument(value.snapshot.retention).toJson(QJsonDocument::Compact)));
+                const auto retention = value.snapshot.retention;
+                QString text = QStringLiteral("历史会话 %1：原始 %2 / 消息 %3 / 操作 %4\n")
+                    .arg(value.snapshot.sessionId).arg(value.snapshot.records.size()).arg(value.snapshot.messages.size()).arg(value.snapshot.operations.size());
+                text += retention.value("complete").toBool() ? QStringLiteral("当前归档范围完整\n") : QStringLiteral("历史证据存在缺失或未完成项，请查看来源状态；完整性摘要会随导出保留。\n");
+                text += QStringLiteral("过载丢失 %1（%2 — %3）；正常轮换 %4（%5 — %6）\n查询省略 %7 项\n")
+                    .arg(retention.value("droppedEvents").toString(), retention.value("lossFromUtc").toString(), retention.value("lossToUtc").toString(),
+                         retention.value("rotatedEvents").toString(), retention.value("rotationFromUtc").toString(), retention.value("rotationToUtc").toString(),
+                         retention.value("queryOmittedEntries").toString());
+                if (retention.value("segmentsUnavailableDuringQuery").toBool()) text += QStringLiteral("查询期间部分分段已不可用。\n");
+                if (retention.value("corruptOrIncompleteSegment").toBool() || retention.value("archiveGap").toBool()) text += QStringLiteral("存在损坏、未完整提交或无法证明的历史分段。\n");
+                if (!retention.value("recordingError").toString().isEmpty()) text += QStringLiteral("历史写入错误：") + retention.value("recordingError").toString() + '\n';
                 for (const auto &operation : value.snapshot.operations.mid(0, 100)) text += QStringLiteral("操作 #%1 %2 %3\n").arg(operation.request.id).arg(operation.update.state, operation.update.detail);
                 for (const auto &message : value.snapshot.messages.mid(0, 100)) text += QStringLiteral("消息 #%1 操作 #%2 %3\n").arg(message.id).arg(message.operationId).arg(message.status);
                 for (const auto &source : value.snapshot.sources.mid(0, 100)) text += QStringLiteral("来源 #%1 %2 offset=%3 length=%4 %5\n")

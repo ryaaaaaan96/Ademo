@@ -45,12 +45,14 @@ ArchiveResult readArchive(const QString &path, const QString &sessionId, const T
     QSet<QString> sessions;
     QMap<quint64, Message> messages;
     QMap<quint64, OperationSnapshot> operations;
+    QMap<quint64, qint64> messageCosts, operationCosts, recordCosts;
+    qint64 messageBytes = 0, operationBytes = 0, recordBytes = 0;
     QMap<quint64, QPair<QString, quint64>> operationPositions;
     quint64 queryOmissions = 0;
     auto inTime = [&filter](const QDateTime &time) {
         return (!filter.fromUtc.isValid() || time >= filter.fromUtc) && (!filter.toUtc.isValid() || time <= filter.toUtc);
     };
-    auto scan = [&](const std::function<void(const QJsonObject &)> &consume) {
+    auto scan = [&](const std::function<void(const QJsonObject &, qint64)> &consume) {
         qint64 scanned = 0;
         for (const auto &value : segments) {
             const auto segment = value.toObject(); QFile file(directory.filePath(segment.value("name").toString()));
@@ -67,12 +69,12 @@ ArchiveResult readArchive(const QString &path, const QString &sessionId, const T
                 QJsonParseError error; const auto object = QJsonDocument::fromJson(line, &error).object();
                 if (error.error != QJsonParseError::NoError || object.value("schemaVersion").toInt() != 1
                     || QUuid(object.value("sessionId").toString()).isNull()) { corrupt = true; continue; }
-                consume(object);
+                consume(object, line.size());
             }
             if (!segment.value("orphan").toBool() && lines != id(segment.value("events"))) corrupt = true;
         }
     };
-    scan([&](const QJsonObject &event) {
+    scan([&](const QJsonObject &event, qint64 cost) {
         const auto owner = event.value("sessionId").toString(); sessions.insert(owner);
         if (owner != sessionId || sessionId.isEmpty()) return;
         const auto type = event.value("type").toString();
@@ -82,15 +84,20 @@ ArchiveResult readArchive(const QString &path, const QString &sessionId, const T
             if (filter.messageId && message.id != filter.messageId) return;
             if (filter.operationId && message.operationId && message.operationId != filter.operationId) return;
             if (!inTime(message.observedUtc)) return;
+            messageBytes -= messageCosts.value(message.id); messageCosts[message.id] = cost; messageBytes += cost;
             messages.insert(message.id, message);
-            if (messages.size() > 8192) { messages.erase(messages.begin()); ++queryOmissions; }
+            while (messages.size() > 8192 || messageBytes > 8 * 1024 * 1024) {
+                messageBytes -= messageCosts.take(messages.firstKey()); messages.erase(messages.begin()); ++queryOmissions;
+            }
         } else if (type == "operation") {
             const auto operation = tracecodec::decodeOperation(event);
             if (!operation.request.id) { corrupt = true; return; }
             if (filter.operationId && operation.request.id != filter.operationId) return;
             operations.insert(operation.request.id, operation);
+            operationBytes -= operationCosts.value(operation.request.id); operationCosts[operation.request.id] = cost; operationBytes += cost;
             operationPositions[operation.request.id] = {event.value("recordingId").toString(), id(event.value("sequence"))};
-            if (operations.size() > 1024) {
+            while (operations.size() > 1024 || operationBytes > 8 * 1024 * 1024) {
+                operationBytes -= operationCosts.take(operations.firstKey());
                 operationPositions.remove(operations.firstKey()); operations.erase(operations.begin()); ++queryOmissions;
             }
         }
@@ -101,7 +108,7 @@ ArchiveResult readArchive(const QString &path, const QString &sessionId, const T
     for (const auto &message : messages) for (auto source : message.sources) refs.insert(source);
     for (const auto &operation : operations) for (auto source : operation.observedRefs) refs.insert(source);
     QMap<quint64, TraceRecord> records;
-    scan([&](const QJsonObject &event) {
+    scan([&](const QJsonObject &event, qint64 cost) {
         if (event.value("sessionId").toString() != sessionId || event.value("type") != "trace") return;
         const auto record = tracecodec::decodeTrace(event);
         const auto encoded = event.value("bytesHex").toString();
@@ -123,7 +130,10 @@ ArchiveResult readArchive(const QString &path, const QString &sessionId, const T
             if (!refs.contains(record.id) && !observed) return;
         } else if (!inTime(record.observedUtc) && !refs.contains(record.id)) return;
         records.insert(record.id, record);
-        if (records.size() > 8192) { records.erase(records.begin()); ++queryOmissions; }
+        recordBytes -= recordCosts.value(record.id); recordCosts[record.id] = cost; recordBytes += cost;
+        while (records.size() > 8192 || recordBytes > 32 * 1024 * 1024) {
+            recordBytes -= recordCosts.take(records.firstKey()); records.erase(records.begin()); ++queryOmissions;
+        }
     });
     all.records = records.values(); all.messages = messages.values(); all.operations = operations.values();
     result.snapshot = filterSnapshot(all, filter);

@@ -48,7 +48,7 @@ QByteArray fileBytes(const QString &path) { QFile file(path); if (!file.open(QIO
 template <class T> bool ready(const std::shared_future<T> &future) {
     return future.valid() && future.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready;
 }
-int archiveChild(const QString &directory) {
+int archiveChild(const QString &directory, bool printIdentity = false) {
     Wire wire; DebugSession session(catalog(), nullptr, wire.factory());
     if (!session.start(config())) return 1; QCoreApplication::processEvents();
     if (!session.startRecording(options(directory))) return 2;
@@ -56,7 +56,7 @@ int archiveChild(const QString &directory) {
     auto future = session.stopRecording(); QElapsedTimer timer; timer.start();
     while (!ready(future) && timer.elapsed() < 10000) { QCoreApplication::processEvents(); QThread::msleep(1); }
     if (!ready(future) || future.get().state != "stopped" || future.get().droppedEvents) return 3;
-    std::printf("%s", session.sessionId().toUtf8().constData()); return 0;
+    if (printIdentity) std::printf("%s", session.sessionId().toUtf8().constData()); return 0;
 }
 }
 class RecordingTests : public QObject {
@@ -131,6 +131,17 @@ private slots:
         QVERIFY(result.snapshot.retention.value("rotationFromUtc").toString().size());
         bool expired = false; for (const auto &source : result.snapshot.sources) if (source.availability == "expired") expired = true;
         QVERIFY(expired); QVERIFY(!result.snapshot.retention.value("complete").toBool());
+    }
+    void byteQuotaRejectsWithoutBlockingProtocolInput() {
+        QTemporaryDir directory; Wire wire; DebugSession session(catalog(), nullptr, wire.factory());
+        QVERIFY(session.start(config())); QCoreApplication::processEvents();
+        auto selected = options(directory.path()); selected.queueItems = 8192; selected.queueBytes = 1024;
+        auto gate = std::make_shared<QSemaphore>(); auto entered = std::make_shared<QSemaphore>(); auto once = std::make_shared<std::atomic<bool>>(true);
+        QVERIFY(session.startRecording(selected, nullptr, [gate, entered, once] { if (once->exchange(false)) { entered->release(); gate->acquire(); } }));
+        QTRY_VERIFY(entered->available() == 1); wire.receive(QByteArray(4096, 'x'));
+        const auto stats = session.recordingStats(); QVERIFY(stats.droppedEvents >= 1); QVERIFY(stats.queuedBytes <= 1024);
+        QCOMPARE(session.traces().last().bytes.size(), 4096); QCOMPARE(session.state(), SessionState::Running);
+        gate->release(); auto stopped = session.stopRecording(); QTRY_VERIFY(ready(stopped)); QCOMPARE(stopped.get().state, "stopped");
     }
     void pollingAndExportContinueWithBlockedDisk() {
         QTemporaryDir directory; Wire wire; qint64 time = 0;
@@ -225,6 +236,30 @@ private slots:
         QTRY_COMPARE(session.recordingStats().state, "error"); auto stopped = session.stopRecording(); QTRY_VERIFY(ready(stopped));
         QCOMPARE(fileBytes(directory.filePath("manifest.json")), corruptedBytes);
     }
+    void orphanRotationKeepsIndexReadable() {
+        QTemporaryDir directory; QCOMPARE(archiveChild(directory.path()), 0);
+        const auto orphanName = QStringLiteral("segment-00000000000000000999-11111111-1111-1111-1111-111111111111.jsonl");
+        QFile orphan(directory.filePath(orphanName)); QVERIFY(orphan.open(QIODevice::WriteOnly));
+        QCOMPARE(orphan.write(QByteArray(200000, 'x')), qint64(200000)); orphan.close();
+        QFile sentinel(directory.filePath("keep.txt")); QVERIFY(sentinel.open(QIODevice::WriteOnly)); sentinel.write("keep"); sentinel.close();
+        Wire wire; DebugSession session(catalog(), nullptr, wire.factory());
+        auto selected = options(directory.path()); selected.diskBytes = 262144; selected.segmentBytes = 8192;
+        QVERIFY(session.startRecording(selected)); QTRY_COMPARE(session.recordingStats().state, "running");
+        auto stopped = session.stopRecording(); QTRY_VERIFY(ready(stopped)); QCOMPARE(stopped.get().state, "stopped");
+        QVERIFY(!QFile::exists(directory.filePath(orphanName))); QCOMPARE(fileBytes(directory.filePath("keep.txt")), "keep");
+        auto query = queryArchive(directory.path(), session.sessionId()); QTRY_VERIFY(ready(query)); QVERIFY(query.get().ok);
+        QVERIFY(query.get().snapshot.retention.value("archiveGap").toBool());
+        QVERIFY(!query.get().snapshot.retention.value("complete").toBool());
+    }
+    void localOnlyFlagSurvivesArchive() {
+        QTemporaryDir directory; Wire wire; DebugSession session(catalog(), nullptr, wire.factory());
+        QVERIFY(session.start(config())); QCoreApplication::processEvents(); QVERIFY(session.startRecording(options(directory.path())));
+        const auto op = session.submit("local-example", {}); QVERIFY(session.operation(op).localOnly); session.stop();
+        auto stopped = session.stopRecording(); QTRY_VERIFY(ready(stopped));
+        auto query = queryArchive(directory.path(), session.sessionId(), {op}); QTRY_VERIFY(ready(query)); QVERIFY(query.get().ok);
+        QCOMPARE(query.get().snapshot.operations.size(), 1); QVERIFY(query.get().snapshot.operations.first().localOnly);
+        QCOMPARE(query.get().snapshot.operations.first().update.state, "success");
+    }
     void widgetRecordingAndArchiveExport() {
         QTemporaryDir directory; Wire wire; DebugSession session(catalog(), nullptr, wire.factory());
         QVERIFY(session.start(config())); QCoreApplication::processEvents(); RecordingPanel panel(session); panel.resize(980, 1000); panel.show();
@@ -246,7 +281,7 @@ private slots:
 };
 int main(int argc, char **argv) {
     QApplication app(argc, argv);
-    if (argc == 3 && QString::fromLocal8Bit(argv[1]) == "--archive-child") return archiveChild(QString::fromLocal8Bit(argv[2]));
+    if (argc == 3 && QString::fromLocal8Bit(argv[1]) == "--archive-child") return archiveChild(QString::fromLocal8Bit(argv[2]), true);
     RecordingTests tests; return QTest::qExec(&tests, argc, argv);
 }
 #include "recording_tests.moc"
