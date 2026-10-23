@@ -7,6 +7,7 @@
 #include <QJsonDocument>
 #include <QLabel>
 #include <QPointer>
+#include <QPushButton>
 #include <QSaveFile>
 #include <QScrollArea>
 #include <QScrollBar>
@@ -122,6 +123,7 @@ quint64 WorkspaceController::begin(const QString &input, bool writing)
             if (writing) { self->rawRoot_ = captured; self->complete(id, "success", QStringLiteral("工作区配置快照已保存；后续配置修改需再次保存，未写入设备")); return; }
             QString reason;
             const bool loaded = self->apply(result.value("document").toObject(), directory, reason);
+            if (!self) return;
             self->complete(id, loaded ? "success" : "cancelled", loaded ? QStringLiteral("工作区已恢复，所有会话均未启动；请由操作人员启动通信") : reason);
         }, Qt::QueuedConnection);
     };
@@ -162,14 +164,20 @@ QJsonObject WorkspaceController::capture(const QString &directory) const
 }
 bool WorkspaceController::apply(const QJsonObject &document, const QString &directory, QString &error)
 {
-    for (int index = 0; index < window_.sessionCount(); ++index) if (!window_.session(index)->resolveUnsaved()) {
-        error = QStringLiteral("工作区替换已取消，现有会话和未保存数据保留"); return false;
+    QPointer<WorkspaceController> alive(this);
+    for (int index = 0; index < window_.sessionCount(); ++index) {
+        const bool resolved = window_.session(index)->resolveUnsaved();
+        if (!alive) return false;
+        if (!resolved) {
+            error = QStringLiteral("工作区替换已取消，现有会话和未保存数据保留"); return false;
+        }
     }
     // 后续会话的模态确认期间，前面的会话仍可能收到设备写入。
     for (int index = 0; index < window_.sessionCount(); ++index) if (window_.session(index)->hasUnsavedOrBusy()) {
         error = QStringLiteral("确认期间出现新的未保存数据或后台任务，未替换工作区"); return false;
     }
     while (window_.tabs_->count()) { auto *pane = window_.tabs_->widget(0); window_.tabs_->removeTab(0); delete pane; }
+    window_.findChild<QPushButton *>("addSession")->setEnabled(true);
     rawRoot_ = document;
     for (const auto &entry : document.value("sessions").toArray()) {
         auto item = entry.toObject();
@@ -194,6 +202,8 @@ bool WorkspaceController::apply(const QJsonObject &document, const QString &dire
     return true;
 }
 }
+
+
 
 
 

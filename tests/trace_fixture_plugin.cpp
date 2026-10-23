@@ -7,7 +7,11 @@ public:
     QString prepare(const SessionConfig &) override { return {}; }
     void activate() override {}
     void stop() override {}
+    LocalState localState() const override { return {false, false, false, {"local-example"}}; }
     void submit(const OperationRequest &request) override {
+        if (request.action == "local-example") {
+            services_.publish({request.id, "success", QStringLiteral("测试本地操作"), {}}); return;
+        }
         operation_ = request.id;
         services_.send(operation_, "attempt1"); services_.send(operation_, "attempt2");
     }

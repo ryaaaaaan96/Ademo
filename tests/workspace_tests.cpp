@@ -62,6 +62,17 @@ private slots:
  QCOMPARE(read(path)["sessions"].toArray()[0].toObject()["configuration"].toObject()["endpoint"].toObject()["port"].toString(),QString("COM123"));
  QTest::mouseClick(w.findChild<QPushButton *>("workspaceOpen"),Qt::LeftButton); QTRY_VERIFY(w.findChild<QLabel *>("workspaceStatus")->text().contains(QStringLiteral("已恢复"))); QCOMPARE(wire.opens,0);
  }
+ void unknownEndpointChoiceRoundTripsAndCannotStart() {
+ QTemporaryDir dir; auto path=dir.filePath("unknown-baud.json"),target=dir.filePath("saved.json"); auto item=entry(); auto cfg=item["configuration"].toObject(),endpoint=cfg["endpoint"].toObject(); endpoint["baud"]="230400"; cfg["endpoint"]=endpoint; item["configuration"]=cfg; QVERIFY(save(path,workspace({item})));
+ Wire wire; Workbench w(catalog,nullptr,wire.factory()); auto id=w.openWorkspace(path); QTRY_COMPARE(w.workspaceOperation(id).state,QString("success")); QCOMPARE(w.sessionConfiguration(0).endpoint["baud"].toString(),QString("230400"));
+ id=w.saveWorkspace(target); QTRY_COMPARE(w.workspaceOperation(id).state,QString("success")); QCOMPARE(read(target)["sessions"].toArray()[0].toObject()["configuration"].toObject()["endpoint"].toObject()["baud"].toString(),QString("230400"));
+ QVERIFY(!w.session(0)->start(w.sessionConfiguration(0))); QCOMPARE(wire.opens,0); QVERIFY(w.session(0)->diagnostic().contains(QStringLiteral("无效的串口参数")));
+ }
+ void emptyWorkspaceRestoresAddButtonAfterSixteenTabs() {
+ QTemporaryDir dir; auto full=dir.filePath("full.json"),empty=dir.filePath("empty.json"); QJsonArray items; for(int i=0;i<16;++i) items.append(entry()); QVERIFY(save(full,workspace(items))); QVERIFY(save(empty,workspace({}))); Workbench w(catalog);
+ auto id=w.openWorkspace(full); QTRY_COMPARE(w.workspaceOperation(id).state,QString("success")); QCOMPARE(w.sessionCount(),16); QVERIFY(!w.findChild<QPushButton *>("addSession")->isEnabled());
+ id=w.openWorkspace(empty); QTRY_COMPARE(w.workspaceOperation(id).state,QString("success")); QCOMPARE(w.sessionCount(),0); QVERIFY(w.findChild<QPushButton *>("addSession")->isEnabled()); QTest::mouseClick(w.findChild<QPushButton *>("addSession"),Qt::LeftButton); QCOMPARE(w.sessionCount(),1);
+ }
  void invalidDocumentDoesNotReplaceOrOverwrite() {
  QTemporaryDir dir; Wire wire; Workbench w(catalog,nullptr,wire.factory()); auto *original=w.session(0); const auto path=dir.filePath("invalid.json"); QVERIFY(save(path,{{"version",2},{"sessions",QJsonArray{}}}));
  auto id=w.openWorkspace(path); QTRY_COMPARE(w.workspaceOperation(id).state,QString("file-error")); QCOMPARE(w.session(0),original); QCOMPARE(w.sessionCount(),1);
@@ -72,11 +83,17 @@ private slots:
  auto executor=[&](std::function<void()> job){jobs.append(std::move(job));}; Wire wire; qint64 now=0; Workbench w(catalog,nullptr,wire.factory(),[&]{return now;},executor);
  auto cfg=w.sessionConfiguration(0); cfg.endpoint["port"]="COM122"; QVERIFY(w.session(0)->start(cfg)); QTRY_COMPARE(w.session(0)->state(),SessionState::Running);
  auto id=w.openWorkspace(path); QVERIFY(id); QCOMPARE(w.openWorkspace(path),quint64(0)); QCOMPARE(w.session(0)->state(),SessionState::Running); QCOMPARE(wire.opens,1);
- const auto readId=w.session(0)->submit("read-holding",{{"unit",1},{"start",0},{"count",2}}); now+=2000; w.session(0)->poll(); QCoreApplication::processEvents(); QVERIFY(!wire.writes.isEmpty());
- wire.events.sent(wire.writes.last().first,true,{}); wire.events.received(ReceiveChunk(QByteArray::fromHex("010304000a0014da3e"),{})); QCoreApplication::processEvents(); now+=2000; w.session(0)->poll(); QCoreApplication::processEvents(); QCOMPARE(w.session(0)->operation(readId).update.state,QString("confirmed"));
+ const auto readId=w.session(0)->submit("read-holding",{{"unit",1},{"start",0},{"count",2}}); now+=5000; w.session(0)->poll(); QCoreApplication::processEvents(); QVERIFY(!wire.writes.isEmpty());
+ wire.events.sent(wire.writes.last().first,true,{}); wire.events.received(ReceiveChunk(QByteArray::fromHex("010304000a0014da3e"),{})); QCoreApplication::processEvents(); now+=5000; w.session(0)->poll(); QCoreApplication::processEvents(); QCOMPARE(w.session(0)->operation(readId).update.state,QString("success"));
  QList<Workbench *> others; for(int i=0;i<3;++i) {auto *other=new Workbench(catalog,nullptr,{}, {},executor); others.append(other); QVERIFY(other->openWorkspace(path));}
  Workbench overflow(catalog,nullptr,{}, {},executor); QCOMPARE(overflow.openWorkspace(path),quint64(0));
  qDeleteAll(others); for(auto &job:jobs) job(); jobs.clear(); QTRY_COMPARE(w.workspaceOperation(id).state,QString("success")); QCOMPARE(wire.opens,1);
+ }
+ void replacementGuardCanDestroyWindow() {
+ QTemporaryDir dir; auto file=dir.filePath("device.json"),path=dir.filePath("empty.json"); QVERIFY(save(file,document())); QVERIFY(save(path,workspace({}))); Wire wire;
+ auto *window=new Workbench(catalog,nullptr,wire.factory()); QPointer<Workbench> alive(window); QVERIFY(window->closeSession(0)); auto i=window->addSession(config({QJsonObject{{"unit",17},{"path",file}}},"COM126")); auto *session=window->session(i); QVERIFY(session->start(window->sessionConfiguration(i))); QTRY_COMPARE(session->state(),SessionState::Running);
+ QVERIFY(session->submit("slave-edit-value",{{"unit",17},{"area","holding"},{"address",107},{"value",888}})); session->access().setDiscardGuard([window]{delete window;return false;}); QVERIFY(window->openWorkspace(path)); QTRY_VERIFY(alive.isNull()); QCoreApplication::processEvents();
+ QList<std::function<void()>> jobs; QList<Workbench *> windows; for(int n=0;n<4;++n) {auto *w=new Workbench(catalog,nullptr,{}, {},[&](std::function<void()> job){jobs.append(std::move(job));}); windows.append(w); QVERIFY(w->openWorkspace(path));} qDeleteAll(windows); for(auto &job:jobs) job(); jobs.clear(); QCoreApplication::processEvents();
  }
  void replacementRechecksEarlierDirtySession() {
  QTemporaryDir dir; auto file=dir.filePath("device.json"),path=dir.filePath("empty.json"); QVERIFY(save(file,document())); QVERIFY(save(path,workspace({}))); Wire wire; Workbench w(catalog,nullptr,wire.factory()); QVERIFY(w.closeSession(0));
@@ -88,6 +105,9 @@ private slots:
 };
 QTEST_MAIN(WorkspaceTests)
 #include "workspace_tests.moc"
+
+
+
 
 
 

@@ -138,7 +138,9 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     outer->addWidget(scroll, 1);
     updateProtocol();
     layout->addWidget(new TracePanel(session_, this));
+    layout->addWidget(new RecordingPanel(session_, this));
     auto refresh = [this, formWidget, endpointWidget, protocol, transport, role, start, stop, reconnect, status] {
+
         const bool active = session_.state() == SessionState::Starting || session_.state() == SessionState::Running;
         formWidget->setEnabled(!active);
         endpointWidget->setEnabled(!active);
@@ -211,7 +213,11 @@ void SessionPane::loadConfiguration(const SessionConfig &config)
     if (auto *transport = catalog_->transport(config.transportId)) for (const auto &field : transport->describe().fields) {
         if (!config.endpoint.contains(field.key)) continue;
         if (auto *line = findChild<QLineEdit *>(field.key)) line->setText(config.endpoint.value(field.key).toString());
-        else if (auto *combo = findChild<QComboBox *>(field.key)) combo->setCurrentText(config.endpoint.value(field.key).toString());
+        else if (auto *combo = findChild<QComboBox *>(field.key)) {
+            const auto value = config.endpoint.value(field.key).toString();
+            if (combo->findText(value) < 0) combo->addItem(value);
+            combo->setCurrentText(value);
+        }
     }
     const QSignalBlocker a(findChild<QCheckBox *>("autoReconnect"));
     const QSignalBlocker b(findChild<QCheckBox *>("restorePolling"));
@@ -315,3 +321,5 @@ void Workbench::closeEvent(QCloseEvent *event)
     event->accept();
 }
 }
+
+

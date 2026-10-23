@@ -11,6 +11,7 @@ bool DebugSession::configureRecovery(QJsonObject policy)
         return false;
     }
     config_.recovery = std::move(policy);
+    recordSessionConfiguration();
     reconnectDueUs_ = recoverable_ && config_.recovery.value("autoReconnect").toBool()
         ? nowUs() + qint64(config_.recovery.value("intervalMs").toInt(1000)) * 1000 : -1;
     if (reconnectDueUs_ >= 0 && !clock_) pollTimer_.start();
@@ -28,6 +29,7 @@ void DebugSession::connectionFailed(const QString &reason)
         operation.update = {operation.request.id, "transport-error", reason
             + (operation.sendAccepted ? QStringLiteral("；已提交的操作未获确认，设备可能已执行；不会自动补发") : QString()),
             {{"uncertain", operation.sendAccepted}}};
+        recordOperation(operation);
     }
     if (protocol_ && !preparing_) protocol_->connectionLost(reason);
     sendAttempts_.clear();

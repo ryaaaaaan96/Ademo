@@ -46,9 +46,11 @@ Qt/LLVM-MinGW、Debug/Release 与 LLDB 验证已完成，见 [环境证据](tool
 | 06 | `dd39760` | [06 验收](evidence/06/acceptance.md)，Debug/Release 各 131 项通过 | 同上，SDK5 合并提交 `0943bc2` |
 | 07 | `48df1a6` | [07 验收](evidence/07/acceptance.md)，Debug/Release 各 156 项通过 | 整合 05/06/07/11 后 Debug 构建与 CTest 7/7 通过 |
 | 08 | `0559225` | [08 验收](evidence/08/acceptance.md)，Debug/Release 各 181 项通过 | 复用完整 03–08/11 组合；专项配置覆盖问题修复并复核关闭，产物与证据哈希匹配 |
+| 09 | `77fca54`、`95ff916` | [09 验收](evidence/09/acceptance.md)，Debug/Release 各 195 项通过 | 集成 Debug CTest 9/9；关闭确认竞态的 P2 已修复并独立复核，102 项哈希匹配 |
 | 11 | `a4dec16` | [11 验收](evidence/11/acceptance.md)，Debug/Release 各 59 项通过 | 整合 03/04/11 后 Debug 构建与 CTest 4/4 通过 |
+| 12 | `522336e`、`8be3807`、`8bd8c60`、`4c7d651` | [12 验收](evidence/12/acceptance.md)、[09/12 组合](evidence/integration09-12/acceptance.md) | 两配置各 CTest 10/10、218 项；两个专项 P2 修复并独立复核，108 项哈希匹配 |
 
-03–08、11 已合入，09、12 实施中。10 等待 09；13–19 不启动。
+03–09、11、12 已合入。10 在 08/09 验收后实施中；停止写操作的终态保护正补组合修复，整体审查与最终双配置验收尚待完成。13 等待真实硬件条件，14–19 不启动。
 
 ## 依赖与状态规则
 

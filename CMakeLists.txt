@@ -11,7 +11,9 @@ target_link_libraries(debugger_sdk INTERFACE Qt6::Widgets)
 # 配套交付指纹：SDK、产品、Qt、编译器与配置必须一致。
 target_compile_definitions(debugger_sdk INTERFACE
   DEBUGGER_BUILD_KEY="sdk8-product0.2-qt${Qt6_VERSION}-${CMAKE_CXX_COMPILER_ID}${CMAKE_CXX_COMPILER_VERSION}-${CMAKE_SYSTEM_PROCESSOR}-$<CONFIG>")
-add_library(debugger_host STATIC src/workspace.cpp src/session_recovery.cpp src/host.cpp src/workbench.cpp src/trace_query.cpp src/trace_panel.cpp include/debugger/host.h)
+add_library(debugger_host STATIC src/workspace.cpp src/session_recovery.cpp src/host.cpp src/workbench.cpp src/trace_query.cpp src/trace_panel.cpp
+  src/trace_codec.cpp src/recording.cpp src/archive_query.cpp src/archive_format.cpp src/recording_panel.cpp include/debugger/host.h)
+
 target_link_libraries(debugger_host PUBLIC debugger_sdk)
 foreach(plugin IN ITEMS modbus serial)
   add_library(${plugin}_plugin MODULE plugins/${plugin}.cpp)
@@ -94,3 +96,10 @@ target_link_libraries(workspace_tests PRIVATE debugger_host Qt6::Test)
 add_dependencies(workspace_tests modbus_plugin serial_plugin incompatible_plugin)
 add_test(NAME workspace_roundtrip COMMAND workspace_tests -o workspace-results.txt,txt)
 set_tests_properties(workspace_roundtrip PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=windows" TIMEOUT 45)
+add_executable(recording_tests tests/recording_tests.cpp)
+target_link_libraries(recording_tests PRIVATE debugger_host Qt6::Test)
+add_dependencies(recording_tests trace_tests)
+add_test(NAME bounded_disk_recording COMMAND recording_tests -o recording-results.txt,txt)
+set_tests_properties(bounded_disk_recording PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=windows" TIMEOUT 60)
+
+
