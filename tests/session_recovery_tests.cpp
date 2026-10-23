@@ -1,5 +1,6 @@
 #include "slave_test_support.h"
 #include <QApplication>
+#include <QAction>
 #include <QCheckBox>
 #include <QCloseEvent>
 #include <QComboBox>
@@ -7,7 +8,13 @@
 #include <QPushButton>
 #include <QTabWidget>
 #include <QTest>
-
+#include <QCursor>
+#include <QScreen>
+#include <QPlainTextEdit>
+#include <QTreeWidget>
+#ifdef Q_OS_WIN
+#include <qt_windows.h>
+#endif
 namespace {
 SessionConfig master(const QString &port, bool polls = false) {
     return {"modbus.rtu", "serial", "master", {{"port", port}, {"baud", "115200"},
@@ -209,10 +216,189 @@ private slots:
         QVERIFY(session.configure({{"extraReadRetries", 0}})); QVERIFY(!session.canReconnect());
         now += 1000000; session.poll(); QCOMPARE(link->opens, 1);
     }
-    void workbenchCreatesParallelTabsAndProtectsDirtyClose() {
+    void closingWindowRetainsSessionConfigurationAndOtherConnection() {
         Hub hub; Workbench window(catalog, nullptr, hub.factory());
-        QVERIFY(window.closeSession(0));
+        const auto settings = master("COM107");
+        QCOMPARE(window.addSession(settings, QStringLiteral("保留配置的会话")), 1);
+        auto *first = window.session(0), *second = window.session(1);
+        QVERIFY(first->start(master("COM106")));
+        QVERIFY(second->start(settings));
+        QTRY_COMPARE(first->state(), SessionState::Running);
+        QTRY_COMPARE(second->state(), SessionState::Running);
+        QVERIFY(window.closeSession(1));
+        QCOMPARE(window.sessionCount(), 2);
+        QCOMPARE(window.session(1), second);
+        QCOMPARE(second->state(), SessionState::Stopped);
+        QCOMPARE(window.sessionConfiguration(1).endpoint, settings.endpoint);
+        QCOMPARE(first->state(), SessionState::Running);
+        QCOMPARE(hub.links["COM107"]->closes, 1);
+        window.selectSession(1);
+        QCOMPARE(second->state(), SessionState::Stopped);
+        QCOMPARE(hub.links["COM107"]->opens, 1);
+    }
+    void windowArrangementIsAvailableWithoutStoppingSessions() {
+        Hub hub; Workbench window(catalog, nullptr, hub.factory());
+        window.addSession(master("COM109"));
+        QVERIFY(window.session(0)->start(master("COM108")));
+        QVERIFY(window.session(1)->start(window.sessionConfiguration(1)));
+        QTRY_COMPARE(window.session(0)->state(), SessionState::Running);
+        QTRY_COMPARE(window.session(1)->state(), SessionState::Running);
+        window.show();
+        QAction *tile = nullptr;
+        for (auto *action : window.findChildren<QAction *>())
+            if (action->text() == QStringLiteral("左右平铺")) tile = action;
+        QVERIFY2(tile, "工作台应提供同时显示多个会话的平铺入口");
+        tile->trigger();
+        QCOMPARE(window.session(0)->state(), SessionState::Running);
+        QCOMPARE(window.session(1)->state(), SessionState::Running);
+        QVERIFY(!window.isSessionFloating(0)); QVERIFY(!window.isSessionFloating(1));
+        QVERIFY(window.sessionView(0)->isVisible()); QVERIFY(window.sessionView(1)->isVisible());
+        const auto *first = window.session(0);
+        auto *content = window.sessionView(0);
+        window.floatSession(0);
+        auto *floating = window.sessionWindow(0); QVERIFY(floating->isWindow());
+        QVERIFY(floating->windowFlags().testFlag(Qt::WindowMinimizeButtonHint));
+        QVERIFY(floating->windowFlags().testFlag(Qt::WindowMaximizeButtonHint));
+        QVERIFY(floating->windowFlags().testFlag(Qt::WindowCloseButtonHint));
+        QVERIFY(window.screen()->availableGeometry().contains(floating->frameGeometry()));
+        QVERIFY(QLineF(floating->frameGeometry().center(), window.frameGeometry().center()).length() < 32);
+        floating->showMinimized(); QTest::qWait(40);
+        QCOMPARE(window.session(0), first); QCOMPARE(first->state(), SessionState::Running);
+        window.selectSession(0); QVERIFY(!floating->isMinimized());
+        floating->showMaximized(); QTest::qWait(40);
+        QCOMPARE(first->state(), SessionState::Running);
+        floating->showNormal(); window.dockSession(0); window.tileSessions(Qt::Vertical);
+        QCOMPARE(window.sessionView(0), content); QCOMPARE(window.session(0), first);
+        QCOMPARE(first->state(), SessionState::Running);
+        window.floatSession(0); QVERIFY(floating->close());
+        QVERIFY(!window.isSessionOpen(0)); QCOMPARE(first->state(), SessionState::Stopped);
+        QCOMPARE(window.session(1)->state(), SessionState::Running);
+        window.tileSessions(Qt::Horizontal); QVERIFY(!window.isSessionOpen(0));
+        window.selectSession(0); QVERIFY(window.isSessionOpen(0));
+        QCOMPARE(first->state(), SessionState::Stopped);
+    }
+#ifdef Q_OS_WIN
+    void nativeWindowMoveDropsIntoEmptyWorkbench() {
+        Hub hub; Workbench window(catalog, nullptr, hub.factory()); window.show();
+        auto *floating = window.sessionWindow(0); QVERIFY(floating);
+        QVERIFY(window.isSessionFloating(0));
+        window.raise(); window.activateWindow(); QTest::qWait(100);
+        const auto previous = QCursor::pos();
+        QCursor::setPos(window.mapToGlobal(QPoint(window.width() * 3 / 4, window.height() / 2)));
+        const auto handle = reinterpret_cast<HWND>(floating->winId());
+        SendMessage(handle, WM_ENTERSIZEMOVE, 0, 0);
+        floating->move(floating->pos() + QPoint(10, 10));
+        SendMessage(handle, WM_MOVING, 0, 0);
+        SendMessage(handle, WM_EXITSIZEMOVE, 0, 0);
+        QTest::qWait(100); QCursor::setPos(previous);
+        QVERIFY2(!window.isSessionFloating(0), "原生窗口移动完成后应按预览停靠到空工作台");
+        QCOMPARE(window.session(0)->state(), SessionState::Stopped);
+    }
+    void nativeMoveCancellationAndOcclusionKeepFloating() {
+        Hub hub; Workbench window(catalog, nullptr, hub.factory()); window.show();
+        auto *floating = window.sessionWindow(0);
+        const auto handle = reinterpret_cast<HWND>(floating->winId());
+        const auto previous = QCursor::pos();
+        const auto point = window.mapToGlobal(QPoint(window.width() * 3 / 4, window.height() / 2));
+        window.raise(); window.activateWindow(); QTest::qWait(80); QCursor::setPos(point);
+        SendMessage(handle, WM_ENTERSIZEMOVE, 0, 0); floating->move(floating->pos() + QPoint(10, 10));
+        SendMessage(handle, WM_MOVING, 0, 0); SendMessage(handle, WM_CANCELMODE, 0, 0);
+        SendMessage(handle, WM_EXITSIZEMOVE, 0, 0); QTest::qWait(80);
+        const bool cancelled = window.isSessionFloating(0);
+        QWidget other; other.setWindowTitle(QStringLiteral("遮挡工作台的窗口")); other.resize(240, 180);
+        other.move(point - QPoint(120, 90)); other.show(); other.raise(); other.activateWindow(); QTest::qWait(80);
+        SendMessage(handle, WM_ENTERSIZEMOVE, 0, 0); floating->move(floating->pos() + QPoint(10, 10));
+        SendMessage(handle, WM_MOVING, 0, 0); SendMessage(handle, WM_EXITSIZEMOVE, 0, 0); QTest::qWait(80);
+        const bool occluded = window.isSessionFloating(0);
+        QCursor::setPos(previous);
+        QVERIFY(cancelled); QVERIFY(occluded);
+    }
+    void nativeMoveCanTileOnEverySideOfAnotherSession() {
+        Hub hub; Workbench window(catalog, nullptr, hub.factory());
+        window.addSession(master("COM112")); window.show();
+        const auto previous = QCursor::pos();
+        for (int side = 0; side < 4; ++side) {
+            window.dockSession(0); window.floatSession(1);
+            window.raise(); window.activateWindow(); QTest::qWait(80);
+            auto *anchor = window.sessionWindow(0), *moving = window.sessionWindow(1);
+            const QList<QPoint> points{{12, anchor->height() / 2}, {anchor->width() - 12, anchor->height() / 2},
+                {anchor->width() / 2, 12}, {anchor->width() / 2, anchor->height() - 12}};
+            QCursor::setPos(anchor->mapToGlobal(points[side]));
+            const auto handle = reinterpret_cast<HWND>(moving->winId());
+            SendMessage(handle, WM_ENTERSIZEMOVE, 0, 0); moving->move(moving->pos() + QPoint(10, 10));
+            SendMessage(handle, WM_MOVING, 0, 0); SendMessage(handle, WM_EXITSIZEMOVE, 0, 0);
+            QTest::qWait(100); QCursor::setPos(previous);
+            QVERIFY(!window.isSessionFloating(1));
+            const auto a = anchor->mapToGlobal(anchor->rect().center());
+            const auto b = moving->mapToGlobal(moving->rect().center());
+            if (side == 0) QVERIFY(b.x() < a.x());
+            if (side == 1) QVERIFY(b.x() > a.x());
+            if (side == 2) QVERIFY(b.y() < a.y());
+            if (side == 3) QVERIFY(b.y() > a.y());
+        }
+    }
+#endif
+    void navigationAndRecordsStayWithTheirSession() {
+        Hub hub; Workbench window(catalog, nullptr, hub.factory());
+        auto settings = master("COM111");
+        settings.protocol["parameterRows"] = QJsonArray{
+            QJsonObject{{"unit", 17}, {"area", "holding"}, {"address", 107}},
+            QJsonObject{{"unit", 18}, {"area", "holding"}, {"address", 107}}};
+        window.addSession(settings, QStringLiteral("导航目标 B")); window.show();
+        QVERIFY(window.session(0)->start(master("COM110")));
+        QVERIFY(window.session(1)->start(settings));
+        QTRY_COMPARE(window.session(0)->state(), SessionState::Running);
+        QTRY_COMPARE(window.session(1)->state(), SessionState::Running);
+        auto recordView = [](QWidget *pane) {
+            for (auto *view : pane->findChildren<QPlainTextEdit *>())
+                if (view->accessibleName() == QStringLiteral("本会话通信记录")) return view;
+            return static_cast<QPlainTextEdit *>(nullptr);
+        };
+        auto *firstRecords = recordView(window.sessionView(0)), *secondRecords = recordView(window.sessionView(1));
+        QVERIFY(firstRecords && secondRecords);
+        hub.links["COM110"]->events.received(QByteArray::fromHex("a1b2"));
+        hub.links["COM111"]->events.received(QByteArray::fromHex("c3d4"));
+        QTRY_VERIFY(firstRecords->toPlainText().contains("a1 b2"));
+        QTRY_VERIFY(secondRecords->toPlainText().contains("c3 d4"));
+        QVERIFY(!firstRecords->toPlainText().contains("c3 d4"));
+        QVERIFY(window.selectDevice(1, "18"));
+        QTreeWidget *tree = nullptr;
+        for (auto *candidate : window.findChildren<QTreeWidget *>())
+            if (candidate->accessibleName() == QStringLiteral("会话与设备")) tree = candidate;
+        QVERIFY(tree);
+        QTRY_COMPARE(tree->topLevelItemCount(), 2);
+        QTRY_COMPARE(tree->topLevelItem(1)->childCount(), 2);
+        auto *device = tree->topLevelItem(1)->child(0);
+        QCOMPARE(device->text(0), QStringLiteral("设备 17"));
+        window.sessionWindow(1)->showMinimized();
+        QTest::mouseClick(tree->viewport(), Qt::LeftButton, Qt::NoModifier, tree->visualItemRect(device).center());
+        QCOMPARE(window.parameterView(1)->selectedDevice(), QString("17"));
+        QVERIFY(!window.sessionWindow(1)->isMinimized());
+        QPushButton *fold = nullptr;
+        for (auto *button : window.sessionView(1)->findChildren<QPushButton *>())
+            if (button->text() == QStringLiteral("通信记录")) fold = button;
+        QVERIFY2(fold, "所属窗口应提供通信记录折叠入口");
+        QTest::mouseClick(fold, Qt::LeftButton); QVERIFY(!secondRecords->isVisible());
+        QCOMPARE(window.session(1)->state(), SessionState::Running);
+        QTest::mouseClick(fold, Qt::LeftButton);
+        window.tileSessions(Qt::Horizontal); window.floatSession(1);
+        QCOMPARE(recordView(window.sessionView(1)), secondRecords);
+        QVERIFY(secondRecords->toPlainText().contains("c3 d4"));
+        QCOMPARE(hub.links["COM111"]->opens, 1);
+        QCOMPARE(window.session(0)->state(), SessionState::Running);
+        const auto output = qEnvironmentVariable("DEBUGGER_EVIDENCE_DIR");
+        if (!output.isEmpty()) {
+            QVERIFY(window.sessionWindow(1)->grab().save(output + "/floating-session-records.png"));
+            window.tileSessions(Qt::Horizontal); QTest::qWait(100);
+            QVERIFY(window.grab().save(output + "/two-session-workbench.png"));
+        }
+    }
+
+    void workbenchCreatesParallelWindowsAndProtectsDirtyClose() {
+        Hub hub; Workbench window(catalog, nullptr, hub.factory());
         QTemporaryDir dir; const auto path = dir.filePath("slave.json"); QVERIFY(save(path, document()));
+        const auto empty = dir.filePath("empty.json"); QVERIFY(save(empty, {{"version", 1}, {"sessions", QJsonArray{}}}));
+        const auto loaded = window.openWorkspace(empty); QTRY_COMPARE(window.workspaceOperation(loaded).state, QString("success"));
         QCOMPARE(window.addSession(config({QJsonObject{{"unit", 17}, {"path", path}}}, "COM99"), QStringLiteral("从站A")), 0);
         QCOMPARE(window.addSession(master("COM100"), QStringLiteral("主站B")), 1); QCOMPARE(window.sessionCount(), 2);
         for (int i = 0; i < 2; ++i) QVERIFY(window.session(i)->start(window.sessionConfiguration(i)));
@@ -222,8 +408,9 @@ private slots:
         slave->access().setDiscardGuard([] { return false; });
         QVERIFY(!window.closeSession(0)); QCOMPARE(window.sessionCount(), 2); QCOMPARE(value(*slave), 77);
         window.resize(1100, 900); window.show(); window.selectSession(1); QCOMPARE(window.currentSessionIndex(), 1);
-        auto *tabs = window.findChild<QTabWidget *>("sessionTabs"); QVERIFY(tabs); QCOMPARE(tabs->count(), 2);
-        auto *pane = tabs->widget(1); QVERIFY(pane->findChild<QPushButton *>("reconnect"));
+        QVERIFY(!window.sessionWindow(0)->close()); QVERIFY(window.isSessionOpen(0));
+        QCOMPARE(window.session(0)->state(), SessionState::Running);
+        auto *pane = window.sessionView(1); QVERIFY(pane->findChild<QPushButton *>("reconnect"));
         pane->findChild<QCheckBox *>("autoReconnect")->setChecked(true);
         QVERIFY(window.sessionConfiguration(1).recovery.value("autoReconnect").toBool());
         const auto output = qEnvironmentVariable("DEBUGGER_EVIDENCE_DIR");
@@ -240,13 +427,16 @@ private slots:
         if (!output.isEmpty()) QVERIFY(window.grab().save(output + "/parallel-reconnected-controlled.png"));
         QVERIFY(!window.close()); QVERIFY(window.isVisible());
         slave->access().setDiscardGuard([slave] { slave->submit("slave-discard", {{"unit", 17}}); return true; });
-        QVERIFY(window.closeSession(0)); QCOMPARE(window.sessionCount(), 1);
-        QCOMPARE(window.session(0)->state(), SessionState::Running);
-        QVERIFY(window.close()); QCOMPARE(window.session(0)->state(), SessionState::Stopped);
+        QVERIFY(window.closeSession(0)); QCOMPARE(window.sessionCount(), 2);
+        QCOMPARE(window.session(0)->state(), SessionState::Stopped);
+        QCOMPARE(window.session(1)->state(), SessionState::Running);
+        QVERIFY(window.close()); QCOMPARE(window.session(1)->state(), SessionState::Stopped);
     }
     void windowCloseRechecksEarlierSessionAfterLaterGuard() {
-        Hub hub; Workbench window(catalog, nullptr, hub.factory()); QVERIFY(window.closeSession(0));
+        Hub hub; Workbench window(catalog, nullptr, hub.factory());
         QTemporaryDir dir;
+        const auto empty = dir.filePath("empty.json"); QVERIFY(save(empty, {{"version", 1}, {"sessions", QJsonArray{}}}));
+        const auto loaded = window.openWorkspace(empty); QTRY_COMPARE(window.workspaceOperation(loaded).state, QString("success"));
         const auto firstPath = dir.filePath("first.json"), secondPath = dir.filePath("second.json");
         QVERIFY(save(firstPath, document())); QVERIFY(save(secondPath, document()));
         window.addSession(config({QJsonObject{{"unit", 17}, {"path", firstPath}}}, "COM104"));

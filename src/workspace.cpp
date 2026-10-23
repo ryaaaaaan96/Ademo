@@ -136,7 +136,7 @@ QJsonObject WorkspaceController::capture(const QString &directory) const
     document["version"] = 1;
     QJsonArray sessions;
     for (int index = 0; index < window_.sessionCount(); ++index) {
-        auto *pane = window_.tabs_->widget(index);
+        auto *pane = window_.sessionView(index);
         auto item = pane->property("workspaceRaw").value<QJsonObject>();
         auto config = window_.sessionConfiguration(index);
         auto *protocol = catalog_->protocol(config.protocolId); auto *transport = catalog_->transport(config.transportId);
@@ -147,7 +147,7 @@ QJsonObject WorkspaceController::capture(const QString &directory) const
         } else {
             if (!item.contains("referenceBase")) item["referenceBase"] = pane->property("workspaceBase").toString();
         }
-        item["title"] = window_.tabs_->tabText(index);
+        item["title"] = window_.sessionTitle(index);
         item["configuration"] = overlay(item.value("configuration").toObject(), config);
         auto layout = item.value("layout").toObject();
         auto *scroll = pane->findChild<QScrollArea *>("sessionContent");
@@ -176,7 +176,7 @@ bool WorkspaceController::apply(const QJsonObject &document, const QString &dire
     for (int index = 0; index < window_.sessionCount(); ++index) if (window_.session(index)->hasUnsavedOrBusy()) {
         error = QStringLiteral("确认期间出现新的未保存数据或后台任务，未替换工作区"); return false;
     }
-    while (window_.tabs_->count()) { auto *pane = window_.tabs_->widget(0); window_.tabs_->removeTab(0); delete pane; }
+    window_.clearSessions();
     window_.findChild<QPushButton *>("addSession")->setEnabled(true);
     rawRoot_ = document;
     for (const auto &entry : document.value("sessions").toArray()) {
@@ -186,7 +186,7 @@ bool WorkspaceController::apply(const QJsonObject &document, const QString &dire
         if (auto *plugin = catalog_->protocol(config.protocolId)) config.protocol = plugin->relocateConfiguration(config.protocol, base, {});
         if (auto *plugin = catalog_->transport(config.transportId)) config.endpoint = plugin->relocateConfiguration(config.endpoint, base, {});
         const auto index = window_.addSession(config, item.value("title").toString());
-        auto *pane = window_.tabs_->widget(index);
+        auto *pane = window_.sessionView(index);
         pane->setProperty("workspaceRaw", item); pane->setProperty("workspaceBase", base);
         auto *scroll = pane->findChild<QScrollArea *>("sessionContent");
         const auto layout = item.value("layout").toObject();
