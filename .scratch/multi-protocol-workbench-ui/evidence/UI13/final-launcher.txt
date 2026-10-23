@@ -1,0 +1,11 @@
+Date: 2026-10-23
+Source merge: 4ae8f321a62a79dfa04bafd886c0b9e19935b117
+Integration evidence: 1321ea70d8d96fc766c8ca163d2d2637d513da94
+CMD exit: 0
+PID: 32120
+Executable: C:\Users\81966\Documents\Ademo\build\qt-llvm-release\bin\multi_protocol_debugger.exe
+Window title: 多协议调试工具 · 多会话工作台
+Window handle present: True
+Caller PATH unchanged: True
+Previous process IDs preserved: True
+Application left running for user operation; no automatic communication started.

@@ -28,7 +28,7 @@ Status: ready-for-agent
 | [UI10](issues/10-qml-parameter-trends.md) | 用 QWidget 内嵌 QML 展示设备参数趋势 | ready-for-agent | UI06 | 已完成：c008399；合入 640ce33；[验收与集成复测](evidence/UI10/integration.md) |
 | [UI11](issues/11-window-workspace-recovery.md) | 保存并恢复多窗口工作区和插件配置 | ready-for-agent | UI03、UI06、UI08 | 已完成：90a475d；合入 1003854；[验收与集成复测](evidence/UI11/integration.md) |
 | [UI12](issues/12-plugin-ui-contract-validation.md) | 通过独立示例插件验证表格与编辑页扩展 | ready-for-agent | UI03、UI07 | 已完成：e394d58；合入 66ffa7e；[验收与集成复测](evidence/UI12/integration.md) |
-| [UI13](issues/13-rtu-ui-acceptance-migration.md) | 验收 RTU 新界面完整流程并完成旧入口迁移 | ready-for-agent | UI09、UI10、UI11、UI12 | 软件迁移/自动验收完成，整体审查与用户正式操作确认待完成：36daaba；合入 0040f55；[集成验收](evidence/UI13/integration.md) |
+| [UI13](issues/13-rtu-ui-acceptance-migration.md) | 验收 RTU 新界面完整流程并完成旧入口迁移 | ready-for-agent | UI09、UI10、UI11、UI12 | 软件迁移、整体审查与最终自动验收完成；用户正式操作确认待完成。36daaba；修复 ce2e65f；最终合入 4ae8f32；[最终审查与验收](evidence/UI13/final-review.md) |
 | [旧13](../multi-protocol-debugger/issues/13-rtu-phase-acceptance.md) | 验收 RTU 第一阶段的真实互通与负载 | needs-info | UI13、旧10/12（已完成）；硬件/对端 | 未启动 |
 | [旧14](../multi-protocol-debugger/issues/14-upp-can-receive.md) | 通过插件接收并解析真实 UPP/CAN 消息 | needs-info | 旧13；UPP 规范/硬件 | 未启动 |
 | [旧15](../multi-protocol-debugger/issues/15-upp-can-exchange.md) | 完成真实 UPP/CAN 发送交互并与 RTU 并行 | needs-info | 旧14；真实交互条件 | 未启动 |
@@ -58,3 +58,7 @@ Status: ready-for-agent
 ### 2026-10-23：UI01 用户确认并授权正式实施
 
 用户明确表示“前端完成了可以开始接下来的实施了”，并调用 implement-spec。UI01 以 bb3aa81 原型为接受基准：白底通信记录、会话和绘图的 QMainWindow 系统三按钮、拖动悬停停靠／平铺、点击浮动居中。按综合实施索引进入 UI02–UI13，每项独立 worktree 和分支，验证后合入 codex/workbench-ui-integration。该确认来自用户反馈，不把程序冒烟扩称为人工逐步测试，也不代替 UI13 正式产品验收。旧13等待真实硬件，旧14–19不启动。
+
+### 2026-10-23：正式软件实施、复审及最终双配置验收完成
+
+UI02–UI13 软件切片均已按依赖合入。整体 Standards 初审两项生命周期问题由单个实施者集中修复，并修复直接关联的确认重入保护；Standards / Spec 修后复审均无遗留。最终源码4ae8f32在主目录Debug/Release各22/22套、358项通过，证据1321ea7。独立实施worktree已清理，正式Release已通过根目录CMD启动供操作。UI13仅用户正式操作确认仍待完成；旧13硬件和旧14–19门槛保持，详见[最终记录](evidence/UI13/final-review.md)。
