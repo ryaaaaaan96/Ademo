@@ -40,3 +40,7 @@ Blocked by: [02 完成一次 RTU 保持寄存器读取](02-rtu-first-register-re
 在独立 worktree `rtu-slave` / 分支 `codex/rtu-slave`，基于共享基线 `abb5169` 复用 01/02 实施。四种写入动作均通过插件视图与公共通道执行，验证回显值/起址/数量、CRC、Unit 与功能码后才视为设备确认。已提交未确认的写入不自动重试；停止/重启不补发，人工再次执行生成新操作与来源记录。
 
 Debug、Release 均通过 3/3 CTest；生命周期 13、读取 36、写入 36，共每配置 85 项 Qt Test 检查（含初始化/清理），0 failed / 0 skipped。会话公开接口覆盖规范向量、四种异常、越界、超时、本地失败、断线、停止、手动重做、无重试及来源关联；原生 Widgets 覆盖四动作成功及异常/超时/断线/停止的不确定提示。详见 [04 验收证据](../evidence/04/acceptance.md)。真实串口成功写入与独立硬件对端尚未验证，留待 13。
+
+### 2026-10-23：停止未确认写入的公开终态修复
+
+集成审查发现宿主先finished再protocol.stop，导致协议发布的cancelled/uncertain被忽略。现协议先发布终态，宿主仅兜底剩余未完成操作，已提交未确认时明确标记uncertain；保留08的后台localOnly操作及preparing保护。新增公开回归覆盖停止时等待本地完成/设备确认、排队未发送、重启不补发，以及宿主fallback与归档JSONL。定向Debug 5/5 CTest、98项通过，0失败/跳过；最终集成双配置另由根代理验证。详见[停止终态修复证据](../evidence/stop-uncertain-reviewfix/acceptance.md)。
