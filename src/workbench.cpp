@@ -12,6 +12,8 @@
 #include <QTabWidget>
 #include <QSignalBlocker>
 #include <QScrollArea>
+#include <QFileDialog>
+#include <QDir>
 
 namespace debugger {
 class SessionPane final : public QWidget {
@@ -24,6 +26,8 @@ public:
 private:
     std::shared_ptr<PluginCatalog> catalog_;
     QWidget *view_ = nullptr;
+    SessionConfig original_;
+    std::function<void()> rebuildProtocol_, refresh_;
 };
 SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent,
                      DebugSession::EndpointFactory factory, std::function<qint64()> clock)
@@ -93,6 +97,7 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
         view_ = catalog_->createView(p->describe().id, this, session_.access());
         if (view_) layout->addWidget(view_);
     };
+    rebuildProtocol_ = updateProtocol;
     connect(transport, &QComboBox::currentIndexChanged, this, updateTransport);
     connect(protocol, &QComboBox::currentIndexChanged, this, updateProtocol);
     updateTransport();
@@ -121,8 +126,9 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     recovery->addWidget(automatic); recovery->addWidget(restore); recovery->addWidget(interval);
     outer->addLayout(recovery);
     auto updateRecovery = [this, automatic, restore, interval] {
-        session_.configureRecovery({{"autoReconnect", automatic->isChecked()}, {"restorePolling", restore->isChecked()},
-            {"intervalMs", interval->value()}});
+        auto policy = session_.config().recovery;
+        policy["autoReconnect"] = automatic->isChecked(); policy["restorePolling"] = restore->isChecked();
+        policy["intervalMs"] = interval->value(); session_.configureRecovery(policy);
     };
     connect(automatic, &QCheckBox::toggled, this, updateRecovery);
     connect(restore, &QCheckBox::toggled, this, updateRecovery);
@@ -132,16 +138,24 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     outer->addWidget(scroll, 1);
     updateProtocol();
     layout->addWidget(new TracePanel(session_, this));
-    auto refresh = [this, formWidget, endpointWidget, protocol, transport, start, stop, reconnect, status] {
+    auto refresh = [this, formWidget, endpointWidget, protocol, transport, role, start, stop, reconnect, status] {
         const bool active = session_.state() == SessionState::Starting || session_.state() == SessionState::Running;
         formWidget->setEnabled(!active);
         endpointWidget->setEnabled(!active);
-        start->setEnabled(!active && protocol->count() && transport->count());
+        auto *p = catalog_->protocol(protocol->currentData().toString());
+        auto *t = catalog_->transport(transport->currentData().toString());
+        const bool available = p && t && p->describe().roles.contains(role->currentData().toString())
+            && p->describe().transports.contains(t->describe().id);
+        start->setEnabled(!active && available);
         stop->setEnabled(active || session_.canReconnect());
         reconnect->setEnabled(session_.canReconnect());
-        status->setText(stateText(session_.state()) + "\n" + session_.diagnostic());
+        status->setText(stateText(session_.state()) + "\n" + (available ? session_.diagnostic()
+            : QStringLiteral("所需插件/角色/支持组合不可用，仅禁用此会话；原配置完整保留。\n") + catalog_->diagnostics().join('\n')));
     };
+    refresh_ = refresh;
     connect(&session_, &DebugSession::changed, this, refresh);
+    connect(role, &QComboBox::currentIndexChanged, this, refresh);
+    connect(transport, &QComboBox::currentIndexChanged, this, refresh);
     connect(start, &QPushButton::clicked, this, [this, protocol, transport, role, editors] {
         SessionConfig config;
         config.protocolId = protocol->currentData().toString();
@@ -167,7 +181,9 @@ SessionPane::~SessionPane()
 }
 SessionConfig SessionPane::configuration() const
 {
-    auto config = session_.config();
+    auto config = original_;
+    config.protocol = session_.config().protocol;
+    config.recovery = session_.config().recovery;
     config.protocolId = findChild<QComboBox *>("protocol")->currentData().toString();
     config.transportId = findChild<QComboBox *>("transport")->currentData().toString();
     config.role = findChild<QComboBox *>("role")->currentData().toString();
@@ -179,17 +195,24 @@ SessionConfig SessionPane::configuration() const
 }
 void SessionPane::loadConfiguration(const SessionConfig &config)
 {
-    for (const auto &item : QList<QPair<const char *, QString>>{{"protocol", config.protocolId}, {"transport", config.transportId}, {"role", config.role}}) {
+    original_ = config;
+    session_.configure(config.protocol);
+    for (const auto &item : QList<QPair<const char *, QString>>{{"protocol", config.protocolId}, {"transport", config.transportId}}) {
         auto *combo = findChild<QComboBox *>(item.first);
-        const int index = combo->findData(item.second);
+        int index = combo->findData(item.second);
+        if (index < 0 && !item.second.isEmpty()) { combo->addItem(QStringLiteral("不可用：") + item.second, item.second); index = combo->count() - 1; }
         if (index >= 0) combo->setCurrentIndex(index);
     }
+    rebuildProtocol_();
+    auto *role = findChild<QComboBox *>("role");
+    int roleIndex = role->findData(config.role);
+    if (roleIndex < 0 && !config.role.isEmpty()) { role->addItem(QStringLiteral("不可用：") + config.role, config.role); roleIndex = role->count() - 1; }
+    if (roleIndex >= 0) role->setCurrentIndex(roleIndex);
     if (auto *transport = catalog_->transport(config.transportId)) for (const auto &field : transport->describe().fields) {
         if (!config.endpoint.contains(field.key)) continue;
         if (auto *line = findChild<QLineEdit *>(field.key)) line->setText(config.endpoint.value(field.key).toString());
         else if (auto *combo = findChild<QComboBox *>(field.key)) combo->setCurrentText(config.endpoint.value(field.key).toString());
     }
-    session_.configure(config.protocol);
     const QSignalBlocker a(findChild<QCheckBox *>("autoReconnect"));
     const QSignalBlocker b(findChild<QCheckBox *>("restorePolling"));
     const QSignalBlocker c(findChild<QSpinBox *>("reconnectIntervalMs"));
@@ -197,9 +220,10 @@ void SessionPane::loadConfiguration(const SessionConfig &config)
     findChild<QCheckBox *>("restorePolling")->setChecked(config.recovery.value("restorePolling").toBool(true));
     findChild<QSpinBox *>("reconnectIntervalMs")->setValue(config.recovery.value("intervalMs").toInt(1000));
     session_.configureRecovery(config.recovery);
+    refresh_();
 }
 Workbench::Workbench(std::shared_ptr<PluginCatalog> catalog, QWidget *parent,
-                     DebugSession::EndpointFactory factory, std::function<qint64()> clock)
+                     DebugSession::EndpointFactory factory, std::function<qint64()> clock, WorkspaceController::Executor workspaceExecutor)
     : QWidget(parent), catalog_(std::move(catalog)), factory_(std::move(factory)), clock_(std::move(clock))
 {
     setWindowTitle(QStringLiteral("多协议调试工具 · 多会话工作台"));
@@ -212,6 +236,22 @@ Workbench::Workbench(std::shared_ptr<PluginCatalog> catalog, QWidget *parent,
     status->setObjectName("workspaceStatus");
     status->setWordWrap(true);
     layout->addWidget(status);
+    workspace_ = std::make_unique<WorkspaceController>(*this, catalog_, std::move(workspaceExecutor));
+    auto *files = new QHBoxLayout;
+    auto *path = new QLineEdit(this); path->setObjectName("workspacePath"); path->setPlaceholderText(QStringLiteral("工作区 JSON 绝对路径"));
+    auto *open = new QPushButton(QStringLiteral("打开工作区（不启动通信）"), this); open->setObjectName("workspaceOpen");
+    auto *save = new QPushButton(QStringLiteral("保存 / 另存工作区"), this); save->setObjectName("workspaceSave");
+    files->addWidget(path, 1); files->addWidget(open); files->addWidget(save); layout->addLayout(files);
+    connect(open, &QPushButton::clicked, this, [this, path] {
+        auto selected = path->text();
+        if (selected.isEmpty()) selected = QFileDialog::getOpenFileName(this, QStringLiteral("打开工作区"), {}, "JSON (*.json)");
+        if (!selected.isEmpty()) { path->setText(selected); openWorkspace(selected); }
+    });
+    connect(save, &QPushButton::clicked, this, [this, path] {
+        auto selected = path->text();
+        if (selected.isEmpty()) selected = QFileDialog::getSaveFileName(this, QStringLiteral("保存工作区"), {}, "JSON (*.json)");
+        if (!selected.isEmpty()) { path->setText(selected); saveWorkspace(selected); }
+    });
     tabs_ = new QTabWidget(this);
     tabs_->setObjectName("sessionTabs");
     tabs_->setTabsClosable(true);
@@ -229,6 +269,7 @@ int Workbench::addSession(const SessionConfig &config, const QString &title)
 {
     if (tabs_->count() >= 16) return -1;
     auto *pane = new SessionPane(catalog_, tabs_, factory_, clock_);
+    pane->setProperty("workspaceBase", QDir::currentPath());
     pane->loadConfiguration(config);
     const int index = tabs_->addTab(pane, title.isEmpty() ? QStringLiteral("会话 %1").arg(nextSessionNumber_++) : title);
     tabs_->setCurrentIndex(index);
@@ -248,6 +289,9 @@ SessionConfig Workbench::sessionConfiguration(int index) const
 }
 int Workbench::currentSessionIndex() const { return tabs_->currentIndex(); }
 void Workbench::selectSession(int index) { tabs_->setCurrentIndex(index); }
+quint64 Workbench::openWorkspace(const QString &path) { return workspace_->open(path); }
+quint64 Workbench::saveWorkspace(const QString &path) { return workspace_->save(path); }
+WorkspaceOperation Workbench::workspaceOperation(quint64 id) const { return workspace_->operation(id); }
 bool Workbench::closeSession(int index)
 {
     auto *pane = dynamic_cast<SessionPane *>(tabs_->widget(index));
