@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.30)
+project(DebuggerUiPrototype LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_AUTOMOC ON)
+find_package(Qt6 6.12 REQUIRED COMPONENTS Widgets QuickWidgets Qml)
+qt_add_executable(debugger_ui_prototype WIN32 main.cpp)
+target_link_libraries(debugger_ui_prototype PRIVATE Qt6::Widgets Qt6::QuickWidgets Qt6::Qml)
+qt_add_resources(debugger_ui_prototype prototype_assets PREFIX "/" FILES Chart.qml)

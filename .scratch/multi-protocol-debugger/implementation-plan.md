@@ -6,7 +6,7 @@ Status: ready-for-agent
 
 ## 当前任务与直接依赖
 
-以下表格是唯一的当前任务清单。编号只指本表链接，不按整个目录中的编号前缀猜测；同目录的旧版链接入口和 legacy-issues 归档不参与任务调度。
+本表保留原产品编号与完成历史；当前综合调度以 [新界面与后续阶段综合索引](../multi-protocol-workbench-ui/implementation-plan.md) 为准。编号只指本表链接，不按整个目录中的编号前缀猜测；同目录的旧版链接入口和 legacy-issues 归档不参与任务调度。
 
 | 编号 | 可交付流程 | 阶段 | Status | Blocked by |
 | --- | --- | --- | --- | --- |
@@ -22,7 +22,7 @@ Status: ready-for-agent
 | [10](issues/10-workspace-plugin-recovery.md) | 保存恢复工作区并处理插件缺失 | RTU | ready-for-agent | 08、09 |
 | [11](issues/11-trace-query-export.md) | 按操作与消息回溯并导出记录 | RTU | ready-for-agent | 02 |
 | [12](issues/12-bounded-disk-recording.md) | 开启磁盘回溯并在过载时保持通信 | RTU | ready-for-agent | 05、11 |
-| [13](issues/13-rtu-phase-acceptance.md) | 验收 RTU 第一阶段的真实互通与负载 | RTU 阶段验收 | needs-info | 10、12；另需外部条件 |
+| [13](issues/13-rtu-phase-acceptance.md) | 验收 RTU 第一阶段的真实互通与负载 | RTU 阶段验收 | needs-info | UI13、10、12；另需外部条件 |
 | [14](issues/14-upp-can-receive.md) | 通过插件接收并解析真实 UPP/CAN 消息 | UPP/CAN | needs-info | 13；另需外部条件 |
 | [15](issues/15-upp-can-exchange.md) | 完成真实 UPP/CAN 发送交互并与 RTU 并行 | UPP/CAN | needs-info | 14；另需外部条件 |
 | [16](issues/16-tcp-first-register-read.md) | 完成一次 Modbus TCP 主站读取 | TCP | ready-for-agent | 15 |
@@ -80,3 +80,7 @@ Qt/LLVM-MinGW、Debug/Release 与 LLDB 验证已完成，见 [环境证据](tool
 ### 2026-10-22：发布确认后的 19 项任务
 
 按用户批准的拆分发布 19 个独立任务，保留全部验收边界、直接依赖及 68 条用户故事的对应关系。12 份旧 issue 原文与评论按字节归档，旧路径转换为明确的历史入口；不以新编号覆盖旧任务的含义。未改动父规格、产品代码或已有工具链验证。
+
+### 2026-10-23：接入已批准的综合计划
+
+已发布 [UI01–UI13 与旧13–19综合索引](../multi-protocol-workbench-ui/implementation-plan.md)。旧01–12的完成记录保留，旧13增加UI13前置，旧13–19按新界面补充验收；本轮仅继续UI01原型，不开始后续产品实施。

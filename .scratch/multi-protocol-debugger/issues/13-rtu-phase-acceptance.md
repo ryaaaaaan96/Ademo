@@ -2,7 +2,7 @@
 
 Status: needs-info
 Stage: RTU 阶段验收
-Blocked by: [10 保存恢复工作区并处理插件缺失](10-workspace-plugin-recovery.md)、[12 开启磁盘回溯并在过载时保持通信](12-bounded-disk-recording.md)
+Blocked by: [UI13 新界面完整流程验收](../../multi-protocol-workbench-ui/issues/13-rtu-ui-acceptance-migration.md)、[10 保存恢复工作区并处理插件缺失](10-workspace-plugin-recovery.md)、[12 开启磁盘回溯并在过载时保持通信](12-bounded-disk-recording.md)
 
 ## What to build
 
@@ -43,3 +43,11 @@ Blocked by: [10 保存恢复工作区并处理插件缺失](10-workspace-plugin-
 ### 2026-10-22：经用户确认发布
 
 用户回复“按此发布”，批准 19 项拆分及直接依赖。本项尚未实施；分诊标签不代表完成。原有工作和评论见 [旧版 08](../legacy-issues/08-rtu-interop-and-capacity.md)。工具链已完成证据继续复用。
+
+### 2026-10-23：综合计划接入新界面验收
+
+用户已批准 [综合实施计划](../../multi-protocol-workbench-ui/implementation-plan.md)。本项编号、原验收项与历史记录保留；追加新界面要求，不因发布任务即开始实施。在新界面完成真实主从互通与负载验证，包含多个浮窗和 QML 刷新压力；固定实测边界。硬件准备和旧链路探索可提前，最终验收基于新界面。
+
+- [ ] 在新界面完成真实主从互通与负载验证，包含多个浮窗和 QML 刷新压力；固定实测边界。硬件准备和旧链路探索可提前，最终验收基于新界面。
+
+旧13另以前置 UI13 的用户新界面软件验收为条件；本项原有硬件、资料及阶段依赖仍须满足，不把演示原型当作真实支持组合。
