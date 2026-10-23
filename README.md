@@ -33,11 +33,11 @@ RTU无事务号。重试后有效读取响应可完成逻辑读取，但消息�
 
 ## 插件、回溯与测试边界
 
-当前SDK10包含协议调度、配置、记录、从站准备、通用本地状态、后台值任务、连接恢复、配置引用重定位及可选参数视图能力，支持停止后保护未保存数据。宿主不解释Modbus字段。插件位于bin/plugins，配套SDK10、产品0.2、Qt完整版本、编译器、架构和构建配置，更新后重启；旧SDK DLL须重建。坏插件、身份重复和不兼容有诊断，其他功能可用。会话、视图与后台作业持有DLL租约，不支持热替换或插件崩溃隔离。
+当前SDK11包含协议调度、配置、记录、从站准备、通用本地状态、后台值任务、连接恢复、配置引用重定位及可选参数视图能力，支持停止后保护未保存数据。宿主不解释Modbus字段。插件位于bin/plugins，配套SDK11、产品0.2、Qt完整版本、编译器、架构和构建配置，更新后重启；旧SDK DLL须重建。坏插件、身份重复和不兼容有诊断，其他功能可用。会话、视图与后台作业持有DLL租约，不支持热替换或插件崩溃隔离。
 
 UI02 新参数页提供设备、数据区与单个 PDU 地址入口；停止状态添加参数后，启动会话并点击行内“读取”，每行显示最近成功观测及更新时间。连接表单和重连策略位于“连接配置…”；原读写、轮询和从站视图由“兼容操作页”进入。通信记录归属当前会话，白底概要显示近期原始证据。正式文件、分组、行内写入等后续能力以综合 UI 实施索引为准。
 
-SDK10 的 `ProtocolPlugin::createParameterView` 是可选工厂，返回 `ParameterView` 的公开设备列表、当前设备和选择入口；默认返回空时继续使用旧视图。`PluginCatalog` 为两种视图都保留 DLL 租约。`debugger_widgets` 提供 `ParameterTable`，列、单元格、稳定行 ID 和动作由插件给出；框架不解释 Modbus 字段。Modbus 参数页支持地址范围生成及明确加载 JSON 分组，详见 [正式参数定义格式与兼容规则](docs/parameter-definition.md)。添加或应用参数不会通信，运行中配置替换继续遵循原会话保护；新的 `SessionAccess.background` 为未启动视图的文件任务保留有界额度和 DLL 租约。
+SDK11 的 `ProtocolPlugin::createParameterView` 是可选工厂，返回 `ParameterView` 的公开设备列表、当前设备和选择入口；默认返回空时继续使用旧视图。`PluginCatalog` 为两种视图都保留 DLL 租约。`debugger_widgets` 提供 `ParameterTable`，列、单元格、稳定行 ID 和动作由插件给出；框架不解释 Modbus 字段。Modbus 参数页支持地址范围生成及明确加载 JSON 分组，详见 [正式参数定义格式与兼容规则](docs/parameter-definition.md)。添加或应用参数不会通信，运行中配置替换继续遵循原会话保护；新的 `SessionAccess.background` 为未启动视图的文件任务保留有界额度和 DLL 租约。
 
 近期缓存、消息和操作均有可配置上限；缺失来源明确标记。概要可展开查询，CSV导出概要，JSONL保存实际可用原始字节、元数据与关联；后台导出不阻塞通信。ID在一个会话对象内不复用，运行代次过滤旧回调。
 
@@ -74,6 +74,11 @@ SDK10 的 `ProtocolPlugin::createParameterView` 是可选工厂，返回 `Parame
 
 公开宿主控制新增 `DebugSession.reconnect/configureRecovery/canReconnect`；工作台提供 `sessionCount/session/addSession/closeSession/sessionConfiguration/currentSessionIndex/selectSession`。关闭会话或窗口先检查未保存与忙碌状态，取消时保留模型、视图和其他会话。`sessionConfiguration(index)`读取尚未启动页面的当前端点/角色字段，供配置保存使用。验收见 `.scratch/multi-protocol-debugger/evidence/09/acceptance.md`。
 
+## UI05：单值列待提交与设备写入
+
+主站参数页双击可写数据区的值，编辑内容以黄色待提交状态显示；悬停可查看最近读回值及写入结果。保持寄存器接受 0..65535 整数，线圈接受 true/false 或 0/1；离散输入及输入寄存器只读。只有行内“设置”会提交设备写入，本地发送完成不等于设备确认。成功确认清除本次待提交标记并继续展示最近读回值；失败或不确定保留草稿与证据，所有写入均不自动重试。确认期间的新草稿不会被旧确认清除。
+
+SDK11 的 `SessionAccess.registerViewState(owner, state, resolve)` 将多个视图的未保存／忙状态接到会话关闭与配置替换保护；owner 销毁后自动撤销，旧从站运行数据守卫保持独立。state 必须是同线程只读检查，resolve 由视图提供明确的保存／放弃／取消交互；宿主在所有确认后复查状态。后续文件编辑页可使用自己的 owner 注册，不覆盖待提交值守卫。
 ## 原生会话窗口与导航（UI03）
 
 会话以 QMainWindow 独立窗口打开，系统标题栏提供最小化、最大化／还原和关闭。点击“浮动”时居中到工作台当前屏幕，“左右平铺／上下平铺”可把已打开的会话放回工作台。拖动独立窗口标题到工作台时显示停靠预览，松开后在目标会话左、右、上、下平铺；取消拖动、移出工作台或被其他窗口遮挡时不落位。

@@ -3,6 +3,8 @@
 #include <QMap>
 #include <QHash>
 #include <QPersistentModelIndex>
+#include <QPointer>
+#include <QSet>
 #include <functional>
 
 namespace debugger {
@@ -12,6 +14,9 @@ struct ParameterRow {
     QString id;
     QMap<QString, QString> cells;
     QList<ParameterAction> actions;
+    QSet<QString> editableCells;
+    QSet<QString> pendingCells;
+    QMap<QString, QString> tooltips;
 };
 // 框架只承载插件给出的单元格和动作，不解释设备、地址、数据类型或组帧。
 class ParameterTable : public QTableWidget {
@@ -22,8 +27,12 @@ public:
     void updateRow(const ParameterRow &);
     QStringList selectedParameterIds() const;
     std::function<void(QString parameterId, QString actionId)> onAction;
+    std::function<void(QString parameterId, QString columnId, QString text)> onEdit;
 private:
+    void updateCell(int row, int column, const ParameterRow &);
     QList<ParameterColumn> columns_;
     QHash<QString, QPersistentModelIndex> rowPositions_;
+    QPointer<QWidget> editor_;
+    QPersistentModelIndex editingIndex_;
 };
 }

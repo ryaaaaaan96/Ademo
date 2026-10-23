@@ -514,13 +514,22 @@ SessionAccess DebugSession::access()
                     }, Qt::QueuedConnection);
                 });
                 return true;
+            },
+            [self](QObject *owner, std::function<LocalState()> state, std::function<bool()> resolve) {
+                if (!self || !owner || !state || !resolve) return;
+                const bool registered = self->viewStates_.contains(owner);
+                self->viewStates_[owner] = {owner, std::move(state), std::move(resolve)};
+                if (!registered) QObject::connect(owner, &QObject::destroyed, self, [self, owner] {
+                    if (self) self->viewStates_.remove(owner);
+                });
             }};
 }
 bool DebugSession::configure(QJsonObject protocol)
 {
     if (state_ == SessionState::Starting || state_ == SessionState::Running) return false;
     if (protocol_ && protocol_->localState().busy) return false;
-    if (!resolveUnsaved()) return false;
+    QPointer<DebugSession> guard(this);
+    if (!resolveUnsaved() || !guard) return false;
     // 新启动配置生效后撤下旧本地模型，避免旧绑定的文件作业写回覆盖新配置。
     protocol_.reset();
     config_.protocol = std::move(protocol);
@@ -539,25 +548,41 @@ QJsonObject DebugSession::snapshot() const
 bool DebugSession::ownsProtocol(quint64 run) const { return protocol_ && protocolRun_ == run; }
 bool DebugSession::hasUnsavedOrBusy() const
 {
-    if (!protocol_ || preparing_) return false;
-    const auto state = protocol_->localState();
-    return state.dirty || state.busy;
+    if (protocol_ && !preparing_) {
+        const auto state = protocol_->localState();
+        if (state.dirty || state.busy) return true;
+    }
+    for (const auto &view : viewStates_) if (view.owner) {
+        const auto state = view.state();
+        if (state.dirty || state.busy) return true;
+    }
+    return false;
 }
 bool DebugSession::resolveUnsaved()
 {
     if (resolvingUnsaved_) return false;
-    if (!protocol_ || preparing_) return true;
-    if (protocol_->localState().busy) {
+    bool busy = protocol_ && !preparing_ && protocol_->localState().busy;
+    for (const auto &view : viewStates_) if (view.owner) busy = busy || view.state().busy;
+    if (busy) {
         diagnostic_ = QStringLiteral("后台文件操作尚未结束，请等待后再重新加载或关闭"); emit changed(); return false;
     }
-    if (!protocol_->localState().dirty) return true;
+    if (!hasUnsavedOrBusy()) return true;
+    // 模态确认可能销毁会话及最后一个视图；局部复制的插件回调须先于 DLL 租约析构。
+    const auto catalogLease = catalog_;
     QPointer<DebugSession> guard(this);
     const auto decision = discardGuard_;
     resolvingUnsaved_ = true;
-    const bool resolved = decision && decision();
+    bool resolved = true;
+    if (protocol_ && !preparing_ && protocol_->localState().dirty) resolved = decision && decision();
     if (!guard) return false;
+    const auto views = viewStates_.values();
+    for (const auto &view : views) {
+        if (!resolved) break;
+        if (view.owner && view.state().dirty) resolved = view.resolve();
+        if (!guard) return false;
+    }
     resolvingUnsaved_ = false;
-    if (resolved && protocol_ && !protocol_->localState().dirty && !protocol_->localState().busy) return true;
+    if (resolved && !hasUnsavedOrBusy()) return true;
     diagnostic_ = QStringLiteral("保留未保存修改；请保存、放弃或取消后再重新加载或关闭"); emit changed(); return false;
 }
 bool DebugSession::background(quint64 run, std::function<QJsonObject()> task, std::function<void(QJsonObject)> completion)
