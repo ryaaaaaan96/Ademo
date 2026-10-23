@@ -228,6 +228,27 @@ private slots:
         const auto output = qEnvironmentVariable("DEBUGGER_EVIDENCE_DIR");
         if (!output.isEmpty()) QVERIFY(view->grab().save(output + "/pending-value.png"));
     }
+    void nativeSessionCloseCancelsOrDiscardsPendingWithoutRemovingConfiguration() {
+        Wire wire; Workbench workbench(catalog, nullptr, wire.factory()); workbench.show();
+        const int index = workbench.addSession(configuration(), QStringLiteral("待提交保护"));
+        auto *session = workbench.session(index); QVERIFY(session->start(workbench.sessionConfiguration(index)));
+        QTRY_COMPARE(session->state(), SessionState::Running);
+        auto *view = workbench.parameterView(index); QVERIFY(view);
+        auto *table = accessible<QTableWidget>(*view, QStringLiteral("参数表"));
+        auto *editor = editValue(*table, "123"); QVERIFY(editor); QTest::keyClick(editor, Qt::Key_Return); QTest::qWait(20);
+        QTimer::singleShot(0, [] {
+            if (auto *box = qobject_cast<QMessageBox *>(QApplication::activeModalWidget())) box->button(QMessageBox::Cancel)->click();
+        });
+        QVERIFY(!workbench.sessionWindow(index)->close()); QVERIFY(workbench.isSessionOpen(index));
+        QCOMPARE(session->state(), SessionState::Running); QCOMPARE(table->item(0, 3)->text(), QString("123"));
+        QTimer::singleShot(0, [] {
+            if (auto *box = qobject_cast<QMessageBox *>(QApplication::activeModalWidget())) box->button(QMessageBox::Discard)->click();
+        });
+        QVERIFY(workbench.sessionWindow(index)->close()); QVERIFY(!workbench.isSessionOpen(index));
+        QCOMPARE(workbench.sessionCount(), 2); QCOMPARE(session->state(), SessionState::Stopped);
+        workbench.selectSession(index); QVERIFY(workbench.isSessionOpen(index));
+        QCOMPARE(session->state(), SessionState::Stopped); QCOMPARE(wire.requests.size(), 0);
+    }
 };
 QTEST_MAIN(ParameterWriteTests)
 #include "parameter_write_tests.moc"

@@ -30,7 +30,7 @@ struct Row {
     quint64 operation = 0;
     quint64 writeOperation = 0, editRevision = 0, submittedRevision = 0;
     std::optional<QString> pending;
-    QString writeResult, inputError;
+    QString writeResult, inputError, submittedText;
     QString name, type, displayUnit, description, group;
     QString id() const { return QString("%1/%2/%3").arg(unit).arg(areas[area]).arg(address); }
 };
@@ -208,6 +208,7 @@ private:
         row.writeOperation = access_.submit(row.area == 0 ? "write-single-coil" : "write-single-register",
             {{"unit", row.unit}, {"start", row.address}, {"value", value}});
         row.submittedRevision = row.editRevision;
+        row.submittedText = text;
         row.writeResult = row.writeOperation ? QStringLiteral("写入已提交，等待设备确认") : QStringLiteral("写入未提交：操作容量已满");
     }
     QJsonObject storedRow(const Row &row) const {
@@ -325,7 +326,7 @@ private:
         for (auto &row : rows_) {
             if (row.writeOperation && access_.operation) {
                 const auto write = access_.operation(row.writeOperation);
-                row.writeResult = write.request.id ? write.update.state + " · " + write.update.detail
+                row.writeResult = write.request.id ? QStringLiteral("提交值 %1 · %2 · %3").arg(row.submittedText, write.update.state, write.update.detail)
                                                   : QStringLiteral("写入记录已过期；请核对设备后决定是否再次设置");
                 if (write.update.result.value("uncertain").toBool()) row.writeResult.prepend(QStringLiteral("结果不确定 · "));
                 if (write.finished && write.update.state == "success" && row.submittedRevision == row.editRevision) row.pending.reset();

@@ -567,6 +567,8 @@ bool DebugSession::resolveUnsaved()
         diagnostic_ = QStringLiteral("后台文件操作尚未结束，请等待后再重新加载或关闭"); emit changed(); return false;
     }
     if (!hasUnsavedOrBusy()) return true;
+    // 模态确认可能销毁会话及最后一个视图；局部复制的插件回调须先于 DLL 租约析构。
+    const auto catalogLease = catalog_;
     QPointer<DebugSession> guard(this);
     const auto decision = discardGuard_;
     resolvingUnsaved_ = true;
