@@ -190,6 +190,7 @@ private:
     void clearSessions();
     void refreshNavigation();
     void dragSession(SessionDock *, QPoint, DockDragPhase);
+    QString chooseWorkspaceFile(bool writing);
     QList<SessionDock *> docks_;
     QTreeWidget *navigation_ = nullptr;
     QDockWidget *navigationDock_ = nullptr;
@@ -197,6 +198,7 @@ private:
     int currentSession_ = -1;
     QString navigationSignature_;
     bool presented_ = false;
+    int workspaceDialogDepth_ = 0;
     int nextSessionNumber_ = 1;
     std::unique_ptr<WorkspaceController> workspace_;
 };

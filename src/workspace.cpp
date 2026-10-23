@@ -1,4 +1,5 @@
 #include "debugger/host.h"
+#include "session_window.h"
 #include <QCoreApplication>
 #include <QDir>
 #include <QFile>
@@ -18,6 +19,32 @@
 
 namespace debugger {
 namespace {
+QString validateEncodedLayout(const QJsonObject &layout, const QStringList &keys)
+{
+    for (const auto &key : keys) if (layout.contains(key)) {
+        const auto value = layout.value(key);
+        if (!value.isString() || value.toString().size() > 256 * 1024)
+            return QStringLiteral("布局 %1 必须为有界 Base64 字符串").arg(key);
+        if (!QByteArray::fromBase64Encoding(value.toString().toLatin1(), QByteArray::AbortOnBase64DecodingErrors))
+            return QStringLiteral("布局 %1 的 Base64 无效").arg(key);
+    }
+    return {};
+}
+QString validateWindowLayout(const QJsonObject &document)
+{
+    // Qt 的不透明布局在临时窗口上先完整校验，不能拿正在通信的工作区试恢复。
+    QMainWindow probe;
+    const auto root = document.value("layout").toObject();
+    const auto geometry = QByteArray::fromBase64(root.value("geometry").toString().toLatin1());
+    if (!geometry.isEmpty() && !probe.restoreGeometry(geometry)) return QStringLiteral("工作台窗口几何无效");
+    const auto state = QByteArray::fromBase64(root.value("dockState").toString().toLatin1());
+    if (!state.isEmpty() && !probe.restoreState(state)) return QStringLiteral("工作台停靠布局无效");
+    for (const auto &entry : document.value("sessions").toArray()) {
+        const auto saved = QByteArray::fromBase64(entry.toObject().value("layout").toObject().value("windowGeometry").toString().toLatin1());
+        if (!saved.isEmpty() && !probe.restoreGeometry(saved)) return QStringLiteral("调试窗口几何无效");
+    }
+    return {};
+}
 constexpr qint64 maximumBytes = 8 * 1024 * 1024;
 QSemaphore workspaceSlots(4);
 struct JobLease { ~JobLease() { workspaceSlots.release(); } };
@@ -46,9 +73,15 @@ QString validate(const QJsonObject &document)
             return QStringLiteral("不透明配置的 referenceBase 必须为绝对目录");
         if (item.contains("title") && !item.value("title").isString()) return QStringLiteral("会话 title 必须为字符串");
         if (item.contains("layout") && !item.value("layout").isObject()) return QStringLiteral("会话 layout 必须为对象");
+        const auto layout = item.value("layout").toObject();
+        for (const auto &key : {"floating", "open"})
+            if (layout.contains(key) && !layout.value(key).isBool()) return QStringLiteral("窗口布局开关必须为布尔值");
+        if (layout.contains("selectedDevice") && !layout.value("selectedDevice").isString()) return QStringLiteral("选择设备必须为字符串");
+        const auto layoutError = validateEncodedLayout(layout, {"windowGeometry"});
+        if (!layoutError.isEmpty()) return layoutError;
     }
     if (document.contains("layout") && !document.value("layout").isObject()) return QStringLiteral("工作区 layout 必须为对象");
-    return {};
+    return validateEncodedLayout(document.value("layout").toObject(), {"geometry", "dockState"});
 }
 SessionConfig decode(const QJsonObject &config)
 {
@@ -94,6 +127,18 @@ WorkspaceOperation WorkspaceController::operation(quint64 id) const
     for (const auto &item : operations_) if (item.id == id) return item;
     return {};
 }
+bool WorkspaceController::restoreLayout()
+{
+    QPointer<WorkspaceController> alive(this);
+    auto *status = window_.findChild<QLabel *>("workspaceStatus");
+    if (busy_ || rawRoot_.isEmpty()) {
+        status->setText(QStringLiteral("请先完成打开或保存工作区，再恢复布局。")); return false;
+    }
+    applyLayout(rawRoot_, false);
+    if (!alive) return false;
+    status->setText(QStringLiteral("已恢复最后打开／保存的布局；当前窗口开闭、数据与通信保持不变。"));
+    return true;
+}
 void WorkspaceController::complete(quint64 id, const QString &state, const QString &detail)
 {
     busy_ = false;
@@ -121,6 +166,8 @@ quint64 WorkspaceController::begin(const QString &input, bool writing)
             const auto error = result.value("error").toString();
             if (!error.isEmpty()) { self->complete(id, "file-error", error); return; }
             if (writing) { self->rawRoot_ = captured; self->complete(id, "success", QStringLiteral("工作区配置快照已保存；后续配置修改需再次保存，未写入设备")); return; }
+            const auto layoutError = validateWindowLayout(result.value("document").toObject());
+            if (!layoutError.isEmpty()) { self->complete(id, "file-error", layoutError); return; }
             QString reason;
             const bool loaded = self->apply(result.value("document").toObject(), directory, reason);
             if (!self) return;
@@ -152,18 +199,26 @@ QJsonObject WorkspaceController::capture(const QString &directory) const
         auto layout = item.value("layout").toObject();
         auto *scroll = pane->findChild<QScrollArea *>("sessionContent");
         layout["scrollX"] = scroll->horizontalScrollBar()->value(); layout["scrollY"] = scroll->verticalScrollBar()->value();
+        layout["floating"] = window_.isSessionFloating(index);
+        layout["open"] = window_.isSessionOpen(index);
+        layout["windowGeometry"] = QString::fromLatin1(window_.sessionWindow(index)->saveGeometry().toBase64());
+        if (auto *view = window_.parameterView(index)) layout["selectedDevice"] = view->selectedDevice();
         item["layout"] = layout;
         sessions.append(item);
     }
     document["sessions"] = sessions;
     auto layout = document.value("layout").toObject();
     layout["geometry"] = QString::fromLatin1(window_.saveGeometry().toBase64());
+    layout["dockState"] = QString::fromLatin1(window_.saveState().toBase64());
     layout["activeSession"] = window_.currentSessionIndex();
     document["layout"] = layout;
     return document;
 }
 bool WorkspaceController::apply(const QJsonObject &document, const QString &directory, QString &error)
 {
+    if (window_.workspaceDialogDepth_) {
+        error = QStringLiteral("工作区文件选择尚未结束，未替换当前会话。请关闭选择器后重试。"); return false;
+    }
     QPointer<WorkspaceController> alive(this);
     for (int index = 0; index < window_.sessionCount(); ++index) {
         const bool resolved = window_.session(index)->resolveUnsaved();
@@ -195,11 +250,44 @@ bool WorkspaceController::apply(const QJsonObject &document, const QString &dire
             scroll->verticalScrollBar()->setValue(layout.value("scrollY").toInt());
         });
     }
+    applyLayout(document, true);
+    return true;
+}
+void WorkspaceController::applyLayout(const QJsonObject &document, bool restoreOpen)
+{
+    const auto catalogLease = catalog_;
+    QPointer<WorkspaceController> alive(this);
     const auto layout = document.value("layout").toObject();
     const auto geometry = QByteArray::fromBase64(layout.value("geometry").toString().toLatin1());
     if (!geometry.isEmpty()) window_.restoreGeometry(geometry);
-    window_.selectSession(layout.value("activeSession").toInt(0));
-    return true;
+    const auto entries = document.value("sessions").toArray();
+    for (int index = 0; index < qMin(entries.size(), window_.sessionCount()); ++index) {
+        const auto item = entries[index].toObject().value("layout").toObject();
+        auto *dock = window_.docks_[index];
+        if (item.value("floating").toBool(true)) dock->detach(); else dock->attach();
+    }
+    const auto dockState = QByteArray::fromBase64(layout.value("dockState").toString().toLatin1());
+    if (!dockState.isEmpty()) window_.restoreState(dockState);
+    for (int index = 0; index < qMin(entries.size(), window_.sessionCount()); ++index) {
+        const auto item = entries[index].toObject().value("layout").toObject();
+        auto *dock = window_.docks_[index];
+        const auto saved = QByteArray::fromBase64(item.value("windowGeometry").toString().toLatin1());
+        if (dock->detached() && !saved.isEmpty()) dock->window()->restoreGeometry(saved);
+        if (restoreOpen) {
+            if (auto *view = window_.parameterView(index); view && item.contains("selectedDevice")) {
+                view->selectDevice(item.value("selectedDevice").toString());
+                if (!alive) return;
+            }
+            if (!item.value("open").toBool(true)) dock->hideSession();
+        }
+        if (dock->open() && window_.isVisible()) dock->present();
+        else if (!dock->open()) dock->hideSession();
+    }
+    // 已恢复原生几何，第一次显示不得再次套用新建窗口的居中策略。
+    if (layout.contains("dockState")) window_.presented_ = true;
+    const int active = layout.value("activeSession").toInt(0);
+    if (active >= 0 && active < window_.sessionCount()) window_.currentSession_ = active;
+    window_.refreshNavigation();
 }
 }
 

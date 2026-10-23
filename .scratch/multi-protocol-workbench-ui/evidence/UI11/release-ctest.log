@@ -1,0 +1,75 @@
+UpdateCTestConfiguration  from :C:/Users/81966/Documents/Ademo/build/worktrees/ui11/DartConfiguration.tcl
+UpdateCTestConfiguration  from :C:/Users/81966/Documents/Ademo/build/worktrees/ui11/build/qt-llvm-release/DartConfiguration.tcl
+Test project C:/Users/81966/Documents/Ademo/build/worktrees/ui11/build/qt-llvm-release
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 1
+    Start  1: workspace_window_layout
+
+1: Test command: C:\Users\81966\Documents\Ademo\build\worktrees\ui11\build\qt-llvm-release\bin\workspace_layout_tests.exe "-o" "workspace-layout-results.txt,txt"
+1: Working Directory: C:/Users/81966/Documents/Ademo/build/worktrees/ui11/build/qt-llvm-release
+1: Environment variables: 
+1:  QT_QPA_PLATFORM=windows
+1: Test timeout computed to be: 45
+1/6 Test  #1: workspace_window_layout ..........   Passed    8.43 sec
+test 2
+    Start  2: slave_parameter_workflow
+
+2: Test command: C:\Users\81966\Documents\Ademo\build\worktrees\ui11\build\qt-llvm-release\bin\slave_parameter_tests.exe "-o" "slave-parameter-results.txt,txt"
+2: Working Directory: C:/Users/81966/Documents/Ademo/build/worktrees/ui11/build/qt-llvm-release
+2: Environment variables: 
+2:  QT_QPA_PLATFORM=windows
+2: Test timeout computed to be: 60
+2/6 Test  #2: slave_parameter_workflow .........   Passed    2.90 sec
+test 5
+    Start  5: parameter_file_edit_save_apply
+
+5: Test command: C:\Users\81966\Documents\Ademo\build\worktrees\ui11\build\qt-llvm-release\bin\parameter_file_editor_tests.exe "-o" "parameter-file-editor-results.txt,txt"
+5: Working Directory: C:/Users/81966/Documents/Ademo/build/worktrees/ui11/build/qt-llvm-release
+5: Environment variables: 
+5:  QT_QPA_PLATFORM=windows
+5: Test timeout computed to be: 45
+3/6 Test  #5: parameter_file_edit_save_apply ...   Passed    2.86 sec
+test 8
+    Start  8: parameter_pending_write
+
+8: Test command: C:\Users\81966\Documents\Ademo\build\worktrees\ui11\build\qt-llvm-release\bin\parameter_write_tests.exe "-o" "parameter-write-results.txt,txt"
+8: Working Directory: C:/Users/81966/Documents/Ademo/build/worktrees/ui11/build/qt-llvm-release
+8: Environment variables: 
+8:  QT_QPA_PLATFORM=windows
+8: Test timeout computed to be: 40
+4/6 Test  #8: parameter_pending_write ..........   Passed    3.42 sec
+test 11
+    Start 11: parallel_sessions_recovery
+
+11: Test command: C:\Users\81966\Documents\Ademo\build\worktrees\ui11\build\qt-llvm-release\bin\session_recovery_tests.exe "-o" "recovery-results.txt,txt"
+11: Working Directory: C:/Users/81966/Documents/Ademo/build/worktrees/ui11/build/qt-llvm-release
+11: Environment variables: 
+11:  QT_QPA_PLATFORM=windows
+11: Test timeout computed to be: 30
+5/6 Test #11: parallel_sessions_recovery .......   Passed    6.10 sec
+test 20
+    Start 20: workspace_roundtrip
+
+20: Test command: C:\Users\81966\Documents\Ademo\build\worktrees\ui11\build\qt-llvm-release\bin\workspace_tests.exe "-o" "workspace-results.txt,txt"
+20: Working Directory: C:/Users/81966/Documents/Ademo/build/worktrees/ui11/build/qt-llvm-release
+20: Environment variables: 
+20:  QT_QPA_PLATFORM=windows
+20: Test timeout computed to be: 45
+6/6 Test #20: workspace_roundtrip ..............   Passed    6.05 sec
+
+The following tests passed:
+	workspace_window_layout
+	slave_parameter_workflow
+	parameter_file_edit_save_apply
+	parameter_pending_write
+	parallel_sessions_recovery
+	workspace_roundtrip
+
+100% tests passed, 0 tests failed out of 6
+
+Total Test time (real) =  29.79 sec

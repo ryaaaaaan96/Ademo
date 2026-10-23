@@ -18,10 +18,12 @@ public:
     quint64 open(const QString &path);
     quint64 save(const QString &path);
     WorkspaceOperation operation(quint64) const;
+    bool restoreLayout();
 private:
     quint64 begin(const QString &path, bool writing);
     QJsonObject capture(const QString &directory) const;
     bool apply(const QJsonObject &, const QString &directory, QString &error);
+    void applyLayout(const QJsonObject &, bool restoreOpen);
     void complete(quint64 id, const QString &state, const QString &detail);
     Workbench &window_;
     std::shared_ptr<PluginCatalog> catalog_;
