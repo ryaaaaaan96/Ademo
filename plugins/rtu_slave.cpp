@@ -1,4 +1,5 @@
 #include "rtu_slave.h"
+#include "rtu_wire.h"
 #include "write_pdu.h"
 #include <QDir>
 #include <QFile>
@@ -13,14 +14,6 @@ namespace {
 const QStringList areaNames{"coils", "discrete", "holding", "input"};
 bool integer(const QJsonValue &value, int minimum, int maximum) {
     return value.isDouble() && value.toInt(minimum - 1) >= minimum && value.toInt(minimum - 1) <= maximum;
-}
-quint16 crc16(const QByteArray &bytes) {
-    quint16 crc = 0xffff;
-    for (auto byte : bytes) {
-        crc ^= quint8(byte);
-        for (int bit = 0; bit < 8; ++bit) crc = crc & 1 ? (crc >> 1) ^ 0xa001 : crc >> 1;
-    }
-    return crc;
 }
 int word(const QByteArray &bytes, int offset) { return (quint8(bytes[offset]) << 8) | quint8(bytes[offset + 1]); }
 void appendWord(QByteArray &bytes, int value) { bytes.append(char(value >> 8)); bytes.append(char(value)); }
@@ -69,8 +62,9 @@ QString RtuSlave::prepare(const SessionConfig &config)
     const bool noParity = config.endpoint.value("parity") == "none";
     if (config.endpoint.value("stopBits").toString() != (noParity ? "2" : "1"))
         return QStringLiteral("RTU 使用 11 位字符：无校验需 2 个停止位，有校验需 1 个停止位");
-    t15_ = baud > 19200 ? 750 : (16500000LL + baud - 1) / baud;
-    t35_ = baud > 19200 ? 1750 : (38500000LL + baud - 1) / baud;
+    const auto timing = rtuwire::frameTiming(baud);
+    t15_ = timing.interCharacterUs;
+    t35_ = timing.interFrameUs;
     const auto bindings = config.protocol.value("devices").toArray();
     if (bindings.isEmpty() || bindings.size() > 32) return QStringLiteral("从站需配置 1..32 个设备及外部 JSON 文件");
     QMap<int, SlaveDevice> loaded;
@@ -137,7 +131,7 @@ void RtuSlave::finishFrame()
     message.sources = sources_;
     message.sourceRanges = sourceRanges_;
     message.status = "invalid";
-    if (broken_ || oversized_ || buffer_.size() < 4 || crc16(buffer_) != 0)
+    if (broken_ || oversized_ || buffer_.size() < 4 || rtuwire::crc16(buffer_) != 0)
         message.detail = QStringLiteral("请求帧 CRC、长度或可信 t1.5 间隙无效，不应答");
     else {
         const int unit = quint8(buffer_[0]), function = quint8(buffer_[1]);
@@ -199,7 +193,7 @@ void RtuSlave::finishFrame()
             }
             if (unit && !busy) {
                 if (exception) { response.append(char(unit)); response.append(char(function | 0x80)); response.append(char(exception)); message.fields["exceptionCode"] = exception; }
-                const auto crc = crc16(response); response.append(char(crc)); response.append(char(crc >> 8));
+                const auto crc = rtuwire::crc16(response); response.append(char(crc)); response.append(char(crc >> 8));
                 response_ = response;
                 responseSources_ = sourceRanges_;
                 message.status = exception ? "exception" : "response-ready";
