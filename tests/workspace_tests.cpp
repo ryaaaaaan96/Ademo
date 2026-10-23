@@ -1,5 +1,6 @@
 #include "slave_test_support.h"
 #include <QApplication>
+#include <QComboBox>
 #include <QDir>
 #include <QLabel>
 #include <QLineEdit>
@@ -89,6 +90,11 @@ private slots:
  Workbench overflow(catalog,nullptr,{}, {},executor); QCOMPARE(overflow.openWorkspace(path),quint64(0));
  qDeleteAll(others); for(auto &job:jobs) job(); jobs.clear(); QTRY_COMPARE(w.workspaceOperation(id).state,QString("success")); QCOMPARE(wire.opens,1);
  }
+ void protocolSwitchGuardCanDestroyWindow() {
+ QTemporaryDir dir; auto file=dir.filePath("device.json"),path=dir.filePath("missing.json"); QVERIFY(save(file,document())); auto devices=QJsonArray{QJsonObject{{"unit",17},{"path",file}}}; QVERIFY(save(path,workspace({entry("missing.protocol","slave",{{"devices",devices}})}))); Wire wire;
+ auto *window=new Workbench(catalog,nullptr,wire.factory()); QPointer<Workbench> alive(window); auto id=window->openWorkspace(path); QTRY_COMPARE(window->workspaceOperation(id).state,QString("success")); auto *combo=pane(*window)->findChild<QComboBox *>("protocol"); combo->setCurrentIndex(combo->findData("modbus.rtu")); auto *session=window->session(0); QVERIFY(session->start(config(devices,"COM127"))); QTRY_COMPARE(session->state(),SessionState::Running);
+ QVERIFY(session->submit("slave-edit-value",{{"unit",17},{"area","holding"},{"address",107},{"value",888}})); session->stop(); QCOMPARE(session->state(),SessionState::Stopped); QVERIFY(combo->isEnabled()); session->access().setDiscardGuard([window]{delete window;return false;}); combo->setCurrentIndex(combo->findData("missing.protocol")); QVERIFY(alive.isNull());
+ }
  void replacementGuardCanDestroyWindow() {
  QTemporaryDir dir; auto file=dir.filePath("device.json"),path=dir.filePath("empty.json"); QVERIFY(save(file,document())); QVERIFY(save(path,workspace({}))); Wire wire;
  auto *window=new Workbench(catalog,nullptr,wire.factory()); QPointer<Workbench> alive(window); QVERIFY(window->closeSession(0)); auto i=window->addSession(config({QJsonObject{{"unit",17},{"path",file}}},"COM126")); auto *session=window->session(i); QVERIFY(session->start(window->sessionConfiguration(i))); QTRY_COMPARE(session->state(),SessionState::Running);
@@ -105,9 +111,3 @@ private slots:
 };
 QTEST_MAIN(WorkspaceTests)
 #include "workspace_tests.moc"
-
-
-
-
-
-

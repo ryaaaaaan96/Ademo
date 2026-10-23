@@ -82,7 +82,10 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     };
     auto selectedProtocol = std::make_shared<int>(protocol->currentIndex());
     auto updateProtocol = [this, protocol, role, layout, selectedProtocol] {
-        if (view_ && !session_.resolveUnsaved()) {
+        QPointer<SessionPane> alive(this);
+        const bool resolved = !view_ || session_.resolveUnsaved();
+        if (!alive) return;
+        if (!resolved) {
             const QSignalBlocker blocker(protocol);
             protocol->setCurrentIndex(*selectedProtocol);
             return;
@@ -321,5 +324,3 @@ void Workbench::closeEvent(QCloseEvent *event)
     event->accept();
 }
 }
-
-

@@ -109,3 +109,7 @@ Modbus 插件持有数据区和数值。工作区持有设备与外部 JSON 文�
 用户已确认以调试会话的公开控制与查询接口作为主要测试入口，从启动/停止、读写、导入和编辑观察操作结果、发送数据及回溯记录；底层注入可控传输和时钟。以外部行为覆盖请求顺序、超时、关闭和错误，不窥视私有队列。插件加载及必要界面流程另作少量边界验证；实际串口、独立 Modbus 对端及 CAN 硬件验证补充真实时序证据。
 
 开放项由当前 issue 承接：01 在会话启停中验证插件 ABI/对象销毁；02 在首次读取中选择可注入 I/O 的 Modbus 实现；06/08/10 完善文件格式和引用规则；13 验证 RTU 时序、负载与容量；14/15 核对 UPP 固定规范与 CAN 硬件并实现真实交互。工具链已验证；当前没有 UPP 字段、性能保证或已编译 SDK 的结论。
+
+## issue 10 已实现：工作区和路径重定位
+
+SDK 8 新增协议/传输插件通用 `relocateConfiguration(config, fromBase, toBase)` 纯值钩子，主体不解释协议字段；缺插件保留不透明配置及原 referenceBase。公开 Workbench `openWorkspace/saveWorkspace/workspaceOperation` 异步返回配置文件任务结果，恢复不启动通信。格式、限额、未知字段与 dirty 保护规则见 [工作区格式](workspace-format.md)，验收见 [10 证据](evidence/10/acceptance.md)。主体与全部 DLL 必须按 SDK 8 指纹配套重编译。
