@@ -1,0 +1,9 @@
+Test project C:/Users/81966/Documents/Ademo/build/qt-llvm-debug
+    Start  1: workspace_window_layout
+1/2 Test  #1: workspace_window_layout ..........   Passed    5.73 sec
+    Start 20: workspace_roundtrip
+2/2 Test #20: workspace_roundtrip ..............   Passed    7.07 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =  12.84 sec
