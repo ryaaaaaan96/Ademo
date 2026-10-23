@@ -158,7 +158,7 @@ private slots:
     void widgetReflectsExternalWrite() {
         Harness files(catalog); const auto settings=writableConfig(files); Wire wire;
         Workbench window(catalog,nullptr,wire.factory()); window.resize(1100,1100); window.show();
-        auto *tabs=window.findChild<QTabWidget *>(); QVERIFY(tabs); tabs->setCurrentIndex(1);
+        auto *tabs=window.findChild<QTabWidget *>("protocolTabs"); QVERIFY(tabs); tabs->setCurrentIndex(1);
         auto *role=window.findChild<QComboBox *>("role"); role->setCurrentIndex(role->findData("slave"));
         for(const auto &binding : settings.protocol["devices"].toArray()) {
             window.findChild<QSpinBox *>("slaveUnit")->setValue(binding.toObject()["unit"].toInt());

@@ -108,6 +108,9 @@ void DebugSession::retire(bool retainLocal)
 {
     const bool keep = retainLocal && protocol_ && !preparing_ && protocol_->localState().retainAfterStop;
     ++generation_;
+    recoverable_ = false;
+    activated_ = false;
+    reconnectDueUs_ = -1;
     pollTimer_.stop();
     sendAttempts_.clear();
     for (auto &operation : operations_) {
@@ -151,6 +154,7 @@ bool DebugSession::start(const SessionConfig &config)
     if (!resolveUnsaved() || !guard) return false;
     retire();
     config_ = config;
+    if (!configureRecovery(config.recovery)) { fail(diagnostic_); return false; }
     auto *p = catalog_->protocol(config.protocolId);
     auto *t = catalog_->transport(config.transportId);
     if (!p || !t) { fail(QStringLiteral("所需协议或传输插件不可用")); return false; }
@@ -167,7 +171,7 @@ bool DebugSession::start(const SessionConfig &config)
     ProtocolServices services;
     services.nowUs = [self] { return self ? self->nowUs() : qint64(0); };
     services.send = [self, run](quint64 id, QByteArray bytes) {
-        return self && self->send(run, id, bytes);
+        return self && self->ownsProtocol(run) && self->send(self->generation_, id, bytes);
     };
     services.publish = [self, run](OperationUpdate update) {
         if (self && self->ownsProtocol(run)) self->publish(std::move(update));
@@ -176,12 +180,12 @@ bool DebugSession::start(const SessionConfig &config)
         if (self && self->ownsProtocol(run)) self->publishMessage(std::move(message));
     };
     services.submit = [self, run](QString action, QJsonObject parameters) {
-        return self && self->generation_ == run ? self->submit(action, parameters) : quint64(0);
+        return self && self->ownsProtocol(run) ? self->submit(action, parameters) : quint64(0);
     };
     services.publishConfiguration = [self, run](QJsonObject configuration) {
         if (self && self->ownsProtocol(run)) self->config_.protocol = std::move(configuration);
     };
-    services.sendPassive = [self, run](QByteArray bytes) { return self ? self->sendPassive(run, bytes) : 0; };
+    services.sendPassive = [self, run](QByteArray bytes) { return self && self->ownsProtocol(run) ? self->sendPassive(self->generation_, bytes) : 0; };
     services.background = [self, run](std::function<QJsonObject()> task, std::function<void(QJsonObject)> completion) {
         return self && self->background(run, std::move(task), std::move(completion));
     };
@@ -215,12 +219,17 @@ bool DebugSession::prepared(quint64 run, const QString &error)
     if (run != generation_) return false;
     preparing_ = false;
     if (!error.isEmpty()) { fail(error); return false; }
+    return openConnection();
+}
+bool DebugSession::openConnection()
+{
+    const auto run = generation_;
     const auto config = config_;
     auto *t = catalog_->transport(config.transportId);
     QPointer<DebugSession> self(this);
     const auto key = t->endpointKey(config.endpoint);
     if (key.isEmpty() || !catalog_->acquire(key)) {
-        fail(QStringLiteral("端点已被其他会话占用：") + key); return false;
+        connectionFailed(QStringLiteral("端点已被其他会话占用：") + key); return false;
     }
     key_ = key;
     state_ = SessionState::Starting;
@@ -236,7 +245,7 @@ bool DebugSession::prepared(quint64 run, const QString &error)
         if (self) QTimer::singleShot(0, self, [self, run, reason] {
             if (self && self->generation_ == run
                 && (self->state_ == SessionState::Running || self->state_ == SessionState::Starting))
-                self->fail(reason);
+                self->connectionFailed(reason);
         });
     };
     events.received = [self, run](ReceiveChunk chunk) {
@@ -254,7 +263,7 @@ bool DebugSession::prepared(quint64 run, const QString &error)
     };
     endpoint_ = endpointFactory_ ? endpointFactory_(config.endpoint, std::move(events))
                                 : t->createEndpoint(config.endpoint, std::move(events));
-    if (!endpoint_) { fail(QStringLiteral("传输端点创建失败")); return false; }
+    if (!endpoint_) { connectionFailed(QStringLiteral("传输端点创建失败")); return false; }
     endpoint_->open();
     // open 的事件已经排队；通知后不再访问成员，允许观察者同步停止或销毁会话。
     emit changed();
@@ -263,16 +272,27 @@ bool DebugSession::prepared(quint64 run, const QString &error)
 void DebugSession::opened(quint64 run, bool ok, const QString &reason)
 {
     if (run != generation_ || state_ != SessionState::Starting) return;
-    if (!ok) { fail(reason); return; }
-    protocol_->activate();
-    state_ = SessionState::Running;
-    diagnostic_ = QStringLiteral("端点已打开，等待调试操作；本地发送不表示设备应答");
+    if (!ok) { connectionFailed(reason); return; }
+    state_ = SessionState::Running; // 已打开的端点允许协议连接钩子通过统一服务提交交互。
+    if (activated_) protocol_->connectionRestored(config_.recovery.value("restorePolling").toBool(true));
+    else protocol_->activate();
+    const bool recovered = activated_;
+    activated_ = true;
+    recoverable_ = false;
+    reconnectDueUs_ = -1;
+    diagnostic_ = recovered ? QStringLiteral("重连完成；仅按设置恢复轮询，未确认设备写入不会补发")
+        : QStringLiteral("端点已打开，等待调试操作；本地发送不表示设备应答");
+    appendTrace(recovered ? "connection-restored" : "connection-opened", {}, 0, diagnostic_);
     if (!clock_) pollTimer_.start();
     emit changed();
 }
 
 qint64 DebugSession::nowUs() const { return clock_ ? clock_() : elapsed_.nsecsElapsed() / 1000; }
 void DebugSession::poll() {
+    if (state_ == SessionState::Error && reconnectDueUs_ >= 0 && nowUs() >= reconnectDueUs_) {
+        reconnect();
+        return;
+    }
     if (state_ != SessionState::Running || !protocol_) return;
     const auto ids = passiveDeadlines_.keys();
     for (auto id : ids) if (nowUs() >= passiveDeadlines_.value(id))
@@ -464,6 +484,10 @@ bool DebugSession::configure(QJsonObject protocol)
     // 新启动配置生效后撤下旧本地模型，避免旧绑定的文件作业写回覆盖新配置。
     protocol_.reset();
     config_.protocol = std::move(protocol);
+    recoverable_ = false;
+    activated_ = false;
+    reconnectDueUs_ = -1;
+    pollTimer_.stop();
     emit changed();
     return true;
 }
@@ -472,6 +496,12 @@ QJsonObject DebugSession::snapshot() const
     return protocol_ && !preparing_ ? protocol_->snapshot() : QJsonObject{};
 }
 bool DebugSession::ownsProtocol(quint64 run) const { return protocol_ && protocolRun_ == run; }
+bool DebugSession::hasUnsavedOrBusy() const
+{
+    if (!protocol_ || preparing_) return false;
+    const auto state = protocol_->localState();
+    return state.dirty || state.busy;
+}
 bool DebugSession::resolveUnsaved()
 {
     if (resolvingUnsaved_) return false;
