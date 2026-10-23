@@ -1,4 +1,5 @@
 #include "debugger/file_editor.h"
+#include "debugger/confirmation.h"
 #include <QFileInfo>
 #include <QFileDialog>
 #include <QFile>
@@ -12,6 +13,19 @@
 #include <QVBoxLayout>
 
 namespace debugger {
+namespace {
+QString chooseFile(QWidget *parent, const QString &title, const QString &path, bool saving)
+{
+    QPointer<QFileDialog> dialog = new QFileDialog(parent, title, path, "JSON (*.json)");
+    dialog->setAcceptMode(saving ? QFileDialog::AcceptSave : QFileDialog::AcceptOpen);
+    dialog->setFileMode(saving ? QFileDialog::AnyFile : QFileDialog::ExistingFile);
+    dialog->setOption(QFileDialog::DontConfirmOverwrite, saving);
+    const int result = dialog->exec();
+    const auto selected = dialog && result == QDialog::Accepted ? dialog->selectedFiles().value(0) : QString();
+    if (dialog) delete dialog;
+    return selected;
+}
+}
 FileEditorPage::FileEditorPage(SessionAccess access, FileDocumentEditor *editor, Apply apply, QWidget *parent)
     : QWidget(parent), access_(std::move(access)), editor_(editor), apply_(std::move(apply))
 {
@@ -43,9 +57,11 @@ FileEditorPage::FileEditorPage(SessionAccess access, FileDocumentEditor *editor,
         const auto lifetime = access_.lifetime;
         QPointer<FileEditorPage> alive(this);
         const auto revision = revision_;
-        const auto path = QFileDialog::getSaveFileName(this, QStringLiteral("另存编辑文件"), path_->text(),
-            "JSON (*.json)", nullptr, QFileDialog::DontConfirmOverwrite);
-        if (alive && revision == revision_ && !path.isEmpty()) save(path);
+        busy_ = true; refresh();
+        const auto path = chooseFile(this, QStringLiteral("另存编辑文件"), path_->text(), true);
+        if (!alive) return;
+        busy_ = false; refresh();
+        if (revision == revision_ && !path.isEmpty()) save(path);
     });
     connect(applyButton_, &QPushButton::clicked, this, [this] {
         const auto lifetime = access_.lifetime;
@@ -79,10 +95,13 @@ bool FileEditorPage::resolveDraft()
     if (!dirty_) return true;
     const auto revision = revision_;
     QPointer<FileEditorPage> alive(this);
-    const auto choice = QMessageBox::warning(this, QStringLiteral("未保存文件草稿"),
+    busy_ = true; refresh();
+    const auto choice = showConfirmation(this, QMessageBox::Warning, QStringLiteral("未保存文件草稿"),
         QStringLiteral("文件编辑尚未保存。放弃只丢弃编辑草稿，不修改文件或运行参数。"),
         QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Cancel);
-    if (!alive || revision_ != revision) return false;
+    if (!alive) return false;
+    busy_ = false; refresh();
+    if (revision_ != revision) return false;
     if (choice == QMessageBox::Save) { save(); return false; }
     if (choice != QMessageBox::Discard) return false;
     editor_->setDocument(cleanDocument_); path_->setText(documentPath_); ++revision_; dirty_ = false; refresh(); return true;
@@ -105,7 +124,12 @@ void FileEditorPage::open()
     QPointer<FileEditorPage> alive(this);
     const auto revision = revision_;
     auto selected = path_->text();
-    if (selected.isEmpty()) selected = QFileDialog::getOpenFileName(this, QStringLiteral("打开编辑文件（不应用）"), {}, "JSON (*.json)");
+    if (selected.isEmpty()) {
+        busy_ = true; refresh();
+        selected = chooseFile(this, QStringLiteral("打开编辑文件（不应用）"), {}, false);
+        if (!alive) return;
+        busy_ = false; refresh();
+    }
     if (!alive || revision != revision_ || selected.isEmpty()) return;
     const auto path = QFileInfo(selected).absoluteFilePath();
     busy_ = true; refresh(); QPointer<FileEditorPage> self(this);
@@ -151,9 +175,12 @@ void FileEditorPage::save(const QString &destination)
     const auto revision = revision_;
     if (QFileInfo::exists(path)) {
         QPointer<FileEditorPage> alive(this);
-        const auto choice = QMessageBox::question(this, QStringLiteral("覆盖文件"),
+        busy_ = true; refresh();
+        const auto choice = showConfirmation(this, QMessageBox::Question, QStringLiteral("覆盖文件"),
             QStringLiteral("确认用当前编辑快照覆盖以下文件？\n%1").arg(path), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-        if (!alive || choice != QMessageBox::Yes || revision != revision_) return;
+        if (!alive) return;
+        busy_ = false; refresh();
+        if (choice != QMessageBox::Yes || revision != revision_) return;
     }
     busy_ = true; refresh();
     QPointer<FileEditorPage> self(this);

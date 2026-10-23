@@ -1,0 +1,10 @@
+********* Start testing of ParameterWindowTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : ParameterWindowTests::initTestCase()
+FAIL!  : ParameterWindowTests::readFromParameterRowUsesRealRtuSession() Compared values are not the same
+   Actual   (wire.requests.first().toHex()) : "010300000001840a"
+   Expected (QByteArray("1103006b0001f746")): "1103006b0001f746"
+C:/Users/81966/Documents/Ademo/build/worktrees/ui07/tests/parameter_window_tests.cpp(81) : failure location
+PASS   : ParameterWindowTests::cleanupTestCase()
+Totals: 2 passed, 1 failed, 0 skipped, 0 blacklisted, 314ms
+********* Finished testing of ParameterWindowTests *********

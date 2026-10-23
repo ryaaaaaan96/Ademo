@@ -1,0 +1,144 @@
+(lldb) target create "./build/qt-llvm-release/bin/parameter_file_editor_tests.exe"
+Current executable set to 'C:\Users\81966\Documents\Ademo\build\worktrees\ui07\build\qt-llvm-release\bin\parameter_file_editor_tests.exe' (x86_64).
+(lldb) settings set -- target.run-args  "deviceSwitchFileGuardCanDestroyViewWithoutChangingOtherSession" "-o" ".scratch/multi-protocol-workbench-ui/evidence/UI07/probe-device-lldb-test.txt,txt"
+(lldb) run
+Process 18964 launched: 'C:\Users\81966\Documents\Ademo\build\worktrees\ui07\build\qt-llvm-release\bin\parameter_file_editor_tests.exe' (x86_64)
+Process 18964 stopped
+* thread #1, stop reason = Exception 0x80000003 encountered at address 0x7ffe779d9224
+    frame #0: 0x00007ffe779d9225 ntdll.dll`LdrResSearchResource + 2037
+ntdll.dll`LdrResSearchResource:
+->  0x7ffe779d9225 <+2037>: jmp    0x7ffe779d9233            ; <+2051>
+    0x7ffe779d9227 <+2039>: movq   0xf8(%rsp), %rdi
+    0x7ffe779d922f <+2047>: movl   0x20(%rsp), %ebx
+    0x7ffe779d9233 <+2051>: movl   %ebx, 0x30(%rsp)
+(lldb) thread backtrace all
+  thread #4
+    frame #0: 0x00007ffe77ac5a24 ntdll.dll`NtWaitForWorkViaWorkerFactory + 20
+    frame #1: 0x00007ffe77984d0e ntdll.dll`TpCallbackMayRunLong + 6670
+    frame #2: 0x00007ffe76d4dda7 kernel32.dll`BaseThreadInitThunk + 23
+    frame #3: 0x00007ffe779dee4c ntdll.dll`RtlUserThreadStart + 44
+  thread #2
+    frame #0: 0x00007ffe77ac5a24 ntdll.dll`NtWaitForWorkViaWorkerFactory + 20
+    frame #1: 0x00007ffe77984d0e ntdll.dll`TpCallbackMayRunLong + 6670
+    frame #2: 0x00007ffe76d4dda7 kernel32.dll`BaseThreadInitThunk + 23
+    frame #3: 0x00007ffe779dee4c ntdll.dll`RtlUserThreadStart + 44
+* thread #1, stop reason = Exception 0x80000003 encountered at address 0x7ffe779d9224
+  * frame #0: 0x00007ffe779d9225 ntdll.dll`LdrResSearchResource + 2037
+    frame #1: 0x00007ffe7796ae02 ntdll.dll`RtlSetProcessPreferredUILanguages + 2978
+    frame #2: 0x00007ffe77a80a1a ntdll.dll`RtlLengthCurrentClearRunForwardEx + 1050
+    frame #3: 0x00007ffe7798796a ntdll.dll`RtlFreeHeap + 1754
+    frame #4: 0x00007ffe75522d7b ucrtbase.dll`_free_base + 27
+    frame #5: 0x00007ffdc506f923 Qt6Core.dll`QObjectPrivate::deleteChildren(this=0x0000022e3aa5e9d0) at qobject.cpp:2292:9
+    frame #6: 0x00007ffdc5a3476a Qt6Widgets.dll`QWidget::~QWidget(this=0x0000022e38ac17a0) at qwidget.cpp:1542:12
+    frame #7: 0x00007ffdd2b0ccd3 libmodbus_plugin.dll`debugger::FileEditorPage::~FileEditorPage() + 163
+    frame #8: 0x00007ffdc506f923 Qt6Core.dll`QObjectPrivate::deleteChildren(this=0x0000022e38a79d50) at qobject.cpp:2292:9
+    frame #9: 0x00007ffdc5a3476a Qt6Widgets.dll`QWidget::~QWidget(this=0x0000022e38a59a30) at qwidget.cpp:1542:12
+    frame #10: 0x00007ffdc5c28ef1 Qt6Widgets.dll`QStackedWidget::~QStackedWidget(this=<unavailable>) at qstackedwidget.cpp:127:1 [inlined]
+    frame #11: 0x00007ffdc5c28eec Qt6Widgets.dll`QStackedWidget::~QStackedWidget(this=<unavailable>) at qstackedwidget.cpp:126:1
+    frame #12: 0x00007ffdc506f923 Qt6Core.dll`QObjectPrivate::deleteChildren(this=0x0000022e38a79a60) at qobject.cpp:2292:9
+    frame #13: 0x00007ffdc5a3476a Qt6Widgets.dll`QWidget::~QWidget(this=0x0000022e38a78ab0) at qwidget.cpp:1542:12
+    frame #14: 0x00007ffdc5c54951 Qt6Widgets.dll`QTabWidget::~QTabWidget(this=<unavailable>) at qtabwidget.cpp:334:1 [inlined]
+    frame #15: 0x00007ffdc5c5494c Qt6Widgets.dll`QTabWidget::~QTabWidget(this=<unavailable>) at qtabwidget.cpp:333:1
+    frame #16: 0x00007ffdc506f923 Qt6Core.dll`QObjectPrivate::deleteChildren(this=0x0000022e38a79250) at qobject.cpp:2292:9
+    frame #17: 0x00007ffdc5a3476a Qt6Widgets.dll`QWidget::~QWidget(this=0x0000022e38a78570) at qwidget.cpp:1542:12
+    frame #18: 0x00007ffdd2ab8af2 libmodbus_plugin.dll`debugger::(anonymous namespace)::MasterParameters::~MasterParameters() + 242
+    frame #19: 0x00007ffdd2ab8b1d libmodbus_plugin.dll`debugger::(anonymous namespace)::MasterParameters::~MasterParameters() + 13
+    frame #20: 0x00007ffdc507e2ce Qt6Core.dll`QtPrivate::QSlotObjectBase::call(this=0x0000022e3aa928f0, r=0x0000009064d9e5f8, a=0x0000009064d96bc0) at qobjectdefs_impl.h:462:51 [inlined]
+    frame #21: 0x00007ffdc507e2af Qt6Core.dll`void doActivate<false>(sender=0x0000009064d9e5f8, signal_index=3, argv=0x0000009064d96bc0) at qobject.cpp:4431:26
+    frame #22: 0x00007ffdc5090cac Qt6Core.dll`void QMetaObject::activate<void, QTimer::QPrivateSignal>(sender=<unavailable>, mo=<unavailable>, local_signal_index=0, ret=0x0000000000000000, args=0x0000009064d96bbf) at qobjectdefs.h:320:9 [inlined]
+    frame #23: 0x00007ffdc5090c85 Qt6Core.dll`QTimer::timeout(this=<unavailable>, _t1=<unavailable>) at moc_qtimer.cpp:182:5 [inlined]
+    frame #24: 0x00007ffdc5090c85 Qt6Core.dll`QTimer::timerEvent(this=<unavailable>, e=<unavailable>) at qtimer.cpp:332:14
+    frame #25: 0x00007ffdc50702f4 Qt6Core.dll`QObject::event(this=0x0000009064d9e5f8, e=0x0000009064d97030) at qobject.cpp:1467:9
+    frame #26: 0x00007ffdc59e9e3b Qt6Widgets.dll`QApplicationPrivate::notify_helper(this=0x0000022e389fb230, receiver=0x0000009064d9e5f8, e=0x0000009064d97030) at qapplication.cpp:3279:26
+    frame #27: 0x00007ffdc59eaf27 Qt6Widgets.dll`QApplication::notify(this=<unavailable>, receiver=0x0000009064d9e5f8, e=0x0000009064d97030) at qapplication.cpp:0
+    frame #28: 0x00007ffdc501d8bb Qt6Core.dll`QCoreApplication::notifyInternal2(receiver=0x0000009064d9e5f8, event=0x0000009064d97030) at qcoreapplication.cpp:1153:18 [inlined]
+    frame #29: 0x00007ffdc501d84a Qt6Core.dll`QCoreApplication::sendEvent(receiver=0x0000009064d9e5f8, event=0x0000009064d97030) at qcoreapplication.cpp:1598:12
+    frame #30: 0x00007ffdc51f4eae Qt6Core.dll`QEventDispatcherWin32Private::sendTimerEvent(this=<unavailable>, timerId=<unavailable>) at qeventdispatcher_win.cpp:415:9
+    frame #31: 0x00007ffdc51f78fd Qt6Core.dll`QEventDispatcherWin32::event(this=0x0000022e38a2ff70, e=0x0000022e3aac4bc0) at qeventdispatcher_win.cpp:907:12
+    frame #32: 0x00007ffdc59e9e3b Qt6Widgets.dll`QApplicationPrivate::notify_helper(this=0x0000022e389fb230, receiver=0x0000022e38a2ff70, e=0x0000022e3aac4bc0) at qapplication.cpp:3279:26
+    frame #33: 0x00007ffdc59eaf27 Qt6Widgets.dll`QApplication::notify(this=<unavailable>, receiver=0x0000022e38a2ff70, e=0x0000022e3aac4bc0) at qapplication.cpp:0
+    frame #34: 0x00007ffdc501e150 Qt6Core.dll`QCoreApplication::notifyInternal2(receiver=0x0000022e38a2ff70, event=0x0000022e3aac4bc0) at qcoreapplication.cpp:1153:18 [inlined]
+    frame #35: 0x00007ffdc501e0d9 Qt6Core.dll`QCoreApplication::sendEvent(receiver=0x0000022e38a2ff70, event=0x0000022e3aac4bc0) at qcoreapplication.cpp:1598:12 [inlined]
+    frame #36: 0x00007ffdc501e0d3 Qt6Core.dll`QCoreApplicationPrivate::sendPostedEvents(receiver=0x0000000000000000, event_type=0, data=0x0000022e38a09090) at qcoreapplication.cpp:1953:9
+    frame #37: 0x00007ffdc4970f22 Qt6Gui.dll`QWindowsGuiEventDispatcher::sendPostedEvents(this=<unavailable>) at qwindowsguieventdispatcher.cpp:44:28
+    frame #38: 0x00007ffdc51f58c0 Qt6Core.dll`QEventDispatcherWin32::processEvents(this=0x0000022e38a2ff70, flags=QEventLoop::ProcessEventsFlags @ rdi) at qeventdispatcher_win.cpp:484:5
+    frame #39: 0x00007ffdc4970ef9 Qt6Gui.dll`QWindowsGuiEventDispatcher::processEvents(this=<unavailable>, flags=<unavailable>) at qwindowsguieventdispatcher.cpp:37:44
+    frame #40: 0x00007ffdc5028186 Qt6Core.dll`QEventLoop::processEvents(this=0x0000009064d9a6f0, flags=QEventLoop::ProcessEventsFlags @ rdi) at qeventloop.cpp:109:55 [inlined]
+    frame #41: 0x00007ffdc5028169 Qt6Core.dll`QEventLoop::exec(this=0x0000009064d9a6f0, flags=<unavailable>) at qeventloop.cpp:198:9
+    frame #42: 0x00007ffdc5c8fcf4 Qt6Widgets.dll`QDialog::exec(this=0x0000009064d9a7a0) at qdialog.cpp:588:26
+    frame #43: 0x00007ffdc5cc7b06 Qt6Widgets.dll`showNewMessageBox(parent=<unavailable>, icon=<unavailable>, title=<unavailable>, text=<unavailable>, buttons=QMessageBox::StandardButtons @ 0x0000009064d9a850, defaultButton=Cancel) at qmessagebox.cpp:1784:16
+    frame #44: 0x00007ffdc5cc7bc8 Qt6Widgets.dll`QMessageBox::warning(parent=<unavailable>, title=<unavailable>, text=<unavailable>, buttons=<unavailable>, defaultButton=Cancel) at qmessagebox.cpp:1878:12
+    frame #45: 0x00007ffdd2b08a5a libmodbus_plugin.dll`debugger::FileEditorPage::resolveDraft() + 186
+    frame #46: 0x00007ffdd2b086e5 libmodbus_plugin.dll`debugger::FileEditorPage::bindTarget(QString const&, QString const&, QJsonObject const&, QString const&) + 149
+    frame #47: 0x00007ffdd2ab54c5 libmodbus_plugin.dll`debugger::(anonymous namespace)::MasterParameters::bindEditor(QString const&) + 1637
+    frame #48: 0x00007ffdd2ab8e2d libmodbus_plugin.dll`debugger::(anonymous namespace)::MasterParameters::selectDevice(QString const&) + 333
+    frame #49: 0x00007ffdc506e3af Qt6Core.dll`QtPrivate::QSlotObjectBase::call(this=<unavailable>, r=0x0000022e38a78570, a=<unavailable>) at qobjectdefs_impl.h:462:51 [inlined]
+    frame #50: 0x00007ffdc506e39b Qt6Core.dll`QMetaCallEvent::placeMetaCall(this=<unavailable>, object=0x0000022e38a78570) at qobject.cpp:556:21
+    frame #51: 0x00007ffdc5070532 Qt6Core.dll`QObject::event(this=0x0000022e38a78570, e=0x0000022e3b0350c0) at qobject.cpp:1492:18
+    frame #52: 0x00007ffdc5a49cdd Qt6Widgets.dll`QWidget::event(this=<unavailable>, event=<unavailable>) at qwidget.cpp:9404:25
+    frame #53: 0x00007ffdc59e9e3b Qt6Widgets.dll`QApplicationPrivate::notify_helper(this=0x0000022e389fb230, receiver=0x0000022e38a78570, e=0x0000022e3b0350c0) at qapplication.cpp:3279:26
+    frame #54: 0x00007ffdc59eaf27 Qt6Widgets.dll`QApplication::notify(this=<unavailable>, receiver=0x0000022e38a78570, e=0x0000022e3b0350c0) at qapplication.cpp:0
+    frame #55: 0x00007ffdc501e150 Qt6Core.dll`QCoreApplication::notifyInternal2(receiver=0x0000022e38a78570, event=0x0000022e3b0350c0) at qcoreapplication.cpp:1153:18 [inlined]
+    frame #56: 0x00007ffdc501e0d9 Qt6Core.dll`QCoreApplication::sendEvent(receiver=0x0000022e38a78570, event=0x0000022e3b0350c0) at qcoreapplication.cpp:1598:12 [inlined]
+    frame #57: 0x00007ffdc501e0d3 Qt6Core.dll`QCoreApplicationPrivate::sendPostedEvents(receiver=0x0000000000000000, event_type=0, data=0x0000022e38a09090) at qcoreapplication.cpp:1953:9
+    frame #58: 0x00007ffdc4970f22 Qt6Gui.dll`QWindowsGuiEventDispatcher::sendPostedEvents(this=<unavailable>) at qwindowsguieventdispatcher.cpp:44:28
+    frame #59: 0x00007ffdc51f58c0 Qt6Core.dll`QEventDispatcherWin32::processEvents(this=0x0000022e38a2ff70, flags=QEventLoop::ProcessEventsFlags @ rdi) at qeventdispatcher_win.cpp:484:5
+    frame #60: 0x00007ffdc4970ef9 Qt6Gui.dll`QWindowsGuiEventDispatcher::processEvents(this=<unavailable>, flags=<unavailable>) at qwindowsguieventdispatcher.cpp:37:44
+    frame #61: 0x00007ffdc501d44c Qt6Core.dll`QCoreApplication::processEvents(flags=<unavailable>, deadline=(t1 = -9223372036854775808, t2 = 0, type = 0)) at qcoreapplication.cpp:1441:49
+    frame #62: 0x00007ffdc5090564 Qt6Core.dll`QTest::qWait(msecs=<unavailable>) at qtestsupport_core.cpp:168:9
+    frame #63: 0x00007ff7e6d621ef parameter_file_editor_tests.exe`ParameterFileEditorTests::deviceSwitchFileGuardCanDestroyViewWithoutChangingOtherSession() + 2815
+    frame #64: 0x00007ffdc502a2fe Qt6Core.dll`QMetaMethodInvoker::invokeImpl(self=QMetaMethod @ scalar, target=0x0000009064d9fae8, connectionType=DirectConnection, paramCount=1, parameters=0x0000009064d9f230, typeNames=0x0000009064d9f238, metaTypes=0x0000009064d9f240) at qmetaobject.cpp:2897:13
+    frame #65: 0x00007ffdc50301db Qt6Core.dll`QMetaMethod::invokeImpl(self=QMetaMethod @ 0x0000009064d9f220, target=<unavailable>, connectionType=<unavailable>, paramCount=<unavailable>, parameters=0x0000009064d9f230, typeNames=0x0000009064d9f238, metaTypes=0x0000009064d9f240) at qmetaobject.cpp:2736:13
+    frame #66: 0x00007ffdd69872ab Qt6Test.dll`std::__1::enable_if<!AreOldStyleArgs<>::value, bool>::type QMetaMethod::invoke<void>(this=<unavailable>, obj=<unavailable>, c=DirectConnection, r=<unavailable>) const at qmetaobject.h:158:16 [inlined]
+    frame #67: 0x00007ffdd698725d Qt6Test.dll`std::__1::enable_if<!AreOldStyleArgs<>::value, bool>::type QMetaMethod::invoke<>(this=<unavailable>, obj=<unavailable>, c=DirectConnection) const at qmetaobject.h:170:16 [inlined]
+    frame #68: 0x00007ffdd698725d Qt6Test.dll`QTest::invokeTestMethodIfValid(m=<unavailable>, obj=<unavailable>) at qtestcase.cpp:470:18
+    frame #69: 0x00007ffdd698695b Qt6Test.dll`QTest::TestMethods::invokeTestOnData(this=0x0000009064d9f8a0, index=<unavailable>) const at qtestcase.cpp:1084:28
+    frame #70: 0x00007ffdd6987a10 Qt6Test.dll`QTest::TestMethods::invokeTest(int, QLatin1String, std::__1::optional<QTest::WatchDog>&) const::$_4::operator()(this=<unavailable>) const at qtestcase.cpp:1401:25 [inlined]
+    frame #71: 0x00007ffdd6987a0b Qt6Test.dll`void QTest::runWithWatchdog<QTest::TestMethods::invokeTest(int, QLatin1String, std::__1::optional<QTest::WatchDog>&) const::$_4>(watchDog= Has Value=false , f=<unavailable>) at qtestcase.cpp:1287:5 [inlined]
+    frame #72: 0x00007ffdd69879c6 Qt6Test.dll`QTest::TestMethods::invokeTest(this=0x0000009064d9f8a0, index=0, tag=(m_size = 0, m_data = 0x0000000000000000), watchDog= Has Value=false ) const at qtestcase.cpp:1400:21
+    frame #73: 0x00007ffdd6988b51 Qt6Test.dll`QTest::TestMethods::invokeTests(this=0x0000009064d9f8a0, testObject=0x0000009064d9fae8) const at qtestcase.cpp:1741:17
+    frame #74: 0x00007ffdd69896b7 Qt6Test.dll`QTest::qRun() at qtestcase.cpp:1997:18
+    frame #75: 0x00007ffdd6988e15 Qt6Test.dll`QTest::qExec(testObject=<unavailable>, argc=<unavailable>, argv=<unavailable>) at qtestcase.cpp:1852:15
+    frame #76: 0x00007ff7e6d5149f parameter_file_editor_tests.exe`main + 127
+    frame #77: 0x00007ff7e6d510fe parameter_file_editor_tests.exe`__tmainCRTStartup at crtexe.c:260:11
+    frame #78: 0x00007ff7e6d513e6 parameter_file_editor_tests.exe`mainCRTStartup at crtexe.c:129:9
+    frame #79: 0x00007ffe76d4dda7 kernel32.dll`BaseThreadInitThunk + 23
+    frame #80: 0x00007ffe779dee4c ntdll.dll`RtlUserThreadStart + 44
+  thread #3
+    frame #0: 0x00007ffe77ac5a24 ntdll.dll`NtWaitForWorkViaWorkerFactory + 20
+    frame #1: 0x00007ffe77984d0e ntdll.dll`TpCallbackMayRunLong + 6670
+    frame #2: 0x00007ffe76d4dda7 kernel32.dll`BaseThreadInitThunk + 23
+    frame #3: 0x00007ffe779dee4c ntdll.dll`RtlUserThreadStart + 44
+  thread #8
+    frame #0: 0x00007ffe77ac5a24 ntdll.dll`NtWaitForWorkViaWorkerFactory + 20
+    frame #1: 0x00007ffe77984d0e ntdll.dll`TpCallbackMayRunLong + 6670
+    frame #2: 0x00007ffe76d4dda7 kernel32.dll`BaseThreadInitThunk + 23
+    frame #3: 0x00007ffe779dee4c ntdll.dll`RtlUserThreadStart + 44
+  thread #12
+    frame #0: 0x00007ffe77ac28a4 ntdll.dll`NtWaitForMultipleObjects + 20
+    frame #1: 0x00007ffe5e280006 winmm.dll`joySetThreshold + 342
+    frame #2: 0x00007ffe76d4dda7 kernel32.dll`BaseThreadInitThunk + 23
+    frame #3: 0x00007ffe779dee4c ntdll.dll`RtlUserThreadStart + 44
+  thread #5
+    frame #0: 0x00007ffe77ac5a24 ntdll.dll`NtWaitForWorkViaWorkerFactory + 20
+    frame #1: 0x00007ffe77984d0e ntdll.dll`TpCallbackMayRunLong + 6670
+    frame #2: 0x00007ffe76d4dda7 kernel32.dll`BaseThreadInitThunk + 23
+    frame #3: 0x00007ffe779dee4c ntdll.dll`RtlUserThreadStart + 44
+  thread #7
+    frame #0: 0x00007ffe77ac28a4 ntdll.dll`NtWaitForMultipleObjects + 20
+    frame #1: 0x00007ffe74ce2773 KernelBase.dll`WaitForMultipleObjectsEx + 291
+    frame #2: 0x00007ffe770c9abe combase.dll`CoRegisterInitializeSpy + 3390
+    frame #3: 0x00007ffe770c231f combase.dll`RoParameterizedTypeExtraGetTypeSignature + 1391
+    frame #4: 0x00007ffe770c222f combase.dll`RoParameterizedTypeExtraGetTypeSignature + 1151
+    frame #5: 0x00007ffe76d4dda7 kernel32.dll`BaseThreadInitThunk + 23
+    frame #6: 0x00007ffe779dee4c ntdll.dll`RtlUserThreadStart + 44
+  thread #9
+    frame #0: 0x00007ffe77ac5a24 ntdll.dll`NtWaitForWorkViaWorkerFactory + 20
+    frame #1: 0x00007ffe77984d0e ntdll.dll`TpCallbackMayRunLong + 6670
+    frame #2: 0x00007ffe76d4dda7 kernel32.dll`BaseThreadInitThunk + 23
+    frame #3: 0x00007ffe779dee4c ntdll.dll`RtlUserThreadStart + 44
+  thread #6
+    frame #0: 0x00007ffe77ac5a24 ntdll.dll`NtWaitForWorkViaWorkerFactory + 20
+    frame #1: 0x00007ffe77984d0e ntdll.dll`TpCallbackMayRunLong + 6670
+    frame #2: 0x00007ffe76d4dda7 kernel32.dll`BaseThreadInitThunk + 23
+    frame #3: 0x00007ffe779dee4c ntdll.dll`RtlUserThreadStart + 44

@@ -139,7 +139,11 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     };
     rebuildProtocol_ = updateProtocol;
     connect(transport, &QComboBox::currentIndexChanged, this, updateTransport);
-    connect(protocol, &QComboBox::currentIndexChanged, this, updateProtocol);
+    connect(protocol, &QComboBox::currentIndexChanged, this, [this, updateProtocol] {
+        // 修改保护可能销毁整个窗口；先让 QComboBox 完成自己的信号发送再进入模态守卫。
+        if (session_.hasUnsavedOrBusy()) QTimer::singleShot(0, this, updateProtocol);
+        else updateProtocol();
+    });
     updateTransport();
     auto *start = new QPushButton(QStringLiteral("启动会话"), this);
     auto *stop = new QPushButton(QStringLiteral("停止并释放端点"), this);

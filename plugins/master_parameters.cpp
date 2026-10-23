@@ -3,6 +3,7 @@
 #include "parameter_file_editor.h"
 #include "parameter_read_scope.h"
 #include "debugger/parameter_table.h"
+#include "debugger/confirmation.h"
 #include <QComboBox>
 #include <QFormLayout>
 #include <QJsonArray>
@@ -131,13 +132,15 @@ public:
         selectedDevice_ = selectedDevice();
         connect(device_, &QComboBox::currentIndexChanged, this, [this] {
             const auto next = selectedDevice();
-            QPointer<MasterParameters> alive(this);
-            const bool resolved = next == selectedDevice_ || (resolvePending(selectedDevice_) && bindEditor(next));
-            if (!alive) return;
-            if (!resolved) {
-                const QSignalBlocker blocker(device_); device_->setCurrentIndex(device_->findData(selectedDevice_)); return;
+            if (next == selectedDevice_) return;
+            {
+                const QSignalBlocker blocker(device_); device_->setCurrentIndex(device_->findData(selectedDevice_));
             }
-            selectedDevice_ = next; rebuildGroups();
+            // 先退出原生下拉框信号栈；模态守卫可以销毁整个视图。
+            const auto revision = ++deviceSelectionRevision_;
+            QTimer::singleShot(0, this, [this, next, revision] {
+                if (revision == deviceSelectionRevision_) selectDevice(next);
+            });
         });
         connect(group_, &QComboBox::currentIndexChanged, this, [this] { showDevice(); });
         connect(add_, &QPushButton::clicked, this, [this] {
@@ -207,9 +210,13 @@ public:
     }
     QString selectedDevice() const override { return device_->currentData().toString(); }
     bool selectDevice(const QString &id) override {
+        ++deviceSelectionRevision_; // 后续明确选择使旧的排队请求失效。
         const int index = device_->findData(id); if (index < 0) return false;
+        const auto lifetime = access_.lifetime;
         QPointer<MasterParameters> alive(this);
-        device_->setCurrentIndex(index); return alive && selectedDevice() == id;
+        if (id != selectedDevice_ && (!resolvePending(selectedDevice_) || !alive || !bindEditor(id) || !alive)) return false;
+        const QSignalBlocker blocker(device_); device_->setCurrentIndex(index);
+        selectedDevice_ = id; rebuildGroups(); return true;
     }
 private:
     bool bindEditor(const QString &id) {
@@ -277,7 +284,7 @@ private:
         if (!hasPending(device)) return true;
         const auto revision = pendingRevision_;
         QPointer<MasterParameters> alive(this);
-        const auto decision = QMessageBox::warning(this, QStringLiteral("待提交设备值"),
+        const auto decision = showConfirmation(this, QMessageBox::Warning, QStringLiteral("待提交设备值"),
             QStringLiteral("存在尚未确认的待提交值。放弃只清除界面草稿，不撤销已发送的写入，也不删除通信结果。"),
             QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Cancel);
         if (!alive || decision != QMessageBox::Discard || revision != pendingRevision_) return false;
@@ -470,6 +477,7 @@ private:
     QMap<QString, QString> operationStatuses_;
     quint64 lastMessage_ = 0;
     quint64 pendingRevision_ = 0;
+    quint64 deviceSelectionRevision_ = 0;
     QString selectedDevice_;
     bool loading_ = false;
     QComboBox *device_, *area_, *group_;

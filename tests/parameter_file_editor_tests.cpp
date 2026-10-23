@@ -239,6 +239,36 @@ private slots:
         QVERIFY2(!observed.expired(),"DLL最后释放须延迟到插件返回栈退出当前事件");
         QTRY_VERIFY(observed.expired());
     }
+    void deviceSwitchGuardCanDestroyViewWithoutChangingOtherSession_data() {
+        QTest::addColumn<bool>("fileDraft");
+        QTest::newRow("file-draft") << true; QTest::newRow("pending-value") << false;
+    }
+    void deviceSwitchGuardCanDestroyViewWithoutChangingOtherSession() {
+        QFETCH(bool,fileDraft);
+        auto config=configuration(); auto rows=config["parameterRows"].toArray();
+        rows.append(QJsonObject{{"unit",18},{"area","holding"},{"address",3}}); config["parameterRows"]=rows;
+        DebugSession session(catalog), other(catalog); QVERIFY(session.configure(config)); QVERIFY(other.configure(configuration()));
+        std::unique_ptr<ParameterView> view(catalog->createParameterView("modbus.rtu",nullptr,session.access()));
+        view->resize(1200,700); view->show();
+        auto *pages=accessible<QTabWidget>(*view,QStringLiteral("参数页面"));
+        if(fileDraft) {
+            pages->setCurrentIndex(1);
+            accessible<QTableWidget>(*view,QStringLiteral("参数文件内容"))->item(0,0)->setText("unsaved file draft");
+        } else {
+            auto *value=editValue(*accessible<QTableWidget>(*view,QStringLiteral("参数表")),"123"); QVERIFY(value);
+            QPointer<QLineEdit> editing(value); QTest::keyClick(value,Qt::Key_Return); QTRY_VERIFY(!editing || !editing->isVisible());
+        }
+        pages->setCurrentIndex(0); auto *devices=accessible<QComboBox>(*view,QStringLiteral("当前设备")); QVERIFY(devices);
+        bool guardShown=false;
+        QTimer timer; timer.setInterval(5);
+        connect(&timer,&QTimer::timeout,&timer,[&] {
+            guardShown=qobject_cast<QMessageBox *>(QApplication::activeModalWidget());
+            if(guardShown) { timer.stop(); view.reset(); }
+        }); timer.start();
+        devices->setCurrentIndex(devices->findData("18"));
+        QTRY_VERIFY(!view); QVERIFY(guardShown); QCOMPARE(other.config().protocol,configuration());
+        QVERIFY(!other.hasUnsavedOrBusy()); QVERIFY(other.traces().isEmpty()); QCOMPARE(session.config().protocol,config);
+    }
     void closingOneSessionCanCancelFileDraftWithoutChangingOtherSession() {
         Workbench workbench(catalog); workbench.resize(1300,850); workbench.show();
         SessionConfig config{"modbus.rtu","serial","master",{},configuration(),{}};
@@ -257,6 +287,26 @@ private slots:
         workbench.selectSession(first); QVERIFY(workbench.isSessionOpen(first));
         QCOMPARE(workbench.session(first)->config().protocol,configuration());
         QVERIFY(workbench.session(first)->traces().isEmpty()); QVERIFY(workbench.session(second)->traces().isEmpty());
+    }
+    void filePickerBlocksBackgroundWorkspaceReplacement() {
+        QTemporaryDir dir; const auto path=dir.filePath("empty-workspace.json");
+        QFile file(path); QVERIFY(file.open(QIODevice::WriteOnly)); file.write("{\"version\":1,\"sessions\":[]}"); file.close();
+        Workbench workbench(catalog); workbench.resize(1300,850); workbench.show();
+        const int index=workbench.addSession({"modbus.rtu","serial","master",{},configuration(),{}},QStringLiteral("文件对话框保护"));
+        QPointer<ParameterView> view=workbench.parameterView(index); QVERIFY(view);
+        accessible<QTabWidget>(*view,QStringLiteral("参数页面"))->setCurrentIndex(1);
+        const auto operation=workbench.openWorkspace(path); QVERIFY(operation);
+        QTimer timer; timer.setInterval(5);
+        connect(&timer,&QTimer::timeout,&timer,[&] {
+            if(workbench.workspaceOperation(operation).state=="working") return;
+            if(auto *dialog=qobject_cast<QFileDialog *>(QApplication::activeModalWidget())) dialog->reject();
+            timer.stop();
+        }); timer.start();
+        QTest::mouseClick(button(*view,QStringLiteral("另存为…")),Qt::LeftButton);
+        QTRY_VERIFY(workbench.workspaceOperation(operation).state!="working");
+        QCOMPARE(workbench.workspaceOperation(operation).state,QString("cancelled"));
+        QVERIFY(view); QCOMPARE(workbench.sessionCount(),2); QCOMPARE(workbench.session(index)->config().protocol,configuration());
+        QVERIFY(!workbench.session(index)->hasUnsavedOrBusy());
     }
     void fileSaveWhileRunningDoesNotSendOrApply() {
         QTemporaryDir dir; Wire wire; DebugSession session(catalog,nullptr,wire.factory()); QVERIFY(session.configure(configuration()));

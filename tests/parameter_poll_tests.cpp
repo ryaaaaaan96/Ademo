@@ -99,7 +99,7 @@ private slots:
         QTRY_COMPARE(table->item(0, 3)->text(), QString("10"));
         QCOMPARE(table->item(1, 3)->text(), QString("20"));
         QCOMPARE(table->item(2, 3)->text(), QStringLiteral("未读取"));
-        QCOMPARE(table->item(3, 3)->text(), QString("30"));
+        QTRY_COMPARE(table->item(3, 3)->text(), QString("30"));
         QCOMPARE(h.wire.requests.size(), 2);
     }
     void pollingKeepsCapturedScopeAndPendingWhileGroupsChange() {
@@ -132,7 +132,7 @@ private slots:
         h.reply(QByteArray::fromHex("1103020309")); QTest::qWait(70);
         groups->setCurrentText(QStringLiteral("测量"));
         QCOMPARE(table->item(0, 3)->text(), QString("123"));
-        QVERIFY2(table->item(0, 3)->toolTip().contains("777"), qPrintable(table->item(0, 3)->toolTip()));
+        QTRY_VERIFY2(table->item(0, 3)->toolTip().contains("777"), qPrintable(table->item(0, 3)->toolTip()));
         QVERIFY(table->item(0, 3)->toolTip().contains(QStringLiteral("待提交")));
         QCOMPARE(h.session.config().protocol["polls"].toArray().size(), 1);
         QCOMPARE(h.session.config().protocol["polls"].toArray()[0].toObject()["intervalMs"].toInt(), 100);

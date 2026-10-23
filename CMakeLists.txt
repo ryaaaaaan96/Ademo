@@ -11,7 +11,7 @@ target_link_libraries(debugger_sdk INTERFACE Qt6::Widgets)
 # 配套交付指纹：SDK、产品、Qt、编译器与配置必须一致。
 target_compile_definitions(debugger_sdk INTERFACE
   DEBUGGER_BUILD_KEY="sdk12-product0.2-qt${Qt6_VERSION}-${CMAKE_CXX_COMPILER_ID}${CMAKE_CXX_COMPILER_VERSION}-${CMAKE_SYSTEM_PROCESSOR}-$<CONFIG>")
-add_library(debugger_widgets STATIC src/parameter_table.cpp src/file_editor.cpp)
+add_library(debugger_widgets STATIC src/parameter_table.cpp src/file_editor.cpp src/confirmation.cpp)
 target_link_libraries(debugger_widgets PUBLIC debugger_sdk)
 add_library(debugger_host STATIC src/workspace.cpp src/session_recovery.cpp src/host.cpp src/workbench.cpp src/session_window.cpp src/trace_query.cpp src/trace_panel.cpp src/session_records.cpp
   src/trace_codec.cpp src/recording.cpp src/archive_query.cpp src/archive_format.cpp src/recording_panel.cpp include/debugger/host.h)

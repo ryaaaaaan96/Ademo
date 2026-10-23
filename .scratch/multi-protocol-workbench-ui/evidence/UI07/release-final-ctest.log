@@ -1,0 +1,25 @@
+[HANDLER_OUTPUT] 
+Test project C:/Users/81966/Documents/Ademo/build/worktrees/ui07/build/qt-llvm-release
+
+    Start  1: parameter_file_edit_save_apply
+1/9 Test  #1: parameter_file_edit_save_apply ...   Passed    5.83 sec
+    Start  2: parameter_group_polling
+2/9 Test  #2: parameter_group_polling ..........   Passed    1.67 sec
+    Start  3: window_trace_workflow
+3/9 Test  #3: window_trace_workflow ............   Passed    1.78 sec
+    Start  4: parameter_pending_write
+4/9 Test  #4: parameter_pending_write ..........   Passed    2.27 sec
+    Start  5: parameter_definition_read
+5/9 Test  #5: parameter_definition_read ........   Passed    2.14 sec
+    Start  6: parameter_window_read
+6/9 Test  #6: parameter_window_read ............   Passed    0.60 sec
+    Start  7: parallel_sessions_recovery
+7/9 Test  #7: parallel_sessions_recovery .......   Passed    3.35 sec
+    Start  8: slave_edit_import_save
+8/9 Test  #8: slave_edit_import_save ...........   Passed    1.68 sec
+    Start 16: workspace_roundtrip
+9/9 Test #16: workspace_roundtrip ..............   Passed    3.05 sec
+
+100% tests passed, 0 tests failed out of 9
+
+Total Test time (real) =  22.41 sec
