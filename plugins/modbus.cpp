@@ -298,7 +298,7 @@ public:
     Descriptor describe() const override {
         return {"modbus.rtu", QStringLiteral("Modbus RTU"), buildKey(), {"master", "slave"},
                 {"serial"}, {"lifecycle", "read-coils", "read-discrete", "read-holding", "read-input", "write-single-coil", "write-single-register",
-                               "write-multiple-coils", "write-multiple-registers", "configure-polling"}, {}};
+                               "write-multiple-coils", "write-multiple-registers", "configure-polling", "stop-polling"}, {}};
     }
     std::unique_ptr<ProtocolSession> createSession(ProtocolServices services) override {
         return std::make_unique<RtuSession>(std::move(services));

@@ -62,6 +62,7 @@ QString RtuSession::configureSettings(const QJsonObject &settings)
     timeoutUs_ = qint64(timeout) * 1000;
     retryIntervalUs_ = qint64(interval) * 1000;
     polls_ = std::move(polls);
+    settings_ = settings;
     nextPoll_ = 0;
     pollingPaused_ = false;
     return {};
@@ -113,6 +114,15 @@ void RtuSession::connectionRestored(bool resumePolling)
 void RtuSession::submit(const OperationRequest &request)
 {
     if (slave_) { slave_->submit(request); return; }
+    if (request.action == "stop-polling") {
+        if (!active_) { services_.publish({request.id, "invalid", QStringLiteral("会话尚未启动"), {}}); return; }
+        // 只撤下后续采集；在途操作、手动队列、读取重试和响应归属保持原语义。
+        polls_.clear(); pollingPaused_ = true;
+        settings_["polls"] = QJsonArray{};
+        if (services_.publishConfiguration) services_.publishConfiguration(settings_);
+        services_.publish({request.id, "success", QStringLiteral("已停止后续轮询；在途读取仍按原规则完成，会话保持运行"), {}});
+        return;
+    }
     if (request.action == "configure-polling") {
         const auto error = !active_ ? QStringLiteral("会话尚未启动") : request_.id || !pending_.isEmpty()
             ? QStringLiteral("请等待在途与排队操作结束后调整会话配置") : configureSettings(request.parameters);

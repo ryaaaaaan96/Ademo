@@ -56,6 +56,7 @@ private:
     bool writeSubmitted_ = false;
     QList<OperationRequest> pending_;
     QList<PollTask> polls_;
+    QJsonObject settings_;
     qsizetype nextPoll_ = 0;
     int extraRetries_ = 2;
     int attempt_ = 1;
