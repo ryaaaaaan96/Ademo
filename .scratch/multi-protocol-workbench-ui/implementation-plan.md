@@ -17,7 +17,7 @@ Status: ready-for-agent
 | 编号 | 可交付流程 | Status | Blocked by | 执行记录 |
 | --- | --- | --- | --- | --- |
 | [UI01](issues/01-prototype-layout-and-flow.md) | 确认可操作原型的布局与关键流程 | ready-for-agent | 无 | 已完成；2026-10-23 用户确认，原型 bb3aa81 |
-| [UI02](issues/02-window-first-rtu-read.md) | 在新的调试窗口完成一次 RTU 读取 | ready-for-agent | UI01 | 未启动 |
+| [UI02](issues/02-window-first-rtu-read.md) | 在新的调试窗口完成一次 RTU 读取 | ready-for-agent | UI01 | 实施中：codex/ui02-window-read；基于 3de6b5d |
 | [UI03](issues/03-dockable-session-lifecycle.md) | 同时运行并管理多个可停靠调试窗口 | ready-for-agent | UI02 | 未启动 |
 | [UI04](issues/04-parameter-json-groups-read.md) | 加载 JSON 分组并按参数或地址读取设备 | ready-for-agent | UI02 | 未启动 |
 | [UI05](issues/05-inline-pending-value-write.md) | 在单值列编辑并明确设置设备参数 | ready-for-agent | UI04 | 未启动 |
