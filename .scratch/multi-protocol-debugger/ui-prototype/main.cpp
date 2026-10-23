@@ -531,14 +531,45 @@ void SessionPane::addDeviceDialog() {
 class SessionDock : public QDockWidget {
 public:
     SessionPane *pane;
+    QToolButton *minimizeButton, *fullScreenButton;
+    bool fullScreen = false, wasFloating = false;
+    QRect previousGeometry;
     SessionDock(SessionPane *p, QWidget *parent) : QDockWidget(p->sessionName, parent), pane(p) {
         auto *scroll = new QScrollArea(this); scroll->setWidgetResizable(true); scroll->setFrameShape(QFrame::NoFrame);
         scroll->setWidget(pane); setWidget(scroll);
         setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
         setMinimumSize(420, 320); setAllowedAreas(Qt::AllDockWidgetAreas);
+        auto *title = new QWidget(this); title->setObjectName("sessionTitle");
+        auto *bar = new QHBoxLayout(title); bar->setContentsMargins(8, 4, 4, 4);
+        bar->addWidget(new QLabel(pane->sessionName)); bar->addStretch();
+        auto control = [this, bar](const QString &text, const QString &tip) {
+            auto *b = new QToolButton(this); b->setText(text); b->setToolTip(tip); b->setAccessibleName(tip); bar->addWidget(b); return b;
+        };
+        minimizeButton = control("最小化", "最小化会话（通信继续，点击左侧会话恢复）");
+        fullScreenButton = control("全屏", "全屏显示会话 / 还原");
+        auto *floatingButton = control("浮动", "浮动 / 停靠会话");
+        auto *closeButton = control("关闭", "关闭会话（停止通信）");
+        setTitleBarWidget(title);
+        connect(minimizeButton, &QToolButton::clicked, this, [this] { restorePresentation(); hide(); });
+        connect(fullScreenButton, &QToolButton::clicked, this, [this] {
+            if (fullScreen) { restorePresentation(); return; }
+            wasFloating = isFloating(); previousGeometry = geometry(); fullScreen = true;
+            setFloating(true); showFullScreen(); fullScreenButton->setText("还原");
+        });
+        connect(floatingButton, &QToolButton::clicked, this, [this] { restorePresentation(); setFloating(!isFloating()); });
+        connect(closeButton, &QToolButton::clicked, this, [this] { close(); });
+        auto *escape = new QShortcut(QKeySequence(Qt::Key_Escape), this);
+        connect(escape, &QShortcut::activated, this, [this] { restorePresentation(); });
+    }
+    void restorePresentation() {
+        if (!fullScreen) return;
+        fullScreen = false; showNormal(); setFloating(wasFloating);
+        if (wasFloating) setGeometry(previousGeometry);
+        fullScreenButton->setText("全屏");
     }
     void closeEvent(QCloseEvent *event) override {
         if (!pane->canClose()) { event->ignore(); return; }
+        restorePresentation();
         QDockWidget::closeEvent(event);
     }
 };
@@ -565,8 +596,9 @@ public:
         addDockWidget(Qt::LeftDockWidgetArea, navigation);
         connect(tree, &QTreeWidget::itemClicked, this, [this](QTreeWidgetItem *item) {
             const int index = item->data(0, Qt::UserRole).toInt(); if (index < 0 || index >= docks.size()) return;
+            const int device = item->data(0, Qt::UserRole + 1).toInt();
             auto *dock = docks[index]; dock->show(); dock->raise();
-            const int device = item->data(0, Qt::UserRole + 1).toInt(); if (device >= 0) dock->pane->deviceBox->setCurrentIndex(device);
+            if (device >= 0) dock->pane->deviceBox->setCurrentIndex(device);
         });
         layoutLabel = new QLabel("布局 A · 左右对照"); statusBar()->addWidget(layoutLabel);
         statusBar()->addPermanentWidget(new QLabel("拖动窗口标题可浮动 / 停靠；关闭停止通信，配置保留。"));
@@ -602,7 +634,7 @@ public:
     }
     void arrange(int variant) {
         layoutIndex = variant; const QStringList labels = {"布局 A · 左右对照", "布局 B · 上下对照", "布局 C · 独立浮窗"}; layoutLabel->setText(labels[variant]);
-        for (auto *dock : docks) { dock->setFloating(false); addDockWidget(Qt::RightDockWidgetArea, dock); }
+        for (auto *dock : docks) { dock->restorePresentation(); dock->setFloating(false); addDockWidget(Qt::RightDockWidgetArea, dock); }
         if (variant < 2) {
             for (int i = 1; i < docks.size(); ++i) splitDockWidget(docks[i - 1], docks[i], variant == 0 ? Qt::Horizontal : Qt::Vertical);
             QList<QDockWidget *> list; QList<int> sizes; for (auto *dock : docks) if (!dock->isHidden()) { list << dock; sizes << 600; }
@@ -669,6 +701,7 @@ QLabel#prototypeBadge { color: #80dbcc; }
 QDockWidget { font-weight: 600; }
 QDockWidget::title { background: #d7e4ef; padding: 8px; text-align: left; }
 QDockWidget > QWidget { background: #f8fafc; }
+QWidget#sessionTitle { background: #d7e4ef; }
 QTabWidget::pane { border: 1px solid #d7e1eb; background: white; }
 QTabBar::tab { padding: 9px 20px; background: #e9eff5; border-bottom: 2px solid transparent; }
 QTabBar::tab:selected { background: white; color: #087d73; border-bottom: 2px solid #139d90; }
@@ -682,7 +715,7 @@ QHeaderView::section { background: #edf3f8; padding: 7px 5px; border: 0; border-
 QTreeWidget { background: #f5f8fb; border: none; }
 QTreeWidget::item { padding: 9px 3px; }
 QTreeWidget::item:selected { color: #096d66; background: #deefec; }
-QPlainTextEdit#records { font-family: Consolas, 'Microsoft YaHei UI'; font-size: 11px; background: #15263b; color: #bdcfdf; border: 0; border-radius: 3px; padding: 4px; }
+QPlainTextEdit#records { font-family: Consolas, 'Microsoft YaHei UI'; font-size: 11px; background: white; color: #22344a; border: 1px solid #d7e1eb; border-radius: 3px; padding: 4px; }
 QLabel#hint { color: #687d92; font-size: 11px; }
 QStatusBar { background: #e2eaf2; padding: 3px; }
 )";
@@ -711,6 +744,19 @@ int main(int argc, char **argv) {
             master->pages->setCurrentIndex(1); window.grab().save(output + "/02-file-editor.png");
             master->pages->setCurrentIndex(0); master->openPlot({0, 1});
             for (int i = 0; i < 65; ++i) master->read(master->visibleRows);
+            auto *dock = window.docks[0];
+            master->togglePolling();
+            dock->fullScreenButton->click();
+            if (!dock->isFullScreen() || !master->running || !master->pollTimer.isActive()) qFatal("Fullscreen interrupted session");
+            dock->grab().save(output + "/06-fullscreen-session.png");
+            dock->fullScreenButton->click();
+            if (dock->isFloating() || dock->isFullScreen()) qFatal("Docked fullscreen restore failed");
+            dock->minimizeButton->click();
+            if (!dock->isHidden() || !master->running || !master->pollTimer.isActive() || !slave->running) qFatal("Minimize interrupted session");
+            window.grab().save(output + "/07-minimized-session.png");
+            window.tree->itemClicked(window.tree->topLevelItem(0), 0);
+            if (dock->isHidden() || !master->running) qFatal("Navigation restore failed");
+            master->togglePolling();
         });
         QTimer::singleShot(1500, &window, [&window, output] {
             auto *master = window.docks[0]->pane;
@@ -719,6 +765,9 @@ int main(int argc, char **argv) {
         });
         QTimer::singleShot(2000, &window, [&window, output, &app] {
             window.docks[0]->grab().save(output + "/04-floating-session.png");
+            auto *dock = window.docks[0]; const auto before = dock->geometry();
+            dock->fullScreenButton->click(); dock->fullScreenButton->click();
+            if (!dock->isFloating() || dock->geometry() != before) qFatal("Floating fullscreen restore failed");
             QFile result(output + "/capture-result.txt"); if (!result.open(QIODevice::WriteOnly)) { app.exit(3); return; }
             auto *pane = window.docks[0]->pane;
             bool ready = !pane->plots.isEmpty() && pane->plots[0] && pane->plots[0]->quick->status() == QQuickWidget::Ready;

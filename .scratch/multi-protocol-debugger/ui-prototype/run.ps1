@@ -7,12 +7,12 @@ $cmake = 'C:/Qt/Tools/CMake_64/bin/cmake.exe'
 $oldPath = $env:PATH
 try {
     $env:PATH = "$qtRoot/bin;$compilerRoot;C:/Qt/Tools/Ninja;$oldPath"
-    & $cmake -S $prototypeRoot -B "$prototypeRoot/build" -G Ninja "-DCMAKE_BUILD_TYPE=Release" "-DCMAKE_CXX_COMPILER=$compilerRoot/clang++.exe" "-DCMAKE_MAKE_PROGRAM=C:/Qt/Tools/Ninja/ninja.exe" "-DCMAKE_PREFIX_PATH=$qtRoot"
+    & $cmake -S $prototypeRoot -B "$prototypeRoot/build/feedback" -G Ninja "-DCMAKE_BUILD_TYPE=Release" "-DCMAKE_CXX_COMPILER=$compilerRoot/clang++.exe" "-DCMAKE_MAKE_PROGRAM=C:/Qt/Tools/Ninja/ninja.exe" "-DCMAKE_PREFIX_PATH=$qtRoot"
     if ($LASTEXITCODE -ne 0) { throw '原型配置失败' }
-    & $cmake --build "$prototypeRoot/build" --parallel 4
+    & $cmake --build "$prototypeRoot/build/feedback" --parallel 4
     if ($LASTEXITCODE -ne 0) { throw '原型构建失败' }
     if ($BuildOnly) { return }
-    $app = "$prototypeRoot/build/debugger_ui_prototype.exe"
+    $app = "$prototypeRoot/build/feedback/debugger_ui_prototype.exe"
     if ($Capture -or $NativeCapture) {
         $oldPlatform = $env:QT_QPA_PLATFORM
         $oldBackend = $env:QT_QUICK_BACKEND
