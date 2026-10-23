@@ -1,0 +1,12 @@
+********* Start testing of WindowTraceTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : WindowTraceTests::initTestCase()
+QWARN  : WindowTraceTests::transmissionAndExpiredSourcesStayExplicit() QFontDatabase: Cannot find font directory C:/Qt/6.12.0/llvm-mingw_64/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+QWARN  : WindowTraceTests::transmissionAndExpiredSourcesStayExplicit() This plugin does not support propagateSizeHints()
+QWARN  : WindowTraceTests::transmissionAndExpiredSourcesStayExplicit() This plugin does not support raise()
+FAIL!  : WindowTraceTests::transmissionAndExpiredSourcesStayExplicit() 'output->toPlainText().contains(QStringLiteral("已提交传输：是"))' returned FALSE. ()
+C:/Users/81966/Documents/Ademo/build/worktrees/ui09/tests/window_trace_tests.cpp(160) : failure location
+PASS   : WindowTraceTests::cleanupTestCase()
+Totals: 2 passed, 1 failed, 0 skipped, 0 blacklisted, 62ms
+********* Finished testing of WindowTraceTests *********

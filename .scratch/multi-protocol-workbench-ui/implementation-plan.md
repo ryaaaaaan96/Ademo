@@ -21,10 +21,10 @@ Status: ready-for-agent
 | [UI03](issues/03-dockable-session-lifecycle.md) | 同时运行并管理多个可停靠调试窗口 | ready-for-agent | UI02 | 已完成：69def47；合入 94c635f；[验收与集成复测](evidence/UI03/integration.md) |
 | [UI04](issues/04-parameter-json-groups-read.md) | 加载 JSON 分组并按参数或地址读取设备 | ready-for-agent | UI02 | 已完成：d35470f；合入 cf69274；[验收与集成复测](evidence/UI04/integration.md) |
 | [UI05](issues/05-inline-pending-value-write.md) | 在单值列编辑并明确设置设备参数 | ready-for-agent | UI04 | 已完成：dc075b7；合入 efe2930；[验收与集成复测](evidence/UI05/integration.md) |
-| [UI06](issues/06-selected-group-polling.md) | 按选中项或参数组读取并持续轮询多个设备 | ready-for-agent | UI05 | 前置已完成，待调度 |
-| [UI07](issues/07-file-editor-save-apply.md) | 在独立文件页编辑、保存并应用参数配置 | ready-for-agent | UI05 | 前置已完成，待调度 |
+| [UI06](issues/06-selected-group-polling.md) | 按选中项或参数组读取并持续轮询多个设备 | ready-for-agent | UI05 | 实施中：codex/ui06-group-polling；基于 e88a733 |
+| [UI07](issues/07-file-editor-save-apply.md) | 在独立文件页编辑、保存并应用参数配置 | ready-for-agent | UI05 | 实施中：codex/ui07-file-editor；基于 e88a733 |
 | [UI08](issues/08-slave-runtime-file-workflow.md) | 在新界面操作从站模拟值并独立保存、应用文件 | ready-for-agent | UI07 | 未启动 |
-| [UI09](issues/09-window-trace-query-export.md) | 在所属窗口回溯、查询并导出通信记录 | ready-for-agent | UI03 | 实施中：codex/ui09-window-traces；基于 4450c30 |
+| [UI09](issues/09-window-trace-query-export.md) | 在所属窗口回溯、查询并导出通信记录 | ready-for-agent | UI03 | 已完成：3c8b3d9；合入 2fa6317；[验收与集成复测](evidence/UI09/integration.md) |
 | [UI10](issues/10-qml-parameter-trends.md) | 用 QWidget 内嵌 QML 展示设备参数趋势 | ready-for-agent | UI06 | 未启动 |
 | [UI11](issues/11-window-workspace-recovery.md) | 保存并恢复多窗口工作区和插件配置 | ready-for-agent | UI03、UI06、UI08 | 未启动 |
 | [UI12](issues/12-plugin-ui-contract-validation.md) | 通过独立示例插件验证表格与编辑页扩展 | ready-for-agent | UI03、UI07 | 未启动 |

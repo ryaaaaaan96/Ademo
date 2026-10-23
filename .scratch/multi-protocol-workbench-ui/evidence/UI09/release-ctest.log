@@ -1,0 +1,33 @@
+Test project C:/Users/81966/Documents/Ademo/build/worktrees/ui09/build/qt-llvm-release
+      Start  1: window_trace_workflow
+ 1/14 Test  #1: window_trace_workflow ............   Passed    5.39 sec
+      Start  2: parameter_definition_read
+ 2/14 Test  #2: parameter_definition_read ........   Passed    4.00 sec
+      Start  3: parameter_window_read
+ 3/14 Test  #3: parameter_window_read ............   Passed    1.90 sec
+      Start  4: parallel_sessions_recovery
+ 4/14 Test  #4: parallel_sessions_recovery .......   Passed    4.08 sec
+      Start  5: slave_edit_import_save
+ 5/14 Test  #5: slave_edit_import_save ...........   Passed    2.99 sec
+      Start  6: session_lifecycle
+ 6/14 Test  #6: session_lifecycle ................   Passed    3.26 sec
+      Start  7: rtu_first_read
+ 7/14 Test  #7: rtu_first_read ...................   Passed    3.34 sec
+      Start  8: rtu_polling
+ 8/14 Test  #8: rtu_polling ......................   Passed    3.81 sec
+      Start  9: rtu_explicit_write
+ 9/14 Test  #9: rtu_explicit_write ...............   Passed    4.43 sec
+      Start 10: rtu_slave_json_read
+10/14 Test #10: rtu_slave_json_read ..............   Passed    3.70 sec
+      Start 11: rtu_slave_write
+11/14 Test #11: rtu_slave_write ..................   Passed    3.17 sec
+      Start 12: trace_query_export
+12/14 Test #12: trace_query_export ...............   Passed    1.78 sec
+      Start 13: workspace_roundtrip
+13/14 Test #13: workspace_roundtrip ..............   Passed    5.35 sec
+      Start 14: bounded_disk_recording
+14/14 Test #14: bounded_disk_recording ...........   Passed    8.19 sec
+
+100% tests passed, 0 tests failed out of 14
+
+Total Test time (real) =  55.43 sec
