@@ -26,7 +26,7 @@ Status: ready-for-agent
 | [UI08](issues/08-slave-runtime-file-workflow.md) | 在新界面操作从站模拟值并独立保存、应用文件 | ready-for-agent | UI07 | 已完成：96d9b49；合入 503ea6f；[验收与集成复测](evidence/UI08/integration.md) |
 | [UI09](issues/09-window-trace-query-export.md) | 在所属窗口回溯、查询并导出通信记录 | ready-for-agent | UI03 | 已完成：3c8b3d9；合入 2fa6317；[验收与集成复测](evidence/UI09/integration.md) |
 | [UI10](issues/10-qml-parameter-trends.md) | 用 QWidget 内嵌 QML 展示设备参数趋势 | ready-for-agent | UI06 | 已完成：c008399；合入 640ce33；[验收与集成复测](evidence/UI10/integration.md) |
-| [UI11](issues/11-window-workspace-recovery.md) | 保存并恢复多窗口工作区和插件配置 | ready-for-agent | UI03、UI06、UI08 | 未启动 |
+| [UI11](issues/11-window-workspace-recovery.md) | 保存并恢复多窗口工作区和插件配置 | ready-for-agent | UI03、UI06、UI08 | 实施中：codex/ui11-workspace-layout；基于 628ba9b |
 | [UI12](issues/12-plugin-ui-contract-validation.md) | 通过独立示例插件验证表格与编辑页扩展 | ready-for-agent | UI03、UI07 | 已完成：e394d58；合入 66ffa7e；[验收与集成复测](evidence/UI12/integration.md) |
 | [UI13](issues/13-rtu-ui-acceptance-migration.md) | 验收 RTU 新界面完整流程并完成旧入口迁移 | ready-for-agent | UI09、UI10、UI11、UI12 | 未启动 |
 | [旧13](../multi-protocol-debugger/issues/13-rtu-phase-acceptance.md) | 验收 RTU 第一阶段的真实互通与负载 | needs-info | UI13、旧10/12（已完成）；硬件/对端 | 未启动 |
