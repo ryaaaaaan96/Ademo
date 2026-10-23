@@ -1,6 +1,7 @@
 #pragma once
 #include "sdk.h"
 #include "trace_query.h"
+#include "workspace.h"
 #include "recording.h"
 #include <QObject>
 #include <QPointer>
@@ -142,7 +143,8 @@ class SessionPane;
 class Workbench : public QWidget {
 public:
     explicit Workbench(std::shared_ptr<PluginCatalog>, QWidget *parent = nullptr,
-                       DebugSession::EndpointFactory endpointFactory = {}, std::function<qint64()> clock = {});
+                       DebugSession::EndpointFactory endpointFactory = {}, std::function<qint64()> clock = {},
+                       WorkspaceController::Executor workspaceExecutor = {});
     ~Workbench() override;
     int addSession(const SessionConfig & = {}, const QString &title = {});
     bool closeSession(int index);
@@ -151,13 +153,19 @@ public:
     SessionConfig sessionConfiguration(int index) const;
     int currentSessionIndex() const;
     void selectSession(int index);
+    quint64 openWorkspace(const QString &path);
+    quint64 saveWorkspace(const QString &path);
+    WorkspaceOperation workspaceOperation(quint64 id) const;
 protected:
     void closeEvent(QCloseEvent *) override;
 private:
+    friend class WorkspaceController;
     std::shared_ptr<PluginCatalog> catalog_;
     DebugSession::EndpointFactory factory_;
     std::function<qint64()> clock_;
     QTabWidget *tabs_ = nullptr;
     int nextSessionNumber_ = 1;
+    std::unique_ptr<WorkspaceController> workspace_;
 };
 }
+

@@ -5,6 +5,7 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QFormLayout>
+#include <QDir>
 #include <QLineEdit>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -298,6 +299,21 @@ public:
         tabs->addTab(new RtuView(access, tabs), QStringLiteral("主站观测与设备写入"));
         tabs->addTab(createSlaveView(std::move(access), tabs), QStringLiteral("从站文件与模拟数据"));
         return tabs;
+    }
+    QJsonObject relocateConfiguration(QJsonObject config, const QString &fromBase, const QString &toBase) const override {
+        if (!config.value("devices").isArray()) return config;
+        auto devices = config.value("devices").toArray();
+        for (int i = 0; i < devices.size(); ++i) {
+            if (!devices[i].isObject()) continue;
+            auto device = devices[i].toObject();
+            const auto path = device.value("path");
+            if (!path.isString() || path.toString().isEmpty()) continue;
+            const auto absolute = QDir::cleanPath(QDir::isAbsolutePath(path.toString()) ? path.toString() : QDir(fromBase).absoluteFilePath(path.toString()));
+            device["path"] = toBase.isEmpty() ? absolute : QDir(toBase).relativeFilePath(absolute);
+            devices[i] = device;
+        }
+        config["devices"] = devices;
+        return config;
     }
 };
 #include "modbus.moc"

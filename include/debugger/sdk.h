@@ -152,6 +152,8 @@ public:
     virtual Descriptor describe() const = 0;
     virtual std::unique_ptr<ProtocolSession> createSession(ProtocolServices) = 0;
     virtual QWidget *createView(SessionAccess, QWidget *parent) = 0;
+    // 纯配置路径转换；toBase 为空时解析成绝对路径，不读取外部文件。
+    virtual QJsonObject relocateConfiguration(QJsonObject config, const QString &, const QString &) const { return config; }
 };
 class TransportPlugin {
 public:
@@ -160,9 +162,10 @@ public:
     virtual QString validate(const QJsonObject &) const = 0;
     virtual QString endpointKey(const QJsonObject &) const = 0;
     virtual std::unique_ptr<Endpoint> createEndpoint(const QJsonObject &, EndpointEvents) = 0;
+    virtual QJsonObject relocateConfiguration(QJsonObject config, const QString &, const QString &) const { return config; }
 };
 }
-#define DebuggerProtocolIid "org.ademo.debugger.Protocol/7.0"
-#define DebuggerTransportIid "org.ademo.debugger.Transport/7.0"
+#define DebuggerProtocolIid "org.ademo.debugger.Protocol/8.0"
+#define DebuggerTransportIid "org.ademo.debugger.Transport/8.0"
 Q_DECLARE_INTERFACE(debugger::ProtocolPlugin, DebuggerProtocolIid)
 Q_DECLARE_INTERFACE(debugger::TransportPlugin, DebuggerTransportIid)
