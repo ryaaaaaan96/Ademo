@@ -1,0 +1,6 @@
+[1/8] Automatic MOC for target modbus_plugin
+[2/7] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/master_parameters.cpp.obj
+[3/7] Linking CXX shared module bin\plugins\libmodbus_plugin.dll
+[4/7] Automatic MOC for target parameter_definition_tests
+[5/6] Building CXX object CMakeFiles/parameter_definition_tests.dir/tests/parameter_definition_tests.cpp.obj
+[6/6] Linking CXX executable bin\parameter_definition_tests.exe

@@ -1,0 +1,18 @@
+[1/44] Automatic MOC for target modbus_plugin
+[2/43] Automatic MOC for target incompatible_plugin
+[3/41] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/master_parameters.cpp.obj
+[4/41] Linking CXX shared module bin\plugins\libmodbus_plugin.dll
+[5/41] Automatic MOC for target trace_tests
+[6/39] Automatic MOC for target session_recovery_tests
+[7/37] Automatic MOC for target slave_edit_tests
+[8/35] Automatic MOC for target session_tests
+[9/33] Automatic MOC for target rtu_read_tests
+[10/31] Automatic MOC for target rtu_poll_tests
+[11/29] Automatic MOC for target rtu_write_tests
+[12/27] Automatic MOC for target rtu_slave_tests
+[13/25] Automatic MOC for target parameter_definition_tests
+[14/24] Automatic MOC for target rtu_slave_write_tests
+[15/22] Automatic MOC for target workspace_tests
+[16/20] Automatic MOC for target recording_tests
+[17/18] Building CXX object CMakeFiles/parameter_definition_tests.dir/tests/parameter_definition_tests.cpp.obj
+[18/18] Linking CXX executable bin\parameter_definition_tests.exe

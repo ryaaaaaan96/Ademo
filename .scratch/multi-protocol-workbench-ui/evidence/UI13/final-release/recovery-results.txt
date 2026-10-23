@@ -1,0 +1,24 @@
+********* Start testing of RecoveryTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : RecoveryTests::initTestCase()
+PASS   : RecoveryTests::parallelMasterSlaveAndConflictingEndpoint()
+PASS   : RecoveryTests::automaticReconnectResumesPollingAndRejectsOldCallbacks()
+PASS   : RecoveryTests::sentWriteIsUncertainAndNeverReplayed()
+PASS   : RecoveryTests::manualReconnectCanLeavePollingPaused()
+PASS   : RecoveryTests::slaveReconnectPreservesEditedDataDespiteDeletedStartupFile()
+PASS   : RecoveryTests::repeatedLifecycleReleasesEndpointAndBoundsAutomaticAttempts()
+PASS   : RecoveryTests::backgroundSaveCompletesAcrossConnectionEpoch()
+PASS   : RecoveryTests::invalidRecoveryPolicyDoesNotOpenEndpoint()
+PASS   : RecoveryTests::qtTimerRetriesInitialOpenFailureWithoutManualPoll()
+PASS   : RecoveryTests::newConfigurationCancelsOldRecovery()
+PASS   : RecoveryTests::closingWindowRetainsSessionConfigurationAndOtherConnection()
+PASS   : RecoveryTests::windowArrangementIsAvailableWithoutStoppingSessions()
+PASS   : RecoveryTests::nativeWindowMoveDropsIntoEmptyWorkbench()
+PASS   : RecoveryTests::nativeMoveCancellationAndOcclusionKeepFloating()
+PASS   : RecoveryTests::nativeMoveCanTileOnEverySideOfAnotherSession()
+PASS   : RecoveryTests::navigationAndRecordsStayWithTheirSession()
+PASS   : RecoveryTests::workbenchCreatesParallelWindowsAndProtectsDirtyClose()
+PASS   : RecoveryTests::windowCloseRechecksEarlierSessionAfterLaterGuard()
+PASS   : RecoveryTests::cleanupTestCase()
+Totals: 20 passed, 0 failed, 0 skipped, 0 blacklisted, 3079ms
+********* Finished testing of RecoveryTests *********

@@ -1,0 +1,19 @@
+********* Start testing of SessionTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : SessionTests::initTestCase()
+PASS   : SessionTests::startStopAndRelease()
+PASS   : SessionTests::staleCallbacksAndDestruction()
+PASS   : SessionTests::stopOrDestroyFromStartingNotification()
+PASS   : SessionTests::failureReleasesAndRetry()
+PASS   : SessionTests::rejectsUnsupportedAndInvalid()
+QINFO  : SessionTests::realSerialOpenError() Available serial ports: 2
+QINFO  : SessionTests::realSerialOpenError() COM9999 open failed with a readable diagnostic (expected nonexistent port)
+PASS   : SessionTests::realSerialOpenError()
+PASS   : SessionTests::pluginViewLifetime()
+PASS   : SessionTests::brokenPluginDoesNotHideWorkingOnes()
+PASS   : SessionTests::incompatibleAndDuplicatePlugins()
+PASS   : SessionTests::widgetFlow()
+PASS   : SessionTests::widgetStartStopWithControlledTransport()
+PASS   : SessionTests::cleanupTestCase()
+Totals: 13 passed, 0 failed, 0 skipped, 0 blacklisted, 407ms
+********* Finished testing of SessionTests *********
