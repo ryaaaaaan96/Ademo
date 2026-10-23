@@ -1,0 +1,27 @@
+********* Start testing of ParameterPollTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : ParameterPollTests::initTestCase()
+QWARN  : ParameterPollTests::selectedReadsSeparateAreasAndDoNotIncludeUnselectedAddresses() QFontDatabase: Cannot find font directory C:/Qt/6.12.0/llvm-mingw_64/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+QWARN  : ParameterPollTests::selectedReadsSeparateAreasAndDoNotIncludeUnselectedAddresses() This plugin does not support propagateSizeHints()
+PASS   : ParameterPollTests::selectedReadsSeparateAreasAndDoNotIncludeUnselectedAddresses()
+QWARN  : ParameterPollTests::pollingKeepsCapturedScopeAndPendingWhileGroupsChange() This plugin does not support propagateSizeHints()
+QWARN  : ParameterPollTests::pollingKeepsCapturedScopeAndPendingWhileGroupsChange() This plugin does not support propagateSizeHints()
+PASS   : ParameterPollTests::pollingKeepsCapturedScopeAndPendingWhileGroupsChange()
+QWARN  : ParameterPollTests::stoppingPollingKeepsInflightReadAndSessionAlive() This plugin does not support propagateSizeHints()
+QWARN  : ParameterPollTests::stoppingPollingKeepsInflightReadAndSessionAlive() This plugin does not support propagateSizeHints()
+PASS   : ParameterPollTests::stoppingPollingKeepsInflightReadAndSessionAlive()
+QWARN  : ParameterPollTests::pollingDifferentDevicesRetainsCapturedTargets() This plugin does not support propagateSizeHints()
+QWARN  : ParameterPollTests::pollingDifferentDevicesRetainsCapturedTargets() This plugin does not support propagateSizeHints()
+PASS   : ParameterPollTests::pollingDifferentDevicesRetainsCapturedTargets()
+QWARN  : ParameterPollTests::groupReadsSplitAtProtocolLimitWithoutReadingAnotherDevice() This plugin does not support propagateSizeHints()
+PASS   : ParameterPollTests::groupReadsSplitAtProtocolLimitWithoutReadingAnotherDevice()
+QWARN  : ParameterPollTests::overCapacityScopesAreRejectedWithoutPartialRequests() This plugin does not support propagateSizeHints()
+QWARN  : ParameterPollTests::overCapacityScopesAreRejectedWithoutPartialRequests() This plugin does not support propagateSizeHints()
+PASS   : ParameterPollTests::overCapacityScopesAreRejectedWithoutPartialRequests()
+QWARN  : ParameterPollTests::stopKeepsInflightReadRetriesAndOtherSettings() This plugin does not support propagateSizeHints()
+QWARN  : ParameterPollTests::stopKeepsInflightReadRetriesAndOtherSettings() This plugin does not support propagateSizeHints()
+PASS   : ParameterPollTests::stopKeepsInflightReadRetriesAndOtherSettings()
+PASS   : ParameterPollTests::cleanupTestCase()
+Totals: 9 passed, 0 failed, 0 skipped, 0 blacklisted, 4308ms
+********* Finished testing of ParameterPollTests *********

@@ -47,6 +47,11 @@ TraceSnapshot filterSnapshot(const TraceSnapshot &, const TraceFilter &);
 class DebugSession;
 class TracePanel : public QWidget {
 public:
-    explicit TracePanel(DebugSession &, QWidget *parent = nullptr);
+    explicit TracePanel(DebugSession &, QWidget *parent = nullptr, bool collapsible = true);
+};
+// 每个调试窗口只挂载一个记录区；各页始终绑定构造时的会话。
+class SessionRecords : public QWidget {
+public:
+    explicit SessionRecords(DebugSession &, QWidget *parent = nullptr);
 };
 }

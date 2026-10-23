@@ -1,6 +1,7 @@
 #include "master_parameters.h"
 #include "parameter_definition.h"
 #include "parameter_file_editor.h"
+#include "parameter_read_scope.h"
 #include "debugger/parameter_table.h"
 #include <QComboBox>
 #include <QFormLayout>
@@ -18,6 +19,7 @@
 #include <QRegularExpression>
 #include <QMessageBox>
 #include <QTabWidget>
+#include <QPlainTextEdit>
 
 namespace debugger {
 namespace {
@@ -75,6 +77,31 @@ public:
             if (!path.isEmpty()) path_->setText(path);
         });
         connect(load_, &QPushButton::clicked, this, [this] { loadFile(); });
+        auto *readControls = new QHBoxLayout;
+        readSelected_ = new QPushButton(QStringLiteral("读取选中项"), this);
+        readGroup_ = new QPushButton(QStringLiteral("读取当前组"), this);
+        readControls->addWidget(readSelected_); readControls->addWidget(readGroup_);
+        layout->addLayout(readControls);
+        connect(readSelected_, &QPushButton::clicked, this, [this] { readScope(true); });
+        connect(readGroup_, &QPushButton::clicked, this, [this] { readScope(false); });
+        auto *pollControls = new QHBoxLayout;
+        pollScope_ = new QComboBox(this); pollScope_->setAccessibleName(QStringLiteral("轮询范围"));
+        pollScope_->addItems({QStringLiteral("选中项"), QStringLiteral("当前组")});
+        pollInterval_ = new QSpinBox(this); pollInterval_->setRange(10, 3600000); pollInterval_->setValue(1000);
+        pollInterval_->setSuffix(QStringLiteral(" ms")); pollInterval_->setAccessibleName(QStringLiteral("轮询周期"));
+        startPoll_ = new QPushButton(QStringLiteral("开始轮询"), this);
+        stopPoll_ = new QPushButton(QStringLiteral("停止会话轮询"), this);
+        startPoll_->setToolTip(QStringLiteral("更新当前设备当前组的范围和周期；保留其他设备和组的轮询。总线忙时保留原配置并提示重试。"));
+        pollControls->addWidget(new QLabel(QStringLiteral("轮询范围"), this)); pollControls->addWidget(pollScope_);
+        pollControls->addWidget(pollInterval_); pollControls->addWidget(startPoll_); pollControls->addWidget(stopPoll_);
+        layout->addLayout(pollControls);
+        polls_ = new QPlainTextEdit(this); polls_->setAccessibleName(QStringLiteral("轮询任务"));
+        polls_->setReadOnly(true); polls_->setMaximumHeight(75);
+        polls_->setPlaceholderText(QStringLiteral("尚无轮询配置；开始后范围固定，切换设备、分组或页面不改变采集目标。"));
+        layout->addWidget(polls_);
+        pollStatus_ = new QLabel(this); pollStatus_->setWordWrap(true); layout->addWidget(pollStatus_);
+        connect(startPoll_, &QPushButton::clicked, this, [this] { configurePolling(true); });
+        connect(stopPoll_, &QPushButton::clicked, this, [this] { configurePolling(false); });
         table_ = new ParameterTable(this);
         table_->setColumns({{"name", QStringLiteral("名称")}, {"type", QStringLiteral("类型")},
             {"description", QStringLiteral("说明")}, {"value", QStringLiteral("值")}, {"unit", QStringLiteral("单位")},
@@ -195,6 +222,52 @@ private:
         return fileEditor_->bindTarget(id, QStringLiteral("设备 %1").arg(id),
             {{"kind", "modbus-parameter-definition"}, {"version", 1}, {"parameters", parameters}},
             config.value("parameterFiles").toObject().value(id).toString());
+    }
+    void configurePolling(bool starting) {
+        if (!access_.running || !access_.running() || !access_.config || !access_.submit) return;
+        auto settings = access_.config().protocol;
+        QJsonArray tasks;
+        if (starting) {
+            const auto ranges = selectedRanges(pollScope_->currentIndex() == 0);
+            if (ranges.isEmpty()) { pollStatus_->setText(QStringLiteral("轮询范围为空，原配置保留。")); return; }
+            for (const auto &value : settings["polls"].toArray()) {
+                const auto task = value.toObject();
+                if (task["unit"].toInt() != selectedDevice().toInt() || !task.contains("parameterGroup")
+                    || task["parameterGroup"].toString() != group_->currentData().toString()) tasks.append(task);
+            }
+            for (auto range : ranges) {
+                range["intervalMs"] = pollInterval_->value(); range["parameterGroup"] = group_->currentData().toString(); tasks.append(range);
+            }
+            if (tasks.size() > 64) { pollStatus_->setText(QStringLiteral("会话轮询超过 64 个独立请求，请缩小范围；原配置保留。")); return; }
+        }
+        settings["polls"] = tasks;
+        const auto id = access_.submit(starting ? "configure-polling" : "stop-polling", starting ? settings : QJsonObject{});
+        pollStatus_->setText(id && access_.operation ? access_.operation(id).update.detail : QStringLiteral("轮询配置未提交，原配置保留。"));
+        refresh();
+    }
+    QList<QJsonObject> selectedRanges(bool selectedOnly) const {
+        const auto selected = table_->selectedParameterIds();
+        QList<ParameterAddress> parameters;
+        for (const auto &row : rows_)
+            if (QString::number(row.unit) == selectedDevice() && row.group == group_->currentData().toString()
+                && (!selectedOnly || selected.contains(row.id())))
+                parameters.append({row.unit, areas[row.area], row.address});
+        return parameterReadRanges(std::move(parameters));
+    }
+    void readScope(bool selectedOnly) {
+        const auto ranges = selectedRanges(selectedOnly);
+        if (ranges.isEmpty()) { status_->setText(QStringLiteral("读取范围为空，请选择参数或包含参数的分组。")); return; }
+        if (ranges.size() > 64) { status_->setText(QStringLiteral("读取范围超过 64 个独立请求，请缩小选区；未发送。")); return; }
+        if (!access_.running || !access_.running() || !access_.submit) return;
+        int rejected = 0;
+        for (const auto &range : ranges) {
+            const auto id = access_.submit(range["action"].toString(), range);
+            if (!id) ++rejected;
+            for (auto &row : rows_) if (row.unit == range["unit"].toInt() && areas[row.area] == range["area"].toString()
+                && row.address >= range["start"].toInt() && row.address < range["start"].toInt() + range["count"].toInt()) row.operation = id;
+        }
+        refresh();
+        if (rejected) status_->setText(QStringLiteral("操作容量已满，%1 个读取请求未提交；已接受的请求仍按队列处理。").arg(rejected));
     }
     bool hasPending(const QString &device = {}) const {
         for (const auto &row : rows_) if (row.pending && (device.isEmpty() || QString::number(row.unit) == device)) return true;
@@ -335,6 +408,22 @@ private:
     void refresh() {
         const bool configurable = !loading_ && (!access_.running || !access_.running());
         add_->setEnabled(configurable); load_->setEnabled(configurable);
+        const bool running = access_.running && access_.running() && access_.config && access_.config().role == "master";
+        readSelected_->setEnabled(running); readGroup_->setEnabled(running);
+        startPoll_->setEnabled(running);
+        const auto configuredPolls = access_.config ? access_.config().protocol["polls"].toArray() : QJsonArray{};
+        stopPoll_->setEnabled(running && !configuredPolls.isEmpty());
+        if (configuredPolls != shownPolls_) {
+            shownPolls_ = configuredPolls;
+            QStringList descriptions;
+            for (const auto &value : configuredPolls) {
+                const auto task = value.toObject();
+                descriptions << QStringLiteral("设备 %1 · %2 · PDU %3..%4 · %5 ms")
+                    .arg(task["unit"].toInt()).arg(task["action"].toString())
+                    .arg(task["start"].toInt()).arg(task["start"].toInt() + task["count"].toInt() - 1).arg(task["intervalMs"].toInt());
+            }
+            polls_->setPlainText(descriptions.join('\n'));
+        }
         if (access_.messages) for (const auto &message : access_.messages(0)) {
             if (message.id <= lastMessage_) continue;
             lastMessage_ = message.id;
@@ -387,6 +476,13 @@ private:
     QLineEdit *path_;
     QSpinBox *unit_, *address_, *count_;
     QPushButton *add_, *load_;
+    QPushButton *readSelected_, *readGroup_;
+    QComboBox *pollScope_;
+    QSpinBox *pollInterval_;
+    QPushButton *startPoll_, *stopPoll_;
+    QPlainTextEdit *polls_;
+    QLabel *pollStatus_;
+    QJsonArray shownPolls_;
     ParameterTable *table_;
     QLabel *status_;
     FileEditorPage *fileEditor_ = nullptr;

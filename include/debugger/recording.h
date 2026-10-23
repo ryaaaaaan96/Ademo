@@ -48,6 +48,6 @@ std::shared_future<ArchiveResult> queryArchive(QString directory, QString sessio
 class DebugSession;
 class RecordingPanel : public QWidget {
 public:
-    explicit RecordingPanel(DebugSession &, QWidget *parent = nullptr);
+    explicit RecordingPanel(DebugSession &, QWidget *parent = nullptr, bool collapsible = true);
 };
 }

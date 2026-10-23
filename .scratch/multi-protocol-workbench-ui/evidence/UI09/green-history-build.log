@@ -1,0 +1,5 @@
+[1/6] Automatic MOC for target debugger_host
+[2/5] Building CXX object CMakeFiles/debugger_host.dir/src/recording_panel.cpp.obj
+[3/5] Linking CXX static library libdebugger_host.a
+[4/5] Linking CXX executable bin\trace_tests.exe
+[5/5] Linking CXX executable bin\window_trace_tests.exe
