@@ -109,6 +109,14 @@ struct SessionAccess {
     std::function<QJsonObject()> snapshot;
     std::function<void(std::function<bool()>)> setDiscardGuard;
 };
+struct ParameterDevice { QString id; QString name; };
+class ParameterView : public QWidget {
+public:
+    using QWidget::QWidget;
+    virtual QList<ParameterDevice> devices() const = 0;
+    virtual QString selectedDevice() const = 0;
+    virtual bool selectDevice(const QString &) = 0;
+};
 struct ReceiveChunk {
     QByteArray bytes;
     std::optional<qint64> idleBeforeUs;
@@ -152,6 +160,7 @@ public:
     virtual Descriptor describe() const = 0;
     virtual std::unique_ptr<ProtocolSession> createSession(ProtocolServices) = 0;
     virtual QWidget *createView(SessionAccess, QWidget *parent) = 0;
+    virtual ParameterView *createParameterView(SessionAccess, QWidget *) { return nullptr; }
     // 纯配置路径转换；toBase 为空时解析成绝对路径，不读取外部文件。
     virtual QJsonObject relocateConfiguration(QJsonObject config, const QString &, const QString &) const { return config; }
 };
@@ -165,7 +174,7 @@ public:
     virtual QJsonObject relocateConfiguration(QJsonObject config, const QString &, const QString &) const { return config; }
 };
 }
-#define DebuggerProtocolIid "org.ademo.debugger.Protocol/8.0"
-#define DebuggerTransportIid "org.ademo.debugger.Transport/8.0"
+#define DebuggerProtocolIid "org.ademo.debugger.Protocol/9.0"
+#define DebuggerTransportIid "org.ademo.debugger.Transport/9.0"
 Q_DECLARE_INTERFACE(debugger::ProtocolPlugin, DebuggerProtocolIid)
 Q_DECLARE_INTERFACE(debugger::TransportPlugin, DebuggerTransportIid)

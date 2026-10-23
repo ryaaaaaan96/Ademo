@@ -1,6 +1,7 @@
 #include "debugger/sdk.h"
 #include "rtu_session.h"
 #include "slave_view.h"
+#include "master_parameters.h"
 #include <QComboBox>
 #include <QDialog>
 #include <QDialogButtonBox>
@@ -308,6 +309,9 @@ public:
         tabs->addTab(new RtuView(access, tabs), QStringLiteral("主站观测与设备写入"));
         tabs->addTab(createSlaveView(std::move(access), tabs), QStringLiteral("从站文件与模拟数据"));
         return tabs;
+    }
+    ParameterView *createParameterView(SessionAccess access, QWidget *parent) override {
+        return createMasterParameterView(std::move(access), parent);
     }
     QJsonObject relocateConfiguration(QJsonObject config, const QString &fromBase, const QString &toBase) const override {
         if (!config.value("devices").isArray()) return config;

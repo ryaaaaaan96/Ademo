@@ -81,6 +81,13 @@ bool PluginCatalog::acquire(const QString &key)
     occupied_.insert(key);
     return true;
 }
+ParameterView *PluginCatalog::createParameterView(const QString &id, QWidget *parent, SessionAccess access)
+{
+    auto *p = protocol(id);
+    auto *view = p ? p->createParameterView(std::move(access), parent) : nullptr;
+    if (view) QObject::connect(view, &QObject::destroyed, [lease = shared_from_this()] {});
+    return view;
+}
 void PluginCatalog::release(const QString &key) { occupied_.remove(key); }
 QString stateText(SessionState state)
 {
