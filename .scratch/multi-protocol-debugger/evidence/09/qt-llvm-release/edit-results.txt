@@ -9,5 +9,5 @@ PASS   : SlaveEditTests::importDuringEditDoesNotOverwriteNewData()
 PASS   : SlaveEditTests::changedStartupConfigCannotBeOverwrittenByOldModel()
 PASS   : SlaveEditTests::widgetEditSaveAndReloadCancel()
 PASS   : SlaveEditTests::cleanupTestCase()
-Totals: 9 passed, 0 failed, 0 skipped, 0 blacklisted, 1388ms
+Totals: 9 passed, 0 failed, 0 skipped, 0 blacklisted, 1496ms
 ********* Finished testing of SlaveEditTests *********

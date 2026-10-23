@@ -44,5 +44,5 @@ PASS   : ReadTests::widgetReadFlow(success)
 PASS   : ReadTests::widgetReadFlow(exception)
 PASS   : ReadTests::widgetReadFlow(timeout)
 PASS   : ReadTests::cleanupTestCase()
-Totals: 43 passed, 0 failed, 0 skipped, 0 blacklisted, 1954ms
+Totals: 43 passed, 0 failed, 0 skipped, 0 blacklisted, 1963ms
 ********* Finished testing of ReadTests *********

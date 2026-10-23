@@ -36,5 +36,5 @@ PASS   : WriteTests::widgetWrite(exception)
 PASS   : WriteTests::widgetWrite(disconnected)
 PASS   : WriteTests::widgetWrite(stopped)
 PASS   : WriteTests::cleanupTestCase()
-Totals: 36 passed, 0 failed, 0 skipped, 0 blacklisted, 2731ms
+Totals: 36 passed, 0 failed, 0 skipped, 0 blacklisted, 2797ms
 ********* Finished testing of WriteTests *********

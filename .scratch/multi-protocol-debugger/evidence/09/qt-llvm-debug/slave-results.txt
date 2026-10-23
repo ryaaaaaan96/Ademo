@@ -29,5 +29,5 @@ PASS   : SlaveTests::preparationLimitAndCatalogLease()
 PASS   : SlaveTests::widgetBindingsAndData()
 PASS   : SlaveTests::widgetMissingFileError()
 PASS   : SlaveTests::cleanupTestCase()
-Totals: 29 passed, 0 failed, 0 skipped, 0 blacklisted, 2106ms
+Totals: 29 passed, 0 failed, 0 skipped, 0 blacklisted, 2187ms
 ********* Finished testing of SlaveTests *********

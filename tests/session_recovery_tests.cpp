@@ -244,6 +244,35 @@ private slots:
         QCOMPARE(window.session(0)->state(), SessionState::Running);
         QVERIFY(window.close()); QCOMPARE(window.session(0)->state(), SessionState::Stopped);
     }
+    void windowCloseRechecksEarlierSessionAfterLaterGuard() {
+        Hub hub; Workbench window(catalog, nullptr, hub.factory()); QVERIFY(window.closeSession(0));
+        QTemporaryDir dir;
+        const auto firstPath = dir.filePath("first.json"), secondPath = dir.filePath("second.json");
+        QVERIFY(save(firstPath, document())); QVERIFY(save(secondPath, document()));
+        window.addSession(config({QJsonObject{{"unit", 17}, {"path", firstPath}}}, "COM104"));
+        window.addSession(config({QJsonObject{{"unit", 17}, {"path", secondPath}}}, "COM105"));
+        auto *first = window.session(0), *second = window.session(1);
+        QVERIFY(first->start(window.sessionConfiguration(0))); QVERIFY(second->start(window.sessionConfiguration(1)));
+        QTRY_COMPARE(first->state(), SessionState::Running); QTRY_COMPARE(second->state(), SessionState::Running);
+        const auto edit = [](DebugSession *session, int data) {
+            return session->submit("slave-edit-value", {{"unit", 17}, {"area", "holding"}, {"address", 107}, {"value", data}});
+        };
+        edit(first, 111); edit(second, 222);
+        first->access().setDiscardGuard([first] { first->submit("slave-discard", {{"unit", 17}}); return true; });
+        second->access().setDiscardGuard([&] {
+            edit(first, 999); // 模拟第二会话模态确认期间第一会话收到新数据。
+            second->submit("slave-discard", {{"unit", 17}});
+            return true;
+        });
+        window.resize(1100, 900); window.show();
+        QVERIFY(!window.close()); QVERIFY(window.isVisible()); QCOMPARE(window.sessionCount(), 2);
+        QCOMPARE(value(*first), 999); QVERIFY(first->hasUnsavedOrBusy()); QVERIFY(!second->hasUnsavedOrBusy());
+        QCOMPARE(first->state(), SessionState::Running); QCOMPARE(second->state(), SessionState::Running);
+        QVERIFY(window.findChild<QLabel *>("workspaceStatus")->text().contains(QStringLiteral("数据已保留")));
+        const auto output = qEnvironmentVariable("DEBUGGER_EVIDENCE_DIR");
+        if (!output.isEmpty()) QVERIFY(window.grab().save(output + "/close-confirmation-new-data-retained.png"));
+        QVERIFY(window.close()); QCOMPARE(first->state(), SessionState::Stopped); QCOMPARE(second->state(), SessionState::Stopped);
+    }
 };
 QTEST_MAIN(RecoveryTests)
 #include "session_recovery_tests.moc"

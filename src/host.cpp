@@ -496,6 +496,12 @@ QJsonObject DebugSession::snapshot() const
     return protocol_ && !preparing_ ? protocol_->snapshot() : QJsonObject{};
 }
 bool DebugSession::ownsProtocol(quint64 run) const { return protocol_ && protocolRun_ == run; }
+bool DebugSession::hasUnsavedOrBusy() const
+{
+    if (!protocol_ || preparing_) return false;
+    const auto state = protocol_->localState();
+    return state.dirty || state.busy;
+}
 bool DebugSession::resolveUnsaved()
 {
     if (resolvingUnsaved_) return false;

@@ -12,6 +12,7 @@ PASS   : RecoveryTests::invalidRecoveryPolicyDoesNotOpenEndpoint()
 PASS   : RecoveryTests::qtTimerRetriesInitialOpenFailureWithoutManualPoll()
 PASS   : RecoveryTests::newConfigurationCancelsOldRecovery()
 PASS   : RecoveryTests::workbenchCreatesParallelTabsAndProtectsDirtyClose()
+PASS   : RecoveryTests::windowCloseRechecksEarlierSessionAfterLaterGuard()
 PASS   : RecoveryTests::cleanupTestCase()
-Totals: 13 passed, 0 failed, 0 skipped, 0 blacklisted, 701ms
+Totals: 14 passed, 0 failed, 0 skipped, 0 blacklisted, 779ms
 ********* Finished testing of RecoveryTests *********

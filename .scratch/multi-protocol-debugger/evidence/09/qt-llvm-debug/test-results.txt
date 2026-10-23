@@ -15,5 +15,5 @@ PASS   : SessionTests::incompatibleAndDuplicatePlugins()
 PASS   : SessionTests::widgetFlow()
 PASS   : SessionTests::widgetStartStopWithControlledTransport()
 PASS   : SessionTests::cleanupTestCase()
-Totals: 13 passed, 0 failed, 0 skipped, 0 blacklisted, 446ms
+Totals: 13 passed, 0 failed, 0 skipped, 0 blacklisted, 572ms
 ********* Finished testing of SessionTests *********

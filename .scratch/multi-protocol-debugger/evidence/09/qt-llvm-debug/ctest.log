@@ -15,7 +15,7 @@ test 1
 1: Environment variables: 
 1:  QT_QPA_PLATFORM=windows
 1: Test timeout computed to be: 30
-1/9 Test #1: parallel_sessions_recovery .......   Passed    3.47 sec
+1/9 Test #1: parallel_sessions_recovery .......   Passed    3.41 sec
 test 2
     Start 2: slave_edit_import_save
 
@@ -24,7 +24,7 @@ test 2
 2: Environment variables: 
 2:  QT_QPA_PLATFORM=windows
 2: Test timeout computed to be: 30
-2/9 Test #2: slave_edit_import_save ...........   Passed    1.48 sec
+2/9 Test #2: slave_edit_import_save ...........   Passed    3.66 sec
 test 3
     Start 3: session_lifecycle
 
@@ -33,7 +33,7 @@ test 3
 3: Environment variables: 
 3:  QT_QPA_PLATFORM=windows
 3: Test timeout computed to be: 30
-3/9 Test #3: session_lifecycle ................   Passed    0.54 sec
+3/9 Test #3: session_lifecycle ................   Passed    3.17 sec
 test 4
     Start 4: rtu_first_read
 
@@ -42,7 +42,7 @@ test 4
 4: Environment variables: 
 4:  QT_QPA_PLATFORM=windows
 4: Test timeout computed to be: 30
-4/9 Test #4: rtu_first_read ...................   Passed    2.06 sec
+4/9 Test #4: rtu_first_read ...................   Passed    4.80 sec
 test 5
     Start 5: rtu_polling
 
@@ -51,7 +51,7 @@ test 5
 5: Environment variables: 
 5:  QT_QPA_PLATFORM=windows
 5: Test timeout computed to be: 30
-5/9 Test #5: rtu_polling ......................   Passed    1.21 sec
+5/9 Test #5: rtu_polling ......................   Passed    4.36 sec
 test 6
     Start 6: rtu_explicit_write
 
@@ -60,7 +60,7 @@ test 6
 6: Environment variables: 
 6:  QT_QPA_PLATFORM=windows
 6: Test timeout computed to be: 30
-6/9 Test #6: rtu_explicit_write ...............   Passed    2.81 sec
+6/9 Test #6: rtu_explicit_write ...............   Passed    5.57 sec
 test 7
     Start 7: rtu_slave_json_read
 
@@ -69,7 +69,7 @@ test 7
 7: Environment variables: 
 7:  QT_QPA_PLATFORM=windows
 7: Test timeout computed to be: 30
-7/9 Test #7: rtu_slave_json_read ..............   Passed    2.18 sec
+7/9 Test #7: rtu_slave_json_read ..............   Passed    4.79 sec
 test 8
     Start 8: rtu_slave_write
 
@@ -78,7 +78,7 @@ test 8
 8: Environment variables: 
 8:  QT_QPA_PLATFORM=windows
 8: Test timeout computed to be: 30
-8/9 Test #8: rtu_slave_write ..................   Passed    1.93 sec
+8/9 Test #8: rtu_slave_write ..................   Passed    3.65 sec
 test 9
     Start 9: trace_query_export
 
@@ -87,8 +87,8 @@ test 9
 9: Environment variables: 
 9:  QT_QPA_PLATFORM=windows
 9: Test timeout computed to be: 30
-9/9 Test #9: trace_query_export ...............   Passed    0.67 sec
+9/9 Test #9: trace_query_export ...............   Passed    4.34 sec
 
 100% tests passed, 0 tests failed out of 9
 
-Total Test time (real) =  16.37 sec
+Total Test time (real) =  37.76 sec

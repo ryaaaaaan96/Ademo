@@ -16,5 +16,5 @@ PASS   : PollTests::crcFailureRetriesOnlyAfterDeadline()
 PASS   : PollTests::widgetConfiguresTwoDevicesAndObserves()
 PASS   : PollTests::retryAndPassiveTokensShareOneAllocatorAcrossRuns()
 PASS   : PollTests::cleanupTestCase()
-Totals: 16 passed, 0 failed, 0 skipped, 0 blacklisted, 1136ms
+Totals: 16 passed, 0 failed, 0 skipped, 0 blacklisted, 1250ms
 ********* Finished testing of PollTests *********

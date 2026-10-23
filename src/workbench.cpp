@@ -208,6 +208,10 @@ Workbench::Workbench(std::shared_ptr<PluginCatalog> catalog, QWidget *parent,
     auto *add = new QPushButton(QStringLiteral("新增独立会话"), this);
     add->setObjectName("addSession");
     layout->addWidget(add);
+    auto *status = new QLabel(this);
+    status->setObjectName("workspaceStatus");
+    status->setWordWrap(true);
+    layout->addWidget(status);
     tabs_ = new QTabWidget(this);
     tabs_->setObjectName("sessionTabs");
     tabs_->setTabsClosable(true);
@@ -256,6 +260,13 @@ bool Workbench::closeSession(int index)
 void Workbench::closeEvent(QCloseEvent *event)
 {
     for (int i = 0; i < tabs_->count(); ++i) if (!session(i)->resolveUnsaved()) { event->ignore(); return; }
+    // 之前的会话可能在后续模态确认期间被设备再次修改；此处不再泵事件或重复弹窗。
+    for (int i = 0; i < tabs_->count(); ++i) if (session(i)->hasUnsavedOrBusy()) {
+        findChild<QLabel *>("workspaceStatus")->setText(QStringLiteral("关闭已取消：确认期间出现新的未保存修改或后台任务，数据已保留。"));
+        tabs_->setCurrentIndex(i);
+        event->ignore();
+        return;
+    }
     for (int i = 0; i < tabs_->count(); ++i) session(i)->stop();
     event->accept();
 }

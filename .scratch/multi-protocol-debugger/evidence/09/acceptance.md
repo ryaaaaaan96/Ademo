@@ -30,10 +30,10 @@ Windows x64；Qt6.12.0 LLVM-MinGW、Clang22.1.7、C++17、CMake3.30.5、Ninja1.1
 
 | 配置 | 配置/构建/CTest | Qt Test结果 |
 | --- | --- | --- |
-| Debug | [配置](qt-llvm-debug/configure.log)、[构建](qt-llvm-debug/build.log)、[9/9通过](qt-llvm-debug/ctest.log) | 生命周期13、读取43、轮询16、写入36、从站读取29、从站写入25、数据编辑9、回溯10、恢复13；194 passed、0 failed、0 skipped |
-| Release | [配置](qt-llvm-release/configure.log)、[构建](qt-llvm-release/build.log)、[9/9通过](qt-llvm-release/ctest.log) | 同上194 passed、0 failed、0 skipped |
+| Debug | [配置](qt-llvm-debug/configure.log)、[构建](qt-llvm-debug/build.log)、[9/9通过](qt-llvm-debug/ctest.log) | 生命周期13、读取43、轮询16、写入36、从站读取29、从站写入25、数据编辑9、回溯10、恢复14；195 passed、0 failed、0 skipped |
+| Release | [配置](qt-llvm-release/configure.log)、[构建](qt-llvm-release/build.log)、[9/9通过](qt-llvm-release/ctest.log) | 同上195 passed、0 failed、0 skipped |
 
-194包含9套件初始化/清理18项，实际行为检查行176项。每配置的 `*-results.txt` 保存详细结果，`sha256.txt`保存产物与证据哈希；01–08及11原证据未覆盖，构建产物保持忽略。命令最终退出0。
+上表为2026-10-23审查修复后的最终重验：195包含9套件初始化/清理18项，实际行为检查行177项。每配置的 `*-results.txt` 保存详细结果，`sha256.txt`保存产物与证据哈希；01–08及11原证据未覆盖，构建产物保持忽略。命令最终退出0。
 
 ## 验收映射
 
@@ -66,3 +66,18 @@ Windows x64；Qt6.12.0 LLVM-MinGW、Clang22.1.7、C++17、CMake3.30.5、Ninja1.1
 实施者核对代次/运行租约、队列清理、不补发写入、从站数据和文件作业保留、未保存保护及资源释放。首次回归发现连接失败后把端口编辑也禁用了，破坏旧UI错误修正路径；已恢复错误状态可编辑，重连按钮明确按原运行配置，改配置用停止/新启动。首次界面尺寸因长从站编辑页扩展到屏幕之外，已将操作按钮固定并将其余页面内容放入滚动容器。最终改动后双配置全量重新通过。整体Standards/Spec独立审查由集成分支统一记录。
 
 没有打开现有真实设备或连接独立硬件对端。本机串口枚举不证明拓扑；真实驱动拔插、独占访问冲突、线路回显/方向控制与硬件时序仍由13验证。应用按规范化COM名称互斥，不能从两个不同串口名判断它们是否接在同一物理RTU总线上；实际拓扑必须遵守单主站约束。16页是软件资源保护上限，不是已实测持续容量。模拟和固定向量不替代13，不启动14–19。
+
+
+## 2026-10-23：关闭窗口期间再次修改的审查修复
+
+父级专项审查发现P2：逐页未保存确认会运行模态事件循环，较早已保存或丢弃的会话，可能在后续页确认期间接收到新修改。原关闭路径结束全部确认后立即停止并销毁模型，会遗漏这次新数据。
+
+新增公开只读 `DebugSession::hasUnsavedOrBusy()`，读取通用LocalState。窗口完成全部确认后，无事件泵再次检查所有会话；任何dirty或busy均拒绝关闭、切到对应页并显示“数据已保留”，不重复弹出确认，也不停止现有连接。检查全部通过后才同步停止会话。后台准备期间不调用未完成模型的LocalState。
+
+公开Widgets回归 `windowCloseRechecksEarlierSessionAfterLaterGuard` 启动两个独立从站：A先丢弃111变为clean，B确认回调通过公开slave-edit-value把A修改为999，再丢弃B的222。窗口关闭返回false，A999和两个Running会话均保留；B为clean；再次明确关闭可正常停止全部会话。此例通过合法本地编辑覆盖与设备写入共用的dirty保护边界，无需访问私有容器。
+
+中断前的验证进程已完成，恢复后检查无残留cmake/ninja/ctest进程；复核最终Debug/Release均CTest9/9、每配置195 passed、0 failed、0 skipped，恢复套件14项。证据及全部产物SHA256逐条复核0差异。再次审查确认最终检查至stop之间没有事件泵，拒绝关闭保留模型、视图和连接，未引入重复模态确认。
+
+![关闭取消且新数据保留](qt-llvm-debug/close-confirmation-new-data-retained.png)
+
+已目视Debug截图中的关闭取消提示与Running状态；Release同名截图一并保存。原2026-10-22验收和issue评论保留历史日期，本节追加记录本日修复。

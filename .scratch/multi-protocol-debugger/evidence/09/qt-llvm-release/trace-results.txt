@@ -10,5 +10,5 @@ PASS   : TraceTests::exportMissingSourcesAndCsvEscaping()
 PASS   : TraceTests::exportSlotsRejectBeforeCopy()
 PASS   : TraceTests::widgetQueryAndExport()
 PASS   : TraceTests::cleanupTestCase()
-Totals: 10 passed, 0 failed, 0 skipped, 0 blacklisted, 557ms
+Totals: 10 passed, 0 failed, 0 skipped, 0 blacklisted, 584ms
 ********* Finished testing of TraceTests *********

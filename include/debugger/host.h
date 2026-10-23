@@ -56,6 +56,7 @@ public:
     bool configure(QJsonObject protocol);
     QJsonObject snapshot() const;
     bool resolveUnsaved();
+    bool hasUnsavedOrBusy() const;
     quint64 submit(const QString &action, const QJsonObject &parameters);
     OperationSnapshot operation(quint64) const;
     QList<TraceRecord> traces(quint64 operationId = 0) const;

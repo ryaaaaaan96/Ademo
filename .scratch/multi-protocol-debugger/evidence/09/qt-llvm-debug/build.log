@@ -1,3 +1,37 @@
-[1/4] Automatic MOC for target session_recovery_tests
-[2/3] Building CXX object CMakeFiles/session_recovery_tests.dir/tests/session_recovery_tests.cpp.obj
-[3/3] Linking CXX executable bin\session_recovery_tests.exe
+[1/46] Automatic MOC for target debugger_host
+[2/46] Building CXX object CMakeFiles/debugger_host.dir/debugger_host_autogen/mocs_compilation.cpp.obj
+[3/46] Building CXX object CMakeFiles/debugger_host.dir/src/session_recovery.cpp.obj
+[4/46] Building CXX object CMakeFiles/debugger_host.dir/src/trace_query.cpp.obj
+[5/46] Building CXX object CMakeFiles/debugger_host.dir/src/trace_panel.cpp.obj
+[6/46] Building CXX object CMakeFiles/debugger_host.dir/src/workbench.cpp.obj
+[7/46] Building CXX object CMakeFiles/debugger_host.dir/src/host.cpp.obj
+[8/46] Linking CXX static library libdebugger_host.a
+[9/46] Automatic MOC for target session_recovery_tests
+[10/45] Automatic MOC for target slave_edit_tests
+[11/44] Automatic MOC for target rtu_read_tests
+[12/43] Automatic MOC for target session_tests
+[13/42] Automatic MOC for target rtu_poll_tests
+[14/41] Automatic MOC for target trace_tests
+[15/40] Automatic MOC for target rtu_slave_write_tests
+[16/39] Automatic MOC for target rtu_write_tests
+[17/38] Building CXX object CMakeFiles/multi_protocol_debugger.dir/src/main.cpp.obj
+[18/38] Automatic MOC for target rtu_slave_tests
+[19/37] Linking CXX executable bin\multi_protocol_debugger.exe
+[20/37] Building CXX object CMakeFiles/session_tests.dir/tests/session_tests.cpp.obj
+[21/37] Building CXX object CMakeFiles/slave_edit_tests.dir/tests/slave_edit_tests.cpp.obj
+[22/37] Building CXX object CMakeFiles/rtu_poll_tests.dir/tests/rtu_poll_tests.cpp.obj
+[23/37] Linking CXX executable bin\slave_edit_tests.exe
+[24/37] Building CXX object CMakeFiles/rtu_write_tests.dir/tests/rtu_write_tests.cpp.obj
+[25/37] Linking CXX executable bin\rtu_poll_tests.exe
+[26/37] Building CXX object CMakeFiles/trace_tests.dir/tests/trace_tests.cpp.obj
+[27/37] Linking CXX executable bin\session_tests.exe
+[28/37] Building CXX object CMakeFiles/session_recovery_tests.dir/tests/session_recovery_tests.cpp.obj
+[29/37] Linking CXX executable bin\rtu_write_tests.exe
+[30/37] Building CXX object CMakeFiles/rtu_slave_write_tests.dir/tests/rtu_slave_write_tests.cpp.obj
+[31/37] Linking CXX executable bin\trace_tests.exe
+[32/37] Linking CXX executable bin\session_recovery_tests.exe
+[33/37] Building CXX object CMakeFiles/rtu_read_tests.dir/tests/rtu_read_tests.cpp.obj
+[34/37] Linking CXX executable bin\rtu_slave_write_tests.exe
+[35/37] Linking CXX executable bin\rtu_read_tests.exe
+[36/37] Building CXX object CMakeFiles/rtu_slave_tests.dir/tests/rtu_slave_tests.cpp.obj
+[37/37] Linking CXX executable bin\rtu_slave_tests.exe

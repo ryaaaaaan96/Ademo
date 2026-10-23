@@ -25,5 +25,5 @@ PASS   : SlaveWriteTests::maximumLegalMultipleWrites(1968-coils)
 PASS   : SlaveWriteTests::maximumLegalMultipleWrites(123-registers)
 PASS   : SlaveWriteTests::widgetReflectsExternalWrite()
 PASS   : SlaveWriteTests::cleanupTestCase()
-Totals: 25 passed, 0 failed, 0 skipped, 0 blacklisted, 1852ms
+Totals: 25 passed, 0 failed, 0 skipped, 0 blacklisted, 1845ms
 ********* Finished testing of SlaveWriteTests *********
