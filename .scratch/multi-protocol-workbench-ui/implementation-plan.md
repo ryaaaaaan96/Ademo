@@ -16,7 +16,7 @@ Status: ready-for-agent
 
 | 编号 | 可交付流程 | Status | Blocked by | 执行记录 |
 | --- | --- | --- | --- | --- |
-| [UI01](issues/01-prototype-layout-and-flow.md) | 确认可操作原型的布局与关键流程 | ready-for-agent | 无 | 本轮推进原型，待用户确认 |
+| [UI01](issues/01-prototype-layout-and-flow.md) | 确认可操作原型的布局与关键流程 | ready-for-agent | 无 | 原型已修正并启动，待用户操作确认 |
 | [UI02](issues/02-window-first-rtu-read.md) | 在新的调试窗口完成一次 RTU 读取 | ready-for-agent | UI01 | 未启动 |
 | [UI03](issues/03-dockable-session-lifecycle.md) | 同时运行并管理多个可停靠调试窗口 | ready-for-agent | UI02 | 未启动 |
 | [UI04](issues/04-parameter-json-groups-read.md) | 加载 JSON 分组并按参数或地址读取设备 | ready-for-agent | UI02 | 未启动 |
@@ -50,3 +50,7 @@ Status: ready-for-agent
 ### 2026-10-23：综合任务发布并继续 UI01
 
 已发布 UI01–UI13，旧13–19原编号和历史保留，旧13增加UI13前置；旧18澄清操作页即时修改与文件页保存/应用的差别。当前仅推进原型，尚无用户视觉与交互确认。
+
+### 2026-10-23：UI01 已具备操作入口，尚未完成用户验收
+
+复用并修正已有原型，原生 Qt/QML 截图冒烟通过；空从站保存崩溃已修复并独立复核。既有产品完整 Debug CTest 11/11、238项通过，产品代码未变。已通过 CMD 入口重新打开原型供用户操作，见 [UI01 准备证据与反馈项](evidence/UI01/acceptance.md)。Standards / Spec 代码审查均无剩余问题，但用户确认项仍未勾选；UI02–UI13及旧13–19未启动。
