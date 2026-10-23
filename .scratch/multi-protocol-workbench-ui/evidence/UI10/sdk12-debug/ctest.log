@@ -1,0 +1,13 @@
+Test project C:/Users/81966/Documents/Ademo/build/worktrees/ui10/build/qt-llvm-debug
+    Start 1: parameter_qml_trends
+1/4 Test #1: parameter_qml_trends .............   Passed   38.43 sec
+    Start 2: parameter_file_edit_save_apply
+2/4 Test #2: parameter_file_edit_save_apply ...   Passed    4.14 sec
+    Start 3: parameter_group_polling
+3/4 Test #3: parameter_group_polling ..........   Passed    4.17 sec
+    Start 7: parameter_window_read
+4/4 Test #7: parameter_window_read ............   Passed    4.39 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =  51.16 sec
