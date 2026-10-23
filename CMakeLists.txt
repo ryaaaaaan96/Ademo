@@ -39,6 +39,25 @@ add_executable(multi_protocol_debugger WIN32 src/main.cpp)
 target_link_libraries(multi_protocol_debugger PRIVATE debugger_host)
 add_dependencies(multi_protocol_debugger modbus_plugin serial_plugin)
 enable_testing()
+add_library(ui_contract_plugin MODULE tests/ui_contract_plugin.cpp)
+target_link_libraries(ui_contract_plugin PRIVATE debugger_widgets)
+set_target_properties(ui_contract_plugin PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/ui-contract-fixtures"
+  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/ui-contract-fixtures")
+add_library(ui_contract_stale_plugin MODULE tests/ui_contract_stale_plugin.cpp)
+target_link_libraries(ui_contract_stale_plugin PRIVATE Qt6::Core)
+set_target_properties(ui_contract_stale_plugin PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/ui-contract-fixtures"
+  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/ui-contract-fixtures")
+add_executable(plugin_ui_contract_tests tests/plugin_ui_contract_tests.cpp)
+target_link_libraries(plugin_ui_contract_tests PRIVATE debugger_host Qt6::Test)
+add_dependencies(plugin_ui_contract_tests ui_contract_plugin ui_contract_stale_plugin serial_plugin modbus_plugin incompatible_plugin)
+add_custom_command(TARGET plugin_ui_contract_tests POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:serial_plugin> "${CMAKE_BINARY_DIR}/bin/ui-contract-fixtures/"
+  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:modbus_plugin> "${CMAKE_BINARY_DIR}/bin/ui-contract-fixtures/"
+  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:incompatible_plugin> "${CMAKE_BINARY_DIR}/bin/ui-contract-fixtures/")
+add_test(NAME plugin_ui_contract COMMAND plugin_ui_contract_tests -o plugin-ui-contract-results.txt,txt)
+set_tests_properties(plugin_ui_contract PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=windows" TIMEOUT 45)
 add_executable(parameter_trend_tests tests/parameter_trend_tests.cpp)
 target_link_libraries(parameter_trend_tests PRIVATE debugger_host Qt6::Test Qt6::QuickWidgets)
 add_dependencies(parameter_trend_tests modbus_plugin serial_plugin)

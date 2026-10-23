@@ -1,0 +1,4 @@
+c22b82d1e4d4c8bd5e47ce72a585a3be8bad66eaec89914e84262edfe397d6f6  build/qt-llvm-debug/bin/plugin_ui_contract_tests.exe
+c5fdbd099c80473b446151095d0c2abc7eda7a3db5fa934c1951d514116b30a4  build/qt-llvm-debug/bin/ui-contract-fixtures/libui_contract_plugin.dll
+290519effa2c8ad46132462da03b03ec22ba6789c1a246976e1148764c27ede7  build/qt-llvm-debug/bin/plugins/libmodbus_plugin.dll
+9011920c59ec0100ee5ebdb354e528171d7d5e33dc946b982bbf2431f2fb7e5c  build/qt-llvm-debug/bin/plugins/libserial_plugin.dll

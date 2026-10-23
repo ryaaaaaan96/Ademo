@@ -1,0 +1,96 @@
+(lldb) target create "./build/qt-llvm-debug/bin/plugin_ui_contract_tests.exe"
+Current executable set to 'C:\Users\81966\Documents\Ademo\build\worktrees\ui12\build\qt-llvm-debug\bin\plugin_ui_contract_tests.exe' (x86_64).
+(lldb) settings set -- target.run-args  "independentPluginProvidesItsOwnColumnsAndDevices" "specializedControlSendsOnlyItsWindowOperation" "-platform" "offscreen" "-o" "build/lldb-tests.txt,txt"
+(lldb) run
+Process 25020 launched: 'C:\Users\81966\Documents\Ademo\build\worktrees\ui12\build\qt-llvm-debug\bin\plugin_ui_contract_tests.exe' (x86_64)
+Process 25020 stopped
+* thread #1, stop reason = Exception 0xc0000005 encountered at address 0x7ff741647d48: Access violation reading location 0xffffffffffffffff
+    frame #0: 0x00007ff741647d48 plugin_ui_contract_tests.exe`debugger::PluginCatalog::protocol(this=0x0000024da8b4d920, id=0x000000c7bdaf94f0) const at host.cpp:76:39
+   73  	}
+   74  	ProtocolPlugin *PluginCatalog::protocol(const QString &id) const
+   75  	{
+-> 76  	    for (auto *p : protocols_) if (p->describe().id == id) return p;
+    	                                      ^
+   77  	    return nullptr;
+   78  	}
+   79  	TransportPlugin *PluginCatalog::transport(const QString &id) const
+(lldb) thread backtrace all
+* thread #1, stop reason = Exception 0xc0000005 encountered at address 0x7ff741647d48: Access violation reading location 0xffffffffffffffff
+  * frame #0: 0x00007ff741647d48 plugin_ui_contract_tests.exe`debugger::PluginCatalog::protocol(this=0x0000024da8b4d920, id=0x000000c7bdaf94f0) const at host.cpp:76:39
+    frame #1: 0x00007ff741699877 plugin_ui_contract_tests.exe`debugger::SessionPane::SessionPane(std::__1::shared_ptr<debugger::PluginCatalog>, QWidget*, std::__1::function<std::__1::unique_ptr<debugger::Endpoint, std::__1::default_delete<debugger::Endpoint>> (QJsonObject const&, debugger::EndpointEvents)>, std::__1::function<long long ()>)::$_5::operator()(this=0x0000024daab61d10) const at workbench.cpp:194:29
+    frame #2: 0x00007ff7416a5626 plugin_ui_contract_tests.exe`QtPrivate::FunctorCall<std::__1::integer_sequence<unsigned long long>, QtPrivate::List<>, void, debugger::SessionPane::SessionPane(std::__1::shared_ptr<debugger::PluginCatalog>, QWidget*, std::__1::function<std::__1::unique_ptr<debugger::Endpoint, std::__1::default_delete<debugger::Endpoint>> (QJsonObject const&, debugger::EndpointEvents)>, std::__1::function<long long ()>)::$_5>::call(debugger::SessionPane::SessionPane(std::__1::shared_ptr<debugger::PluginCatalog>, QWidget*, std::__1::function<std::__1::unique_ptr<debugger::Endpoint, std::__1::default_delete<debugger::Endpoint>> (QJsonObject const&, debugger::EndpointEvents)>, std::__1::function<long long ()>)::$_5&, void**)::'lambda'()::operator()(this=0x000000c7bdaf95d0) const at qobjectdefs_impl.h:117:24
+    frame #3: 0x00007ff7416a5608 plugin_ui_contract_tests.exe`void QtPrivate::FunctorCallBase::call_internal<void, QtPrivate::FunctorCall<std::__1::integer_sequence<unsigned long long>, QtPrivate::List<>, void, debugger::SessionPane::SessionPane(std::__1::shared_ptr<debugger::PluginCatalog>, QWidget*, std::__1::function<std::__1::unique_ptr<debugger::Endpoint, std::__1::default_delete<debugger::Endpoint>> (QJsonObject const&, debugger::EndpointEvents)>, std::__1::function<long long ()>)::$_5>::call(debugger::SessionPane::SessionPane(std::__1::shared_ptr<debugger::PluginCatalog>, QWidget*, std::__1::function<std::__1::unique_ptr<debugger::Endpoint, std::__1::default_delete<debugger::Endpoint>> (QJsonObject const&, debugger::EndpointEvents)>, std::__1::function<long long ()>)::$_5&, void**)::'lambda'()>(args=0x000000c7bdaf9720, fn=0x000000c7bdaf95d0) at qobjectdefs_impl.h:66:17
+    frame #4: 0x00007ff7416a55e7 plugin_ui_contract_tests.exe`QtPrivate::FunctorCall<std::__1::integer_sequence<unsigned long long>, QtPrivate::List<>, void, debugger::SessionPane::SessionPane(std::__1::shared_ptr<debugger::PluginCatalog>, QWidget*, std::__1::function<std::__1::unique_ptr<debugger::Endpoint, std::__1::default_delete<debugger::Endpoint>> (QJsonObject const&, debugger::EndpointEvents)>, std::__1::function<long long ()>)::$_5>::call(f=0x0000024daab61d10, arg=0x000000c7bdaf9720) at qobjectdefs_impl.h:116:13
+    frame #5: 0x00007ff7416a55a2 plugin_ui_contract_tests.exe`void QtPrivate::FunctorCallable<debugger::SessionPane::SessionPane(std::__1::shared_ptr<debugger::PluginCatalog>, QWidget*, std::__1::function<std::__1::unique_ptr<debugger::Endpoint, std::__1::default_delete<debugger::Endpoint>> (QJsonObject const&, debugger::EndpointEvents)>, std::__1::function<long long ()>)::$_5>::call<QtPrivate::List<>, void>(f=0x0000024daab61d10, (null)=0x0000024da8ba09a0, arg=0x000000c7bdaf9720) at qobjectdefs_impl.h:338:13
+    frame #6: 0x00007ff7416a5553 plugin_ui_contract_tests.exe`QtPrivate::QCallableObject<debugger::SessionPane::SessionPane(std::__1::shared_ptr<debugger::PluginCatalog>, QWidget*, std::__1::function<std::__1::unique_ptr<debugger::Endpoint, std::__1::default_delete<debugger::Endpoint>> (QJsonObject const&, debugger::EndpointEvents)>, std::__1::function<long long ()>)::$_5, QtPrivate::List<>, void>::impl(which=1, this_=0x0000024daab61d00, r=0x0000024da8ba09a0, a=0x000000c7bdaf9720, ret=0x0000000000000000) at qobjectdefs_impl.h:548:21
+    frame #7: 0x00007ffdc507e2ce Qt6Core.dll`QtPrivate::QSlotObjectBase::call(this=0x0000024daab61d00, r=0x0000024da8ba09a0, a=0x000000c7bdaf9720) at qobjectdefs_impl.h:462:51 [inlined]
+    frame #8: 0x00007ffdc507e2af Qt6Core.dll`void doActivate<false>(sender=0x0000024da8ba09d0, signal_index=3, argv=0x000000c7bdaf9720) at qobject.cpp:4431:26
+    frame #9: 0x00007ff7416bc453 plugin_ui_contract_tests.exe`debugger::DebugSession::changed(this=0x0000024da8ba09d0) at moc_host.cpp:116:5
+    frame #10: 0x00007ff74164cf91 plugin_ui_contract_tests.exe`debugger::DebugSession::opened(this=0x0000024da8ba09d0, run=1, ok=true, reason=0x0000024daab7f1d0) at host.cpp:318:10
+    frame #11: 0x00007ff741657345 plugin_ui_contract_tests.exe`debugger::DebugSession::openConnection()::$_0::operator()(bool, QString) const::'lambda'()::operator()(this=0x0000024daab7f1b0) const at host.cpp:272:29
+    frame #12: 0x00007ff7416572f6 plugin_ui_contract_tests.exe`QtPrivate::FunctorCall<std::__1::integer_sequence<unsigned long long>, QtPrivate::List<>, void, debugger::DebugSession::openConnection()::$_0::operator()(bool, QString) const::'lambda'()>::call(debugger::DebugSession::openConnection()::$_0::operator()(bool, QString) const::'lambda'()&, void**)::'lambda'()::operator()(this=0x000000c7bdaf9a70) const at qobjectdefs_impl.h:117:24
+    frame #13: 0x00007ff7416572d8 plugin_ui_contract_tests.exe`void QtPrivate::FunctorCallBase::call_internal<void, QtPrivate::FunctorCall<std::__1::integer_sequence<unsigned long long>, QtPrivate::List<>, void, debugger::DebugSession::openConnection()::$_0::operator()(bool, QString) const::'lambda'()>::call(debugger::DebugSession::openConnection()::$_0::operator()(bool, QString) const::'lambda'()&, void**)::'lambda'()>(args=0x0000024daab7f268, fn=0x000000c7bdaf9a70) at qobjectdefs_impl.h:66:17
+    frame #14: 0x00007ff7416572b7 plugin_ui_contract_tests.exe`QtPrivate::FunctorCall<std::__1::integer_sequence<unsigned long long>, QtPrivate::List<>, void, debugger::DebugSession::openConnection()::$_0::operator()(bool, QString) const::'lambda'()>::call(f=0x0000024daab7f1b0, arg=0x0000024daab7f268) at qobjectdefs_impl.h:116:13
+    frame #15: 0x00007ff741657252 plugin_ui_contract_tests.exe`void QtPrivate::FunctorCallable<debugger::DebugSession::openConnection()::$_0::operator()(bool, QString) const::'lambda'()>::call<QtPrivate::List<>, void>(f=0x0000024daab7f1b0, (null)=0x0000024da8ba09d0, arg=0x0000024daab7f268) at qobjectdefs_impl.h:338:13
+    frame #16: 0x00007ff741657193 plugin_ui_contract_tests.exe`QtPrivate::QCallableObject<debugger::DebugSession::openConnection()::$_0::operator()(bool, QString) const::'lambda'(), QtPrivate::List<>, void>::impl(which=1, this_=0x0000024daab7f1a0, r=0x0000024da8ba09d0, a=0x0000024daab7f268, ret=0x0000000000000000) at qobjectdefs_impl.h:548:21
+    frame #17: 0x00007ffdc506e3af Qt6Core.dll`QtPrivate::QSlotObjectBase::call(this=<unavailable>, r=0x0000024da8ba09d0, a=<unavailable>) at qobjectdefs_impl.h:462:51 [inlined]
+    frame #18: 0x00007ffdc506e39b Qt6Core.dll`QMetaCallEvent::placeMetaCall(this=<unavailable>, object=0x0000024da8ba09d0) at qobject.cpp:556:21
+    frame #19: 0x00007ffdc5070532 Qt6Core.dll`QObject::event(this=0x0000024da8ba09d0, e=0x0000024daab7f220) at qobject.cpp:1492:18
+    frame #20: 0x00007ffdc59e9e3b Qt6Widgets.dll`QApplicationPrivate::notify_helper(this=0x0000024da8b16c20, receiver=0x0000024da8ba09d0, e=0x0000024daab7f220) at qapplication.cpp:3279:26
+    frame #21: 0x00007ffdc59eaf27 Qt6Widgets.dll`QApplication::notify(this=<unavailable>, receiver=0x0000024da8ba09d0, e=0x0000024daab7f220) at qapplication.cpp:0
+    frame #22: 0x00007ffdc501e150 Qt6Core.dll`QCoreApplication::notifyInternal2(receiver=0x0000024da8ba09d0, event=0x0000024daab7f220) at qcoreapplication.cpp:1153:18 [inlined]
+    frame #23: 0x00007ffdc501e0d9 Qt6Core.dll`QCoreApplication::sendEvent(receiver=0x0000024da8ba09d0, event=0x0000024daab7f220) at qcoreapplication.cpp:1598:12 [inlined]
+    frame #24: 0x00007ffdc501e0d3 Qt6Core.dll`QCoreApplicationPrivate::sendPostedEvents(receiver=0x0000000000000000, event_type=0, data=0x0000024da8b18bb0) at qcoreapplication.cpp:1953:9
+    frame #25: 0x00007ffdc51f58c0 Qt6Core.dll`QEventDispatcherWin32::processEvents(this=0x0000024da8b08dc0, flags=QEventLoop::ProcessEventsFlags @ rdi) at qeventdispatcher_win.cpp:484:5
+    frame #26: 0x00007ffdff16cec2 qoffscreen.dll`QOffscreenEventDispatcher<QEventDispatcherWin32>::processEvents(this=<unavailable>, flags=<unavailable>) at qoffscreenintegration.cpp:57:51
+    frame #27: 0x00007ffdc501d44c Qt6Core.dll`QCoreApplication::processEvents(flags=<unavailable>, deadline=(t1 = -9223372036854775808, t2 = 0, type = 0)) at qcoreapplication.cpp:1441:49
+    frame #28: 0x00007ffdc5090564 Qt6Core.dll`QTest::qWait(msecs=<unavailable>) at qtestsupport_core.cpp:168:9
+    frame #29: 0x00007ff741626242 plugin_ui_contract_tests.exe`PluginUiContractTests::specializedControlSendsOnlyItsWindowOperation(this=0x000000c7bdaff6f0) at plugin_ui_contract_tests.cpp:93:9
+    frame #30: 0x00007ff741621a02 plugin_ui_contract_tests.exe`PluginUiContractTests::qt_static_metacall(_o=0x000000c7bdaff6f0, _c=InvokeMetaMethod, _id=1, _a=0x000000c7bdafedd0) at plugin_ui_contract_tests.moc:84:21
+    frame #31: 0x00007ffdc502a2fe Qt6Core.dll`QMetaMethodInvoker::invokeImpl(self=QMetaMethod @ scalar, target=0x000000c7bdaff6f0, connectionType=DirectConnection, paramCount=1, parameters=0x000000c7bdafedd0, typeNames=0x000000c7bdafedd8, metaTypes=0x000000c7bdafede0) at qmetaobject.cpp:2897:13
+    frame #32: 0x00007ffdc50301db Qt6Core.dll`QMetaMethod::invokeImpl(self=QMetaMethod @ 0x000000c7bdafedc0, target=<unavailable>, connectionType=<unavailable>, paramCount=<unavailable>, parameters=0x000000c7bdafedd0, typeNames=0x000000c7bdafedd8, metaTypes=0x000000c7bdafede0) at qmetaobject.cpp:2736:13
+    frame #33: 0x00007ffdfdb472ab Qt6Test.dll`std::__1::enable_if<!AreOldStyleArgs<>::value, bool>::type QMetaMethod::invoke<void>(this=<unavailable>, obj=<unavailable>, c=DirectConnection, r=<unavailable>) const at qmetaobject.h:158:16 [inlined]
+    frame #34: 0x00007ffdfdb4725d Qt6Test.dll`std::__1::enable_if<!AreOldStyleArgs<>::value, bool>::type QMetaMethod::invoke<>(this=<unavailable>, obj=<unavailable>, c=DirectConnection) const at qmetaobject.h:170:16 [inlined]
+    frame #35: 0x00007ffdfdb4725d Qt6Test.dll`QTest::invokeTestMethodIfValid(m=<unavailable>, obj=<unavailable>) at qtestcase.cpp:470:18
+    frame #36: 0x00007ffdfdb4695b Qt6Test.dll`QTest::TestMethods::invokeTestOnData(this=0x000000c7bdaff440, index=<unavailable>) const at qtestcase.cpp:1084:28
+    frame #37: 0x00007ffdfdb47a10 Qt6Test.dll`QTest::TestMethods::invokeTest(int, QLatin1String, std::__1::optional<QTest::WatchDog>&) const::$_4::operator()(this=<unavailable>) const at qtestcase.cpp:1401:25 [inlined]
+    frame #38: 0x00007ffdfdb47a0b Qt6Test.dll`void QTest::runWithWatchdog<QTest::TestMethods::invokeTest(int, QLatin1String, std::__1::optional<QTest::WatchDog>&) const::$_4>(watchDog= Has Value=false , f=<unavailable>) at qtestcase.cpp:1287:5 [inlined]
+    frame #39: 0x00007ffdfdb479c6 Qt6Test.dll`QTest::TestMethods::invokeTest(this=0x000000c7bdaff440, index=1, tag=(m_size = 0, m_data = 0x0000000000000000), watchDog= Has Value=false ) const at qtestcase.cpp:1400:21
+    frame #40: 0x00007ffdfdb48b51 Qt6Test.dll`QTest::TestMethods::invokeTests(this=0x000000c7bdaff440, testObject=0x000000c7bdaff6f0) const at qtestcase.cpp:1741:17
+    frame #41: 0x00007ffdfdb496b7 Qt6Test.dll`QTest::qRun() at qtestcase.cpp:1997:18
+    frame #42: 0x00007ffdfdb48e15 Qt6Test.dll`QTest::qExec(testObject=<unavailable>, argc=<unavailable>, argv=<unavailable>) at qtestcase.cpp:1852:15
+    frame #43: 0x00007ff741621921 plugin_ui_contract_tests.exe`main(argc=5, argv=0x0000024da8b13890) at plugin_ui_contract_tests.cpp:211:41
+    frame #44: 0x00007ff7416210fe plugin_ui_contract_tests.exe`__tmainCRTStartup at crtexe.c:260:11
+    frame #45: 0x00007ff7416213e6 plugin_ui_contract_tests.exe`mainCRTStartup at crtexe.c:129:9
+    frame #46: 0x00007ffe76d4dda7 kernel32.dll`BaseThreadInitThunk + 23
+    frame #47: 0x00007ffe779dee4c ntdll.dll`RtlUserThreadStart + 44
+  thread #2
+    frame #0: 0x00007ffe77ac5a24 ntdll.dll`NtWaitForWorkViaWorkerFactory + 20
+    frame #1: 0x00007ffe77984d0e ntdll.dll`TpCallbackMayRunLong + 6670
+    frame #2: 0x00007ffe76d4dda7 kernel32.dll`BaseThreadInitThunk + 23
+    frame #3: 0x00007ffe779dee4c ntdll.dll`RtlUserThreadStart + 44
+  thread #4
+    frame #0: 0x00007ffe77ac5a24 ntdll.dll`NtWaitForWorkViaWorkerFactory + 20
+    frame #1: 0x00007ffe77984d0e ntdll.dll`TpCallbackMayRunLong + 6670
+    frame #2: 0x00007ffe76d4dda7 kernel32.dll`BaseThreadInitThunk + 23
+    frame #3: 0x00007ffe779dee4c ntdll.dll`RtlUserThreadStart + 44
+  thread #3
+    frame #0: 0x00007ffe77ac5a24 ntdll.dll`NtWaitForWorkViaWorkerFactory + 20
+    frame #1: 0x00007ffe77984d0e ntdll.dll`TpCallbackMayRunLong + 6670
+    frame #2: 0x00007ffe76d4dda7 kernel32.dll`BaseThreadInitThunk + 23
+    frame #3: 0x00007ffe779dee4c ntdll.dll`RtlUserThreadStart + 44
+  thread #5
+    frame #0: 0x00007ffe77ac28a4 ntdll.dll`NtWaitForMultipleObjects + 20
+    frame #1: 0x00007ffe5e280006 winmm.dll`joySetThreshold + 342
+    frame #2: 0x00007ffe76d4dda7 kernel32.dll`BaseThreadInitThunk + 23
+    frame #3: 0x00007ffe779dee4c ntdll.dll`RtlUserThreadStart + 44
+(lldb) frame variable
+(const debugger::PluginCatalog *) this = 0x0000024da8b4d920
+(const QString &) id = 0x000000c7bdaf94f0: {
+  d = {
+    d = 0x0000024da8bbab50
+    ptr = 0x0000024da8bbab60 u"modbus.rtu"
+    size = 10
+  }
+}
+(debugger::ProtocolPlugin *) p = 0x0000024da8b4d320
