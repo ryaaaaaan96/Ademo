@@ -1,0 +1,15 @@
+Test project C:/Users/81966/Documents/Ademo/build/worktrees/ui03/build/qt-llvm-debug
+    Start  1: parameter_definition_read
+1/5 Test  #1: parameter_definition_read ........   Passed    7.01 sec
+    Start  2: parameter_window_read
+2/5 Test  #2: parameter_window_read ............   Passed    3.81 sec
+    Start  3: parallel_sessions_recovery
+3/5 Test  #3: parallel_sessions_recovery .......   Passed    4.87 sec
+    Start  4: slave_edit_import_save
+4/5 Test  #4: slave_edit_import_save ...........   Passed    5.66 sec
+    Start 12: workspace_roundtrip
+5/5 Test #12: workspace_roundtrip ..............   Passed    6.32 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Total Test time (real) =  27.70 sec

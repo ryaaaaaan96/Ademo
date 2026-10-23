@@ -32,6 +32,12 @@
 
 复现：`C:/Qt/Tools/CMake_64/bin/cmake.exe --preset qt-llvm-debug`，随后 `cmake.exe --build --preset qt-llvm-debug --parallel 3`、`ctest.exe --preset qt-llvm-debug --output-on-failure`；Release 替换预设。窗口定向选择 `-R parallel_sessions_recovery`。可见 UI 测试应串行执行，原生移动测试短暂设置并恢复光标，避免与其他桌面操作或可见测试抢占 Z 序。
 
+## UI04 集成后的交叉验证
+
+功能提交 `b26a926` 后，将集成 `1032460`（包含 UI04 验证提交 `4e4aa20`）合并为 `da9c783`。README/CMake 双方增量均保留，SDK10、参数文件后台加载与原生会话窗口无冲突；Qt/LLVM-MinGW 预设不变。两配置重新构建全部目标成功，见 `post-merge-*-configure.log`、`post-merge-*-build.log`。
+
+在独占桌面时段串行执行 `parameter_definition_read|parameter_window_read|parallel_sessions_recovery|slave_edit_import_save|workspace_roundtrip`：Debug 5/5、54 项通过（27.70 秒），Release 5/5、54 项通过（22.52 秒），均无失败／跳过。日志为 [Debug](post-merge-debug-ctest.log)、[Release](post-merge-release-ctest.log)，原始结果为 `post-merge-*-results.txt`。覆盖异步参数定义加载与新表格首次读取、窗口导航／四向拖动／遮挡取消、工作区文件引用往返，以及原有未保存和忙碌关闭保护；无需兼容改码。前表的 12/12 完整回归对应 UI04 合并前的本项功能提交，本节为 SDK10 合并后的相关复核，不把定向结果写成完整回归。
+
 ## 视觉与审查边界
 
 已目视检查 [双会话平铺](two-session-workbench.png)、[浮窗中的所属记录](floating-session-records.png)及[关闭确认期间新数据保留](close-confirmation-new-data-retained.png)。截图由真实 Qt `QWidget::grab` 取得客户区，不包含系统标题栏，不据此宣称原生标题按钮外观已由用户接受。窄窗口允许滚动，后续 UI04–UI13 继续完成参数文件、写入、文件页、曲线及完整布局。
