@@ -422,7 +422,8 @@ private slots:
         if (!output.isEmpty()) QVERIFY(window.grab().save(output + "/parallel-disconnected-controlled.png"));
         QTest::mouseClick(pane->findChild<QPushButton *>("reconnect"), Qt::LeftButton);
         QTRY_COMPARE(window.session(1)->state(), SessionState::Running);
-        QTRY_VERIFY(pane->findChild<QPushButton *>("readHolding")->isEnabled());
+        QVERIFY(window.parameterView(1)); // 重连后保留正式参数操作页。
+        QTRY_VERIFY(pane->findChild<QPushButton *>("stop")->isEnabled());
         QVERIFY(pane->findChild<QLabel *>("status")->text().contains(QStringLiteral("重连完成")));
         if (!output.isEmpty()) QVERIFY(window.grab().save(output + "/parallel-reconnected-controlled.png"));
         QVERIFY(!window.close()); QVERIFY(window.isVisible());

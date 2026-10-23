@@ -6,7 +6,7 @@ UI07 提供 `debugger_widgets` 中的 `FileEditorPage` 和 `FileDocumentEditor`�
 
 `FileEditorPage(access, editor, apply, parent)` 接收公开 `SessionAccess` 和内容控件。`bindTarget(id, label, document, path)` 在草稿保护通过后切换目标，失败返回 false。相同目标保留当前独立编辑快照；单纯刷新运行数据不重置文件页。应用回调收到捕获的目标 ID、完整有效文档及已确认来源路径，返回空字符串表示成功，非空字符串向用户说明拒绝原因。回调须原子更新目标，服从既有会话 configure/修改保护，不能隐式发送设备指令。
 
-公共组件以独立 owner 注册 `registerViewState`，复用四任务上限的 `background`，读取/序列化文件上限 1 MiB；任务仅捕获值，GUI 完成回调检查 QPointer。`QSaveFile` 保证写入失败不截断原文件，编辑 revision 确保迟到保存不清除新修改。保存、打开、新建、另存与应用是独立动作，覆盖文件有确认提示。后续 UI08/UI12 可在插件中复用相同组件，提供各自格式的 editor 与 apply；不得把协议字段下沉到宿主。
+公共组件以独立 owner 注册 `registerViewState`，复用四任务上限的 `background`，读取/序列化文件上限 1 MiB；任务仅捕获值，GUI 完成回调检查 QPointer。`QSaveFile` 保证写入失败不截断原文件，编辑 revision 确保迟到保存不清除新修改。保存、打开、新建、另存与应用是独立动作，覆盖文件有确认提示。主站、从站和契约验证插件复用相同组件，分别提供格式 editor 与 apply；协议字段不下沉到宿主。
 
 UI08 增加可选 `FileEditorPage::Options`：默认 `maximumBytes` 仍为 1 MiB，从站明确使用原文件能力的 4 MiB。`canSave(path)` 由插件检查目标文件与其他设备绑定及自身文件任务的冲突，覆盖确认返回后再次检查。公共页只展示返回的拒绝原因，不解释设备或协议。保存使用紧凑 JSON，保留所有字段值。`isBusy()` 供所在插件协调运行值文件操作；文件草稿仍由页面自身守卫管理。
 

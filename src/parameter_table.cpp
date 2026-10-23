@@ -43,7 +43,10 @@ ParameterTable::ParameterTable(QWidget *parent) : QTableWidget(parent)
     };
     setItemDelegate(delegate);
     setSelectionBehavior(QAbstractItemView::SelectRows);
-    horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+    horizontalHeader()->setMinimumSectionSize(65);
+    setAlternatingRowColors(true);
+    setMinimumHeight(170);
     verticalHeader()->hide();
 }
 void ParameterTable::setColumns(const QList<ParameterColumn> &columns)
@@ -52,6 +55,11 @@ void ParameterTable::setColumns(const QList<ParameterColumn> &columns)
     QStringList titles;
     for (const auto &column : columns_) titles << column.title;
     setColumnCount(titles.size()); setHorizontalHeaderLabels(titles);
+    for (int column = 0; column < columns_.size(); ++column) {
+        const auto id = columns_[column].id;
+        setColumnWidth(column, id == "description" ? 140 : id == "updated" ? 150 : 85);
+        if (id == "actions") horizontalHeader()->setSectionResizeMode(column, QHeaderView::ResizeToContents);
+    }
 }
 void ParameterTable::setRows(const QList<ParameterRow> &rows)
 {
@@ -74,6 +82,7 @@ void ParameterTable::setRows(const QList<ParameterRow> &rows)
                 });
             }
             setCellWidget(index, c, container);
+            container->setMinimumWidth(container->sizeHint().width());
         }
         setRowHeight(index, 36);
         if (columnCount()) rowPositions_.insert(row.id, model()->index(index, 0));

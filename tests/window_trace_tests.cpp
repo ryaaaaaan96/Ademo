@@ -125,7 +125,9 @@ private slots:
         QTRY_COMPARE(first->recordingStats().state, QString("running"));
         first->submit("two-attempts", {}); wire.receive("COM911", "abcdef"); wire.receive("COM911", "gh");
         wire.receive("COM911", "archive-A");
-        QTest::mouseClick(button(view, QStringLiteral("停止记录并后台排空")), Qt::LeftButton);
+        auto *stopRecording = button(view, QStringLiteral("停止记录并后台排空")); QVERIFY(stopRecording);
+        QTRY_VERIFY(stopRecording->isEnabled()); // 记录线程与200ms界面状态刷新是独立的。
+        QTest::mouseClick(stopRecording, Qt::LeftButton);
         QTRY_COMPARE(first->recordingStats().state, QString("stopped"));
         RecordingOptions options; options.directory = directory.path();
         QVERIFY(other->startRecording(options)); QTRY_COMPARE(other->recordingStats().state, QString("running"));

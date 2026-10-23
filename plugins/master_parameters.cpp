@@ -1,4 +1,5 @@
 #include "master_parameters.h"
+#include "master_controls.h"
 #include "master_trends.h"
 #include "parameter_definition.h"
 #include "parameter_file_editor.h"
@@ -22,6 +23,7 @@
 #include <QMessageBox>
 #include <QTabWidget>
 #include <QPlainTextEdit>
+#include <QDialog>
 
 namespace debugger {
 namespace {
@@ -48,9 +50,32 @@ public:
         auto *operations = new QWidget(pages);
         auto *layout = new QVBoxLayout(operations);
         pages->addTab(operations, QStringLiteral("参数操作")); outer->addWidget(pages);
+        auto *settings = new QPushButton(QStringLiteral("读取重试配置…"), this);
+        auto *tools = new QHBoxLayout; tools->addWidget(settings);
+        auto *advanced = new QPushButton(QStringLiteral("按功能码操作…"), this); tools->addWidget(advanced); layout->addLayout(tools);
+        connect(advanced, &QPushButton::clicked, this, [this] {
+            if (advanced_) { advanced_->show(); advanced_->raise(); return; }
+            auto *dialog = new QDialog(this); advanced_ = dialog;
+            dialog->setAttribute(Qt::WA_DeleteOnClose); dialog->setWindowTitle(QStringLiteral("Modbus 功能码操作"));
+            dialog->resize(620, 560); auto *layout = new QVBoxLayout(dialog);
+            layout->addWidget(new QLabel(QStringLiteral("按功能码直接读写；参数观测、轮询与记录仍在所属会话。"), dialog));
+            layout->addWidget(createAdvancedMasterView(access_, dialog)); dialog->show();
+        });
+        connect(settings, &QPushButton::clicked, this, [this] { showReadSettings(access_, this); });
         auto *form = new QFormLayout;
         device_ = new QComboBox(this); device_->setAccessibleName(QStringLiteral("当前设备"));
-        form->addRow(QStringLiteral("当前设备"), device_);
+        auto *selection = new QWidget(this); auto *selectionLine = new QHBoxLayout(selection);
+        selectionLine->setContentsMargins(0, 0, 0, 0); selectionLine->addWidget(device_, 1);
+        group_ = new QComboBox(this); group_->setAccessibleName(QStringLiteral("参数分组"));
+        selectionLine->addWidget(new QLabel(QStringLiteral("分组"), this)); selectionLine->addWidget(group_, 1);
+        form->addRow(QStringLiteral("当前设备"), selection);
+        layout->addLayout(form);
+        auto *sourceToggle = new QPushButton(QStringLiteral("参数来源与地址调试"), this);
+        sourceToggle->setCheckable(true); tools->addWidget(sourceToggle);
+        auto *source = new QWidget(this); auto *sourceForm = new QFormLayout(source);
+        sourceForm->setContentsMargins(0, 0, 0, 0); sourceForm->setRowWrapPolicy(QFormLayout::WrapLongRows);
+        layout->addWidget(source);
+        connect(sourceToggle, &QPushButton::toggled, source, &QWidget::setVisible);
         auto *entry = new QWidget(this);
         auto *line = new QHBoxLayout(entry); line->setContentsMargins(0, 0, 0, 0);
         unit_ = new QSpinBox(entry); unit_->setRange(1, 247); unit_->setAccessibleName(QStringLiteral("设备地址"));
@@ -63,7 +88,7 @@ public:
         line->addWidget(new QLabel(QStringLiteral("设备地址"), entry)); line->addWidget(unit_);
         line->addWidget(area_); line->addWidget(new QLabel(QStringLiteral("PDU 地址"), entry)); line->addWidget(address_);
         line->addWidget(new QLabel(QStringLiteral("数量"), entry)); line->addWidget(count_); line->addWidget(add_);
-        form->addRow(QStringLiteral("地址调试"), entry);
+        sourceForm->addRow(QStringLiteral("地址调试"), entry);
         auto *fileEntry = new QWidget(this); auto *fileLine = new QHBoxLayout(fileEntry);
         fileLine->setContentsMargins(0, 0, 0, 0);
         path_ = new QLineEdit(fileEntry); path_->setAccessibleName(QStringLiteral("参数文件"));
@@ -71,12 +96,17 @@ public:
         auto *browse = new QPushButton(QStringLiteral("选择参数文件…"), fileEntry);
         load_ = new QPushButton(QStringLiteral("加载并应用到设备"), fileEntry);
         fileLine->addWidget(path_, 1); fileLine->addWidget(browse); fileLine->addWidget(load_);
-        form->addRow(QStringLiteral("参数文件"), fileEntry);
-        group_ = new QComboBox(this); group_->setAccessibleName(QStringLiteral("参数分组"));
-        form->addRow(QStringLiteral("参数分组"), group_); layout->addLayout(form);
+        sourceForm->addRow(QStringLiteral("参数文件"), fileEntry);
+
         connect(browse, &QPushButton::clicked, this, [this] {
-            const auto path = QFileDialog::getOpenFileName(this, QStringLiteral("选择参数定义（选择不应用）"), path_->text(), "JSON (*.json)");
-            if (!path.isEmpty()) path_->setText(path);
+            const auto lifetime = access_.lifetime;
+            QPointer<MasterParameters> alive(this);
+            QPointer<QFileDialog> dialog = new QFileDialog(this, QStringLiteral("选择参数定义（选择不应用）"), path_->text(), "JSON (*.json)");
+            dialog->setFileMode(QFileDialog::ExistingFile);
+            const int result = dialog->exec();
+            const auto path = dialog && result == QDialog::Accepted ? dialog->selectedFiles().value(0) : QString();
+            if (dialog) delete dialog;
+            if (alive && !path.isEmpty()) path_->setText(path);
         });
         connect(load_, &QPushButton::clicked, this, [this] { loadFile(); });
         auto *readControls = new QHBoxLayout;
@@ -109,7 +139,7 @@ public:
         pollControls->addWidget(pollInterval_); pollControls->addWidget(startPoll_); pollControls->addWidget(stopPoll_);
         layout->addLayout(pollControls);
         polls_ = new QPlainTextEdit(this); polls_->setAccessibleName(QStringLiteral("轮询任务"));
-        polls_->setReadOnly(true); polls_->setMaximumHeight(75);
+        polls_->setReadOnly(true); polls_->setFixedHeight(42);
         polls_->setPlaceholderText(QStringLiteral("尚无轮询配置；开始后范围固定，切换设备、分组或页面不改变采集目标。"));
         layout->addWidget(polls_);
         pollStatus_ = new QLabel(this); pollStatus_->setWordWrap(true); layout->addWidget(pollStatus_);
@@ -141,6 +171,7 @@ public:
             if (valid && unit >= 1 && unit <= 247 && device_->findData(QString::number(unit)) < 0)
                 device_->addItem(QStringLiteral("设备 %1").arg(unit), QString::number(unit));
         }
+        sourceToggle->setChecked(rows_.isEmpty()); source->setVisible(rows_.isEmpty());
         selectedDevice_ = selectedDevice();
         connect(device_, &QComboBox::currentIndexChanged, this, [this] {
             const auto next = selectedDevice();
@@ -232,6 +263,7 @@ public:
     }
 private:
     QList<QPointer<QWidget>> plots_;
+    QPointer<QDialog> advanced_;
     bool bindEditor(const QString &id) {
         if (!fileEditor_) return true;
         QJsonArray parameters;

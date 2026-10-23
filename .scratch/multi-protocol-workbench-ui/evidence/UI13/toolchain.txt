@@ -1,0 +1,11 @@
+cmake version 3.30.5
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+1.12.1
+clang version 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)
+Target: x86_64-w64-windows-gnu
+Thread model: posix
+InstalledDir: C:/Qt/Tools/llvm-mingw2217_64/bin
+Configuration file: C:/Qt/Tools/llvm-mingw2217_64/bin/x86_64-w64-windows-gnu.cfg
+6.12.0
+Windows native platform; CMake build --parallel 3; CTest -j 1; process-only Qt/LLVM PATH; Qt libraries release, product and plugins matched per configuration.

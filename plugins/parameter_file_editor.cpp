@@ -20,7 +20,10 @@ public:
         table_->setColumnCount(7);
         table_->setHorizontalHeaderLabels({QStringLiteral("名称"), QStringLiteral("数据区"), QStringLiteral("PDU 地址"),
             QStringLiteral("类型"), QStringLiteral("单位"), QStringLiteral("说明"), QStringLiteral("分组")});
-        table_->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        table_->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+        table_->horizontalHeader()->setMinimumSectionSize(80);
+        table_->setColumnWidth(1, 110); table_->setColumnWidth(2, 100);
+        table_->setMinimumHeight(200);
         layout->addWidget(table_);
         auto *actions = new QHBoxLayout;
         auto *add = new QPushButton(QStringLiteral("添加文件参数"), this);

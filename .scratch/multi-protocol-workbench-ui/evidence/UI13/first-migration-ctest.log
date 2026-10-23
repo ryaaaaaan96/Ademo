@@ -1,0 +1,92 @@
+Internal ctest changing into directory: C:/Users/81966/Documents/Ademo/build/worktrees/ui13/build/qt-llvm-debug
+Test project C:/Users/81966/Documents/Ademo/build/worktrees/ui13/build/qt-llvm-debug
+      Start  1: rtu_ui_acceptance
+ 1/22 Test  #1: rtu_ui_acceptance ................   Passed    6.03 sec
+      Start  2: workspace_window_layout
+ 2/22 Test  #2: workspace_window_layout ..........   Passed    6.15 sec
+      Start  3: slave_parameter_workflow
+ 3/22 Test  #3: slave_parameter_workflow .........   Passed    4.49 sec
+      Start  4: plugin_ui_contract
+ 4/22 Test  #4: plugin_ui_contract ...............   Passed    6.44 sec
+      Start  5: parameter_qml_trends
+ 5/22 Test  #5: parameter_qml_trends .............   Passed   37.51 sec
+      Start  6: parameter_file_edit_save_apply
+ 6/22 Test  #6: parameter_file_edit_save_apply ...***Exception: SegFault  2.98 sec
+A crash occurred in C:\Users\81966\Documents\Ademo\build\worktrees\ui13\build\qt-llvm-debug\bin\parameter_file_editor_tests.exe.
+While testing loadedDeviceRebindsFilePageExplicitly
+Function time: 12ms Total time: 674ms
+
+Exception address: 0x00007FFDC5C1B74D
+Exception code   : 0xc0000005
+Nearby symbol    : ZN8QSpinBox8setValueEi
+
+Stack:
+#  1: ZN5QTest12CrashHandler19WindowsFaultHandlerC2Ev() - 0x00007FFDFDB730E0
+#  2: UnhandledExceptionFilter() - 0x00007FFE74DCF2F0
+#  3: strncpy() - 0x00007FFE77AC8110
+#  4: _C_specific_handler() - 0x00007FFE77A84B00
+#  5: _chkstk() - 0x00007FFE77AC6410
+#  6: RtlWow64GetCurrentMachine() - 0x00007FFE77A23A10
+#  7: KiUserExceptionDispatcher() - 0x00007FFE77AC5DC0
+#  8: ZN8QSpinBox8setValueEi() - 0x00007FFDC5C1B730
+#  9: Unable to obtain symbol
+# 10: Unable to obtain symbol
+# 11: ZN18QMetaMethodInvoker10invokeImplE11QMetaMethodPvN2Qt14ConnectionTypeExPKPKvPKPKcPKPKN9QtPrivate18QMetaTypeInterfaceE() - 0x00007FFDC5029E30
+# 12: ZN11QMetaMethod10invokeImplES_PvN2Qt14ConnectionTypeExPKPKvPKPKcPKPKN9QtPrivate18QMetaTypeInterfaceE() - 0x00007FFDC5030160
+# 13: ZN5QTest16qtest_qParseArgsEiPPcb() - 0x00007FFDFDB467A0
+# 14: ZN5QTest16qtest_qParseArgsEiPPcb() - 0x00007FFDFDB467A0
+# 15: ZN5QTest16qtest_qParseArgsEiPPcb() - 0x00007FFDFDB467A0
+# 16: ZN5QTest15toPrettyUnicodeE11QStringView() - 0x00007FFDFDB486E0
+# 17: ZN5QTest4qRunEv() - 0x00007FFDFDB48FC0
+# 18: ZN5QTest5qExecEP7QObjectiPPc() - 0x00007FFDFDB48E00
+# 19: Unable to obtain symbol
+# 20: Unable to obtain symbol
+# 21: Unable to obtain symbol
+# 22: BaseThreadInitThunk() - 0x00007FFE76D4DD90
+# 23: RtlUserThreadStart() - 0x00007FFE779DEE20
+
+
+      Start  7: parameter_group_polling
+ 7/22 Test  #7: parameter_group_polling ..........   Passed    4.25 sec
+      Start  8: window_trace_workflow
+ 8/22 Test  #8: window_trace_workflow ............   Passed    5.06 sec
+      Start  9: parameter_pending_write
+ 9/22 Test  #9: parameter_pending_write ..........   Passed    4.46 sec
+      Start 10: parameter_definition_read
+10/22 Test #10: parameter_definition_read ........   Passed    4.43 sec
+      Start 11: parameter_window_read
+11/22 Test #11: parameter_window_read ............***Failed    2.52 sec
+
+      Start 12: parallel_sessions_recovery
+12/22 Test #12: parallel_sessions_recovery .......   Passed    6.52 sec
+      Start 13: slave_edit_import_save
+13/22 Test #13: slave_edit_import_save ...........   Passed    4.19 sec
+      Start 14: session_lifecycle
+14/22 Test #14: session_lifecycle ................   Passed    3.57 sec
+      Start 15: rtu_first_read
+15/22 Test #15: rtu_first_read ...................   Passed    4.93 sec
+      Start 16: rtu_polling
+16/22 Test #16: rtu_polling ......................   Passed    4.65 sec
+      Start 17: rtu_explicit_write
+17/22 Test #17: rtu_explicit_write ...............***Failed    3.66 sec
+
+      Start 18: rtu_slave_json_read
+18/22 Test #18: rtu_slave_json_read ..............   Passed    5.60 sec
+      Start 19: rtu_slave_write
+19/22 Test #19: rtu_slave_write ..................   Passed    5.64 sec
+      Start 20: trace_query_export
+20/22 Test #20: trace_query_export ...............   Passed    4.08 sec
+      Start 21: workspace_roundtrip
+21/22 Test #21: workspace_roundtrip ..............   Passed    5.43 sec
+      Start 22: bounded_disk_recording
+22/22 Test #22: bounded_disk_recording ...........   Passed   10.99 sec
+
+86% tests passed, 3 tests failed out of 22
+
+Total Test time (real) = 143.63 sec
+
+The following tests FAILED:
+	  6 - parameter_file_edit_save_apply (SEGFAULT)
+	 11 - parameter_window_read (Failed)
+	 17 - rtu_explicit_write (Failed)
+Errors while running CTest

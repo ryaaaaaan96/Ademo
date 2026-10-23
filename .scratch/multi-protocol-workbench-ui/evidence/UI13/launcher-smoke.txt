@@ -1,0 +1,8 @@
+CMD exit: 0
+Executable: C:\Users\81966\Documents\Ademo\build\worktrees\ui13\build\qt-llvm-release\bin\multi_protocol_debugger.exe
+Window title: 多协议调试工具 · 多会话工作台
+Window handle present: True
+Caller PATH unchanged: True
+Existing process count: 2
+Owned window closed normally: True
+Previous process IDs preserved: True

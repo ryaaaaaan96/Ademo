@@ -15,7 +15,7 @@ target_compile_definitions(debugger_sdk INTERFACE
 add_library(debugger_widgets STATIC src/parameter_table.cpp src/file_editor.cpp src/confirmation.cpp
   src/trend_window.cpp src/trends.qrc include/debugger/trend_window.h)
 target_link_libraries(debugger_widgets PUBLIC debugger_sdk Qt6::QuickWidgets)
-add_library(debugger_host STATIC src/workspace.cpp src/session_recovery.cpp src/host.cpp src/workbench.cpp src/session_window.cpp src/trace_query.cpp src/trace_panel.cpp src/session_records.cpp
+add_library(debugger_host STATIC src/application_style.cpp src/workspace.cpp src/session_recovery.cpp src/host.cpp src/workbench.cpp src/session_window.cpp src/trace_query.cpp src/trace_panel.cpp src/session_records.cpp
   src/trace_codec.cpp src/recording.cpp src/archive_query.cpp src/archive_format.cpp src/recording_panel.cpp include/debugger/host.h)
 
 target_link_libraries(debugger_host PUBLIC debugger_sdk)
@@ -31,7 +31,7 @@ foreach(plugin IN ITEMS modbus serial)
 endforeach()
 target_link_libraries(serial_plugin PRIVATE Qt6::SerialPort)
 target_link_libraries(modbus_plugin PRIVATE debugger_widgets)
-target_sources(modbus_plugin PRIVATE plugins/master_parameters.cpp plugins/master_trends.cpp plugins/parameter_definition.cpp plugins/parameter_file_editor.cpp)
+target_sources(modbus_plugin PRIVATE plugins/master_parameters.cpp plugins/master_controls.cpp plugins/master_trends.cpp plugins/parameter_definition.cpp plugins/parameter_file_editor.cpp)
 target_sources(modbus_plugin PRIVATE plugins/parameter_read_scope.cpp)
 target_sources(modbus_plugin PRIVATE plugins/slave_parameters.cpp plugins/slave_file_editor.cpp)
 target_sources(modbus_plugin PRIVATE plugins/rtu_session.cpp plugins/rtu_session.h plugins/write_pdu.cpp plugins/write_pdu.h)
@@ -40,6 +40,11 @@ add_executable(multi_protocol_debugger WIN32 src/main.cpp)
 target_link_libraries(multi_protocol_debugger PRIVATE debugger_host)
 add_dependencies(multi_protocol_debugger modbus_plugin serial_plugin)
 enable_testing()
+add_executable(ui_acceptance_tests tests/ui_acceptance_tests.cpp)
+target_link_libraries(ui_acceptance_tests PRIVATE debugger_host Qt6::Test Qt6::QuickWidgets)
+add_dependencies(ui_acceptance_tests modbus_plugin serial_plugin)
+add_test(NAME rtu_ui_acceptance COMMAND ui_acceptance_tests -o ui-acceptance-results.txt,txt)
+set_tests_properties(rtu_ui_acceptance PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=windows" TIMEOUT 60)
 add_executable(workspace_layout_tests tests/workspace_layout_tests.cpp)
 target_link_libraries(workspace_layout_tests PRIVATE debugger_host Qt6::Test)
 add_dependencies(workspace_layout_tests modbus_plugin serial_plugin)
@@ -176,5 +181,3 @@ target_link_libraries(recording_tests PRIVATE debugger_host Qt6::Test)
 add_dependencies(recording_tests trace_tests)
 add_test(NAME bounded_disk_recording COMMAND recording_tests -o recording-results.txt,txt)
 set_tests_properties(bounded_disk_recording PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=windows" TIMEOUT 60)
-
-

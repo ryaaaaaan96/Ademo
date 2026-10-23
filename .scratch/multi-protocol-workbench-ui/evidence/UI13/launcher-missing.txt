@@ -1,0 +1,5 @@
+Release executable is missing:
+"C:\Users\81966\Documents\Ademo\build\worktrees\ui13\build\launcher missing smoke\build\qt-llvm-release\bin\multi_protocol_debugger.exe"
+Build the qt-llvm-release preset first. See README.md.
+Press any key to continue . . .
+Exit code: 1 (expected 1)

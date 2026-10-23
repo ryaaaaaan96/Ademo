@@ -1,0 +1,13 @@
+********* Start testing of UiAcceptanceTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : UiAcceptanceTests::initTestCase()
+FAIL!  : UiAcceptanceTests::advancedBulkWriteRequiresExplicitCommand(address) 'window.session(0)->hasUnsavedOrBusy()' returned FALSE. (旧写入确认不得清除新目标的输入)
+C:/Users/81966/Documents/Ademo/build/worktrees/ui13/tests/ui_acceptance_tests.cpp(313) : failure location
+FAIL!  : UiAcceptanceTests::advancedBulkWriteRequiresExplicitCommand(unit) 'window.session(0)->hasUnsavedOrBusy()' returned FALSE. (旧写入确认不得清除新目标的输入)
+C:/Users/81966/Documents/Ademo/build/worktrees/ui13/tests/ui_acceptance_tests.cpp(313) : failure location
+FAIL!  : UiAcceptanceTests::advancedBulkWriteRequiresExplicitCommand(function) 'window.session(0)->hasUnsavedOrBusy()' returned FALSE. (旧写入确认不得清除新目标的输入)
+C:/Users/81966/Documents/Ademo/build/worktrees/ui13/tests/ui_acceptance_tests.cpp(313) : failure location
+PASS   : UiAcceptanceTests::advancedBulkWriteRequiresExplicitCommand(value)
+PASS   : UiAcceptanceTests::cleanupTestCase()
+Totals: 3 passed, 3 failed, 0 skipped, 0 blacklisted, 2332ms
+********* Finished testing of UiAcceptanceTests *********
