@@ -1,0 +1,138 @@
+********* Start testing of ParameterTrendTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : ParameterTrendTests::initTestCase()
+QDEBUG : ParameterTrendTests::selectedParametersOpenRealQmlWithoutSendingAndKeepTheirDevice() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::selectedParametersOpenRealQmlWithoutSendingAndKeepTheirDevice() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::selectedParametersOpenRealQmlWithoutSendingAndKeepTheirDevice() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::selectedParametersOpenRealQmlWithoutSendingAndKeepTheirDevice() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::selectedParametersOpenRealQmlWithoutSendingAndKeepTheirDevice() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::selectedParametersOpenRealQmlWithoutSendingAndKeepTheirDevice() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::selectedParametersOpenRealQmlWithoutSendingAndKeepTheirDevice() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::selectedParametersOpenRealQmlWithoutSendingAndKeepTheirDevice() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::selectedParametersOpenRealQmlWithoutSendingAndKeepTheirDevice() qt.scenegraph.general: rhi texture atlas dimensions: 1024x512
+PASS   : ParameterTrendTests::selectedParametersOpenRealQmlWithoutSendingAndKeepTheirDevice()
+QDEBUG : ParameterTrendTests::pauseLegendZoomAndClearOnlyAffectDisplay() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::pauseLegendZoomAndClearOnlyAffectDisplay() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::pauseLegendZoomAndClearOnlyAffectDisplay() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::pauseLegendZoomAndClearOnlyAffectDisplay() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::pauseLegendZoomAndClearOnlyAffectDisplay() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::pauseLegendZoomAndClearOnlyAffectDisplay() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::pauseLegendZoomAndClearOnlyAffectDisplay() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::pauseLegendZoomAndClearOnlyAffectDisplay() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::pauseLegendZoomAndClearOnlyAffectDisplay() qt.scenegraph.general: rhi texture atlas dimensions: 1024x512
+PASS   : ParameterTrendTests::pauseLegendZoomAndClearOnlyAffectDisplay()
+QDEBUG : ParameterTrendTests::clearDoesNotReplaySamplesWaitingForDisplayRefresh() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::clearDoesNotReplaySamplesWaitingForDisplayRefresh() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::clearDoesNotReplaySamplesWaitingForDisplayRefresh() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::clearDoesNotReplaySamplesWaitingForDisplayRefresh() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::clearDoesNotReplaySamplesWaitingForDisplayRefresh() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::clearDoesNotReplaySamplesWaitingForDisplayRefresh() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::clearDoesNotReplaySamplesWaitingForDisplayRefresh() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::clearDoesNotReplaySamplesWaitingForDisplayRefresh() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::clearDoesNotReplaySamplesWaitingForDisplayRefresh() qt.scenegraph.general: rhi texture atlas dimensions: 1024x512
+PASS   : ParameterTrendTests::clearDoesNotReplaySamplesWaitingForDisplayRefresh()
+PASS   : ParameterTrendTests::capacityRefusesTooManySeriesInsteadOfSilentlyTruncating()
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.scenegraph.general: rhi texture atlas dimensions: 1024x512
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.scenegraph.general: rhi texture atlas dimensions: 1024x512
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.scenegraph.general: rhi texture atlas dimensions: 1024x512
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.scenegraph.general: rhi texture atlas dimensions: 1024x512
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.scenegraph.general: rhi texture atlas dimensions: 1024x512
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.scenegraph.general: rhi texture atlas dimensions: 1024x512
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.scenegraph.general: rhi texture atlas dimensions: 1024x512
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.scenegraph.general: rhi texture atlas dimensions: 1024x512
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot() qt.scenegraph.general: rhi texture atlas dimensions: 1024x512
+PASS   : ParameterTrendTests::windowCapacityIsReleasedByClosingAPlot()
+QDEBUG : ParameterTrendTests::equalAddressesInDifferentAreasRemainDifferentCurves() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::equalAddressesInDifferentAreasRemainDifferentCurves() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::equalAddressesInDifferentAreasRemainDifferentCurves() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::equalAddressesInDifferentAreasRemainDifferentCurves() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::equalAddressesInDifferentAreasRemainDifferentCurves() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::equalAddressesInDifferentAreasRemainDifferentCurves() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::equalAddressesInDifferentAreasRemainDifferentCurves() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::equalAddressesInDifferentAreasRemainDifferentCurves() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::equalAddressesInDifferentAreasRemainDifferentCurves() qt.scenegraph.general: rhi texture atlas dimensions: 1024x512
+PASS   : ParameterTrendTests::equalAddressesInDifferentAreasRemainDifferentCurves()
+QDEBUG : ParameterTrendTests::unsuccessfulUnsolicitedAndUncertainValuesAreNotSamples() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::unsuccessfulUnsolicitedAndUncertainValuesAreNotSamples() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::unsuccessfulUnsolicitedAndUncertainValuesAreNotSamples() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::unsuccessfulUnsolicitedAndUncertainValuesAreNotSamples() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::unsuccessfulUnsolicitedAndUncertainValuesAreNotSamples() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::unsuccessfulUnsolicitedAndUncertainValuesAreNotSamples() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::unsuccessfulUnsolicitedAndUncertainValuesAreNotSamples() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::unsuccessfulUnsolicitedAndUncertainValuesAreNotSamples() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::unsuccessfulUnsolicitedAndUncertainValuesAreNotSamples() qt.scenegraph.general: rhi texture atlas dimensions: 1024x512
+PASS   : ParameterTrendTests::unsuccessfulUnsolicitedAndUncertainValuesAreNotSamples()
+QDEBUG : ParameterTrendTests::maximumCurvesRemainBoundedWhileRtuContinues() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::maximumCurvesRemainBoundedWhileRtuContinues() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::maximumCurvesRemainBoundedWhileRtuContinues() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::maximumCurvesRemainBoundedWhileRtuContinues() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::maximumCurvesRemainBoundedWhileRtuContinues() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::maximumCurvesRemainBoundedWhileRtuContinues() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::maximumCurvesRemainBoundedWhileRtuContinues() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::maximumCurvesRemainBoundedWhileRtuContinues() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::maximumCurvesRemainBoundedWhileRtuContinues() qt.scenegraph.general: rhi texture atlas dimensions: 1024x512
+QINFO  : ParameterTrendTests::maximumCurvesRemainBoundedWhileRtuContinues() 2200 completed real RTU requests; 32 curves each capped at 2048 samples; elapsed ms 29064
+PASS   : ParameterTrendTests::maximumCurvesRemainBoundedWhileRtuContinues()
+QDEBUG : ParameterTrendTests::floatingAndDockingPreserveQuickWidgetAndViewDestructionClosesPlot() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::floatingAndDockingPreserveQuickWidgetAndViewDestructionClosesPlot() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::floatingAndDockingPreserveQuickWidgetAndViewDestructionClosesPlot() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::floatingAndDockingPreserveQuickWidgetAndViewDestructionClosesPlot() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::floatingAndDockingPreserveQuickWidgetAndViewDestructionClosesPlot() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::floatingAndDockingPreserveQuickWidgetAndViewDestructionClosesPlot() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::floatingAndDockingPreserveQuickWidgetAndViewDestructionClosesPlot() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::floatingAndDockingPreserveQuickWidgetAndViewDestructionClosesPlot() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::floatingAndDockingPreserveQuickWidgetAndViewDestructionClosesPlot() qt.scenegraph.general: rhi texture atlas dimensions: 1024x512
+PASS   : ParameterTrendTests::floatingAndDockingPreserveQuickWidgetAndViewDestructionClosesPlot()
+QDEBUG : ParameterTrendTests::plotDestructionCanReleaseTheLastCatalogLease() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::plotDestructionCanReleaseTheLastCatalogLease() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::plotDestructionCanReleaseTheLastCatalogLease() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::plotDestructionCanReleaseTheLastCatalogLease() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::plotDestructionCanReleaseTheLastCatalogLease() qt.rhi.general: FLIP_* swapchain supported = true, ALLOW_TEARING supported = true, use legacy (non-FLIP) model = false, max frame latency = 2
+QDEBUG : ParameterTrendTests::plotDestructionCanReleaseTheLastCatalogLease() qt.rhi.general: Adapter 0: 'Intel(R) Iris(R) Xe Graphics' (vendor 0x8086 device 0x9A49 flags 0x0)
+QDEBUG : ParameterTrendTests::plotDestructionCanReleaseTheLastCatalogLease() qt.rhi.general:   using this adapter
+QDEBUG : ParameterTrendTests::plotDestructionCanReleaseTheLastCatalogLease() qt.rhi.general: Adapter 1: 'Microsoft Basic Render Driver' (vendor 0x1414 device 0x8C flags 0x2)
+QDEBUG : ParameterTrendTests::plotDestructionCanReleaseTheLastCatalogLease() qt.scenegraph.general: rhi texture atlas dimensions: 1024x512
+PASS   : ParameterTrendTests::plotDestructionCanReleaseTheLastCatalogLease()
+PASS   : ParameterTrendTests::cleanupTestCase()
+Totals: 12 passed, 0 failed, 0 skipped, 0 blacklisted, 38889ms
+********* Finished testing of ParameterTrendTests *********
