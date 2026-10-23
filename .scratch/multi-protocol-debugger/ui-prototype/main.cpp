@@ -601,12 +601,22 @@ public:
         } else { show(); raise(); }
     }
     void hideSession() { if (detached) sessionWindow->hide(); else hide(); }
+    void centerFloatingWindow(int offset = 0) {
+        const auto available = parentWidget()->screen()->availableGeometry();
+        const auto frameExtra = sessionWindow->frameGeometry().size() - sessionWindow->size();
+        sessionWindow->resize(qMin(780, available.width() - frameExtra.width()), qMin(820, available.height() - frameExtra.height()));
+        const auto frameSize = sessionWindow->frameGeometry().size();
+        auto position = parentWidget()->frameGeometry().center() - QPoint(frameSize.width() / 2, frameSize.height() / 2) + QPoint(offset, offset);
+        position.setX(qBound(available.left(), position.x(), qMax(available.left(), available.right() - frameSize.width() + 1)));
+        position.setY(qBound(available.top(), position.y(), qMax(available.top(), available.bottom() - frameSize.height() + 1)));
+        sessionWindow->move(position);
+    }
     void detach() {
         if (detached) return;
         changing = true; QDockWidget::setFloating(false);
         containerLayout->removeWidget(sessionWindow);
         sessionWindow->setParent(parentWidget(), Qt::Window);
-        detached = true; hide(); sessionWindow->show(); changing = false;
+        detached = true; hide(); sessionWindow->show(); centerFloatingWindow(); changing = false;
         if (presentationChanged) presentationChanged();
     }
     void attach() {
@@ -750,7 +760,8 @@ public:
             QList<QDockWidget *> list; QList<int> sizes; for (auto *dock : docks) if (!dock->sessionHidden()) { list << dock; sizes << 600; }
             if (!list.isEmpty()) resizeDocks(list, sizes, variant == 0 ? Qt::Horizontal : Qt::Vertical);
         } else {
-            int offset = 0; for (auto *dock : docks) if (!dock->sessionHidden()) { dock->detach(); dock->sessionWindow->resize(780, 820); dock->sessionWindow->move(pos() + QPoint(50 + offset, 90 + offset)); offset += 100; }
+            int count = 0; for (auto *dock : docks) if (!dock->sessionHidden()) ++count;
+            int index = 0; for (auto *dock : docks) if (!dock->sessionHidden()) { dock->detach(); dock->centerFloatingWindow((2 * index++ - count + 1) * 12); }
         }
         resizeDocks({navigation}, {190}, Qt::Horizontal);
     }
@@ -765,8 +776,7 @@ public:
         connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept); connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
         if (dialog.exec() != QDialog::Accepted) return;
         auto *pane = new SessionPane(name->text(), protocol->currentText(), endpoint->text(), role->currentIndex() == 1);
-        auto *dock = addPane(pane); dock->detach(); dock->sessionWindow->resize(780, 820);
-        dock->sessionWindow->move(pos() + QPoint(80, 100));
+        auto *dock = addPane(pane); dock->detach();
         if (protocol->currentIndex()) { pane->table->horizontalHeaderItem(0)->setText("参数 / 命令"); pane->table->showColumn(2); pane->notice->setText("示例插件复用表格并显示说明列；没有实现任何 UPP 报文。"); }
     }
     void saveWorkspace() {
@@ -928,6 +938,18 @@ int main(int argc, char **argv) {
         });
         QTimer::singleShot(2000, &window, [&window, output, &app] {
             auto *dock = window.docks[0]; auto *native = dock->sessionWindow;
+            QFile placement(output + "/centered-floating-placement.txt");
+            if (!placement.open(QIODevice::WriteOnly)) qFatal("Cannot record floating placement");
+            QTextStream placementText(&placement); placementText << "Workbench: " << window.frameGeometry().x() << ',' << window.frameGeometry().y()
+                << ' ' << window.frameGeometry().width() << 'x' << window.frameGeometry().height() << '\n';
+            QPoint centerSum;
+            for (auto *session : window.docks) {
+                const auto frame = session->sessionWindow->frameGeometry(); centerSum += frame.center();
+                if (!window.screen()->availableGeometry().contains(frame)) qFatal("Centered floating window outside screen");
+                placementText << session->pane->sessionName << ": " << frame.x() << ',' << frame.y() << ' ' << frame.width() << 'x' << frame.height() << '\n';
+            }
+            if ((centerSum / window.docks.size() - window.frameGeometry().center()).manhattanLength() > 2) qFatal("Floating group not centered");
+            placementText.flush(); placement.close();
             const auto before = native->geometry(); native->showMaximized(); native->showNormal();
             if (!dock->detached || native->geometry() != before) qFatal("Native maximize restore failed");
             auto *slaveDock = window.docks[1]; const int deviceCount = slaveDock->pane->devices.size();
