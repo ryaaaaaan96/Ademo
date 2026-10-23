@@ -23,6 +23,9 @@ template<class T> T *accessible(QWidget &root, const QString &name) {
     return nullptr;
 }
 QPushButton *button(QWidget &root, const QString &text) {
+    if (text == QStringLiteral("添加参数") || text == QStringLiteral("加载并应用到设备"))
+        for (auto *toggle : root.findChildren<QPushButton *>())
+            if (toggle->text() == QStringLiteral("参数来源与地址调试") && !toggle->isChecked()) toggle->click();
     for (auto *widget : root.findChildren<QPushButton *>())
         if (widget->text() == text && widget->isVisibleTo(&root)) return widget;
     return nullptr;
@@ -141,6 +144,7 @@ private slots:
         DebugSession session(catalog); QVERIFY(session.configure(configuration()));
         std::unique_ptr<ParameterView> view(catalog->createParameterView("modbus.rtu", nullptr, session.access()));
         view->resize(1200, 700); view->show();
+        QTest::mouseClick(button(*view, QStringLiteral("参数来源与地址调试")), Qt::LeftButton);
         accessible<QSpinBox>(*view, QStringLiteral("设备地址"))->setValue(18);
         accessible<QLineEdit>(*view, QStringLiteral("参数文件"))->setText(path);
         QTest::mouseClick(button(*view, QStringLiteral("加载并应用到设备")), Qt::LeftButton);

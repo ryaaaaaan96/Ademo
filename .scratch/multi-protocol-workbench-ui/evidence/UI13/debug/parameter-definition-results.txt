@@ -1,0 +1,12 @@
+********* Start testing of ParameterDefinitionTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : ParameterDefinitionTests::initTestCase()
+PASS   : ParameterDefinitionTests::fileGroupsAndMetadataReadFromExplicitTarget()
+PASS   : ParameterDefinitionTests::addressRangeIsAtomicAndReadsSelectedArea()
+PASS   : ParameterDefinitionTests::workspaceKeepsAppliedParametersAndRelocatesSourceReference()
+PASS   : ParameterDefinitionTests::invalidFilesPreserveTargetAndOtherDevices()
+PASS   : ParameterDefinitionTests::closingDuringFileLoadRetainsPluginUntilCompletion()
+PASS   : ParameterDefinitionTests::fileJobsAreBoundedAndReturnValuesOnTheSessionThread()
+PASS   : ParameterDefinitionTests::cleanupTestCase()
+Totals: 8 passed, 0 failed, 0 skipped, 0 blacklisted, 2211ms
+********* Finished testing of ParameterDefinitionTests *********

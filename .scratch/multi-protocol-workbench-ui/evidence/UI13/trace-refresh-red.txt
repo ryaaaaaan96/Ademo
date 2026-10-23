@@ -1,0 +1,12 @@
+********* Start testing of WindowTraceTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : WindowTraceTests::initTestCase()
+PASS   : WindowTraceTests::eachWindowQueriesAndExportsItsEvidenceAfterMoving()
+FAIL!  : WindowTraceTests::historyDefaultsToOwningWindowAndExportsUnknownData() Compared values are not the same
+   Actual   (first->recordingStats().state): "running"
+   Expected (QString("stopped"))           : "stopped"
+C:/Users/81966/Documents/Ademo/build/worktrees/ui13/tests/window_trace_tests.cpp(129) : failure location
+PASS   : WindowTraceTests::transmissionAndExpiredSourcesStayExplicit()
+PASS   : WindowTraceTests::cleanupTestCase()
+Totals: 4 passed, 1 failed, 0 skipped, 0 blacklisted, 17628ms
+********* Finished testing of WindowTraceTests *********

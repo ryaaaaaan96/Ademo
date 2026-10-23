@@ -3,6 +3,12 @@
 #include "slave_view.h"
 #include "slave_parameters.h"
 #include "master_parameters.h"
+#include "master_controls.h"
+#include "debugger/confirmation.h"
+#include <QCloseEvent>
+#include <QKeyEvent>
+#include <QPointer>
+#include <QMessageBox>
 #include <QComboBox>
 #include <QDialog>
 #include <QDialogButtonBox>
@@ -25,7 +31,7 @@
 using namespace debugger;
 class RtuView final : public QWidget {
 public:
-    RtuView(SessionAccess access, QWidget *parent) : QWidget(parent), access_(std::move(access)) {
+    RtuView(SessionAccess access, QWidget *parent, bool commandsOnly = false) : QWidget(parent), access_(std::move(access)), commandsOnly_(commandsOnly) {
         setObjectName("protocolView");
         auto *outer = new QVBoxLayout(this);
         auto *scroll = new QScrollArea(this);
@@ -37,11 +43,11 @@ public:
         auto *layout = new QVBoxLayout(content);
         auto *settings = new QPushButton(QStringLiteral("会话读取重试与多设备轮询配置…"), this);
         settings->setObjectName("pollSettings");
-        layout->addWidget(settings);
+        layout->addWidget(settings); settings->setVisible(!commandsOnly);
         QObject::connect(settings, &QPushButton::clicked, this, [this] { showSettings(); });
         auto *form = new QFormLayout;
-        unit_ = spin("unit", 1, 247, 1);
-        start_ = spin("registerStart", 0, 65535, 0);
+        unit_ = spin("unit", 1, 247, 1); unit_->setAccessibleName(QStringLiteral("功能码操作设备地址"));
+        start_ = spin("registerStart", 0, 65535, 0); start_->setAccessibleName(QStringLiteral("功能码操作PDU地址"));
         count_ = spin("registerCount", 1, 125, 1);
         area_ = new QComboBox(this);
         area_->setObjectName("readArea");
@@ -60,13 +66,13 @@ public:
         layout->addWidget(read_);
         auto *writeForm = new QFormLayout;
         writeAction_ = new QComboBox(this);
-        writeAction_->setObjectName("writeAction");
+        writeAction_->setObjectName("writeAction"); writeAction_->setAccessibleName(QStringLiteral("设备写入功能"));
         writeAction_->addItem(QStringLiteral("单线圈（05）"), "write-single-coil");
         writeAction_->addItem(QStringLiteral("单保持寄存器（06）"), "write-single-register");
         writeAction_->addItem(QStringLiteral("多线圈（0F）"), "write-multiple-coils");
         writeAction_->addItem(QStringLiteral("多保持寄存器（10）"), "write-multiple-registers");
         writeValues_ = new QLineEdit("true", this);
-        writeValues_->setObjectName("writeValues");
+        writeValues_->setObjectName("writeValues"); writeValues_->setAccessibleName(QStringLiteral("设备写入值"));
         writeValues_->setPlaceholderText(QStringLiteral("单值 true / 42；多个值 [true,false] / [42,43]"));
         writeForm->addRow(QStringLiteral("设备写入功能（沿用上方设备与 PDU 起址）"), writeAction_);
         writeForm->addRow(QStringLiteral("写入值（JSON）"), writeValues_);
@@ -78,19 +84,21 @@ public:
         result_->setObjectName("readResult");
         result_->setWordWrap(true);
         layout->addWidget(result_);
-        observations_ = new QTableWidget(0, 4, this);
-        observations_->setObjectName("masterObservations");
-        observations_->setHorizontalHeaderLabels({QStringLiteral("从站"), QStringLiteral("数据区"),
-            QStringLiteral("PDU 范围"), QStringLiteral("最近成功观测值")});
-        observations_->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-        observations_->setEditTriggers(QAbstractItemView::NoEditTriggers);
-        observations_->setMinimumHeight(130);
-        layout->addWidget(observations_);
-        details_ = new QPlainTextEdit(this);
-        details_->setObjectName("operationTrace");
-        details_->setReadOnly(true);
-        details_->setMinimumHeight(150);
-        layout->addWidget(details_);
+        if (!commandsOnly_) {
+            observations_ = new QTableWidget(0, 4, this);
+            observations_->setObjectName("masterObservations");
+            observations_->setHorizontalHeaderLabels({QStringLiteral("从站"), QStringLiteral("数据区"),
+                QStringLiteral("PDU 范围"), QStringLiteral("最近成功观测值")});
+            observations_->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+            observations_->setEditTriggers(QAbstractItemView::NoEditTriggers);
+            observations_->setMinimumHeight(130);
+            layout->addWidget(observations_);
+            details_ = new QPlainTextEdit(this);
+            details_->setObjectName("operationTrace");
+            details_->setReadOnly(true);
+            details_->setMinimumHeight(150);
+            layout->addWidget(details_);
+        }
         QObject::connect(read_, &QPushButton::clicked, this, [this] {
             if (access_.submit) operationId_ = access_.submit(area_->currentData().toString(),
                 {{"unit", unit_->value()}, {"start", start_->value()}, {"count", count_->value()}});
@@ -114,16 +122,55 @@ public:
             }
             QJsonObject parameters{{"unit", unit_->value()}, {"start", start_->value()}};
             parameters[multiple ? "values" : "value"] = wrapper[0];
-            if (access_.submit) operationId_ = access_.submit(action, parameters);
+            submittedRevision_ = draftRevision_;
+            if (access_.submit) submittedWrite_ = operationId_ = access_.submit(action, parameters);
             refresh();
         });
+        if (commandsOnly_) {
+            parent->installEventFilter(this);
+            connect(writeValues_, &QLineEdit::textEdited, this, [this] { draft_ = true; ++draftRevision_; });
+            // 草稿身份包含写入目标；旧目标的确认不能清除已转向另一设备/地址/功能的输入。
+            auto targetChanged = [this] { if (draft_) ++draftRevision_; };
+            connect(unit_, &QSpinBox::valueChanged, this, targetChanged);
+            connect(start_, &QSpinBox::valueChanged, this, targetChanged);
+            connect(writeAction_, &QComboBox::currentIndexChanged, this, targetChanged);
+            if (access_.registerViewState) access_.registerViewState(this,
+                [this] { return LocalState{false, draft_, resolving_, {}}; }, [this] { return resolveDraft(); });
+        }
         auto *timer = new QTimer(this);
         timer->setInterval(50);
         QObject::connect(timer, &QTimer::timeout, this, [this] { refresh(); });
         timer->start();
         refresh();
     }
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override {
+        const auto lifetime = access_.lifetime;
+        if (event->type() == QEvent::KeyPress && static_cast<QKeyEvent *>(event)->key() == Qt::Key_Escape) {
+            if (auto *window = qobject_cast<QWidget *>(watched)) window->close();
+            return true;
+        }
+        if (event->type() == QEvent::Close) {
+            QPointer<RtuView> alive(this);
+            if (!resolveDraft() || !alive) { event->ignore(); return true; }
+        }
+        return QWidget::eventFilter(watched, event);
+    }
 private:
+    bool resolveDraft() {
+        const auto lifetime = access_.lifetime;
+        if (resolving_) return false;
+        if (!draft_) return true;
+        const auto revision = draftRevision_;
+        QPointer<RtuView> alive(this); resolving_ = true;
+        const auto answer = showConfirmation(this, QMessageBox::Warning, QStringLiteral("未提交功能码写入"),
+            QStringLiteral("写入输入尚未确认。放弃只丢弃此输入，不撤回已提交的通信。"),
+            QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Cancel);
+        if (!alive) return false;
+        resolving_ = false;
+        if (revision != draftRevision_ || answer != QMessageBox::Discard) return false;
+        draft_ = false; ++draftRevision_; writeValues_->clear(); return true;
+    }
     void showSettings() {
         auto *dialog = new QDialog(this);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -223,7 +270,7 @@ private:
             const auto current = access_.operation ? access_.operation(operationId_) : OperationSnapshot{};
             return !current.request.id || current.finished;
         };
-        if (access_.messages) for (const auto &message : access_.messages(0)) {
+        if (!commandsOnly_ && access_.messages) for (const auto &message : access_.messages(0)) {
             if (message.id <= observedMessageId_ || !message.fields.value("operationResult").toBool()) continue;
             observedMessageId_ = message.id;
             if (message.status == "success" && !message.fields.value("values").toArray().isEmpty()
@@ -233,12 +280,16 @@ private:
                 operationId_ = message.fields.value("candidateOperationId").toString().toULongLong();
         }
         const auto operation = access_.operation ? access_.operation(operationId_) : OperationSnapshot{};
+        if (draft_ && submittedWrite_ && access_.operation) {
+            const auto written = access_.operation(submittedWrite_);
+            if (written.update.state == "success" && submittedRevision_ == draftRevision_) draft_ = false;
+        }
         read_->setEnabled(running && (!operation.request.id || operation.finished));
         writeButton_->setEnabled(running && (!operation.request.id || operation.finished));
         if (!operationId_) return;
         if (!operation.request.id) {
             result_->setText(QStringLiteral("操作 #%1 已超过保留上限，结果已过期；可继续提交操作。").arg(operationId_));
-            details_->setPlainText(QStringLiteral("操作快照已过期；不会将缺失快照解释为仍在进行。"));
+            if (details_) details_->setPlainText(QStringLiteral("操作快照已过期；不会将缺失快照解释为仍在进行。"));
             return;
         }
         QStringList values;
@@ -253,6 +304,7 @@ private:
             detail += QStringLiteral("\n设备写入尚未确认，结果不确定；不会自动重试，停止也不能撤回已提交的字节。");
         result_->setText(QStringLiteral("操作 #%1 · %2\n%3\n%4")
             .arg(operationId_).arg(operation.update.state, detail, values.join("；")));
+        if (commandsOnly_) return;
         QStringList lines{QStringLiteral("本次操作观察窗口（未匹配的 RX 不表示已确认归属）")};
         if (operation.omittedObservedRefCount)
             lines << QStringLiteral("另有 %1 条较早观察引用已超过保留上限，对应原始记录已过期").arg(operation.omittedObservedRefCount);
@@ -277,10 +329,12 @@ private:
         if (text != details_->toPlainText()) details_->setPlainText(text);
     }
     SessionAccess access_;
+    bool commandsOnly_ = false, draft_ = false, resolving_ = false;
+    quint64 draftRevision_ = 0, submittedRevision_ = 0, submittedWrite_ = 0;
     quint64 operationId_ = 0;
     quint64 observedMessageId_ = 0;
     QComboBox *area_;
-    QTableWidget *observations_;
+    QTableWidget *observations_ = nullptr;
     QSpinBox *unit_;
     QSpinBox *start_;
     QSpinBox *count_;
@@ -289,8 +343,11 @@ private:
     QLineEdit *writeValues_;
     QPushButton *writeButton_;
     QLabel *result_;
-    QPlainTextEdit *details_;
+    QPlainTextEdit *details_ = nullptr;
 };
+QWidget *debugger::createAdvancedMasterView(SessionAccess access, QWidget *parent) {
+    return new RtuView(std::move(access), parent, true);
+}
 class modbusPlugin final : public QObject, public ProtocolPlugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID DebuggerProtocolIid)

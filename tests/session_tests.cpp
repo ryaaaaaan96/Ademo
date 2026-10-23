@@ -197,7 +197,7 @@ private slots:
     void widgetFlow() {
         Workbench window(catalog);
         window.show();
-        QVERIFY(window.findChild<QWidget *>("protocolView"));
+        QVERIFY(window.parameterView(0));
         auto *port = window.findChild<QLineEdit *>("port");
         auto *start = window.findChild<QPushButton *>("start");
         auto *status = window.findChild<QLabel *>("status");

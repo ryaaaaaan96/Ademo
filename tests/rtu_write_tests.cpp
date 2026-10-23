@@ -193,6 +193,10 @@ private slots:
     void widgetWrite() {
         QFETCH(int,index); QFETCH(QString,outcome); const auto &v=vectors[index]; Wire wire;
         Workbench window(catalog,nullptr,wire.factory());
+        QPushButton *advanced=nullptr;
+        for(auto *candidate:window.parameterView(0)->findChildren<QPushButton*>())
+            if(candidate->text()==QStringLiteral("按功能码操作…")) advanced=candidate;
+        QVERIFY(advanced); advanced->click();
         wire.onWrite=[&](quint64 id) {
             wire.events.sent(id,true,{});
             QTimer::singleShot(10,&window,[&]{

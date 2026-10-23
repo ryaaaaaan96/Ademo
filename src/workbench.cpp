@@ -59,7 +59,7 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     scroll->setWidgetResizable(true);
     auto *content = new QWidget(scroll);
     scroll->setWidget(content);
-    auto *layout = new QVBoxLayout(content);
+    auto *layout = new QVBoxLayout(content); layout->setContentsMargins(0, 0, 0, 0);
     auto *formWidget = new QWidget(this);
     auto *form = new QFormLayout(formWidget);
     auto *protocol = new QComboBox(formWidget);
@@ -109,26 +109,15 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
         auto *p = catalog_->protocol(protocol->currentData().toString());
         if (!p) return;
         auto *pages = new QWidget(this);
-        auto *pageLayout = new QVBoxLayout(pages);
+        auto *pageLayout = new QVBoxLayout(pages); pageLayout->setContentsMargins(0, 0, 0, 0);
         auto *stack = new QStackedWidget(pages);
         auto access = session_.access();
         QPointer<SessionPane> self(this);
         access.config = [self] { return self ? self->configuration() : SessionConfig{}; };
         parameterView_ = catalog_->createParameterView(p->describe().id, stack, access);
         if (parameterView_) stack->addWidget(parameterView_);
-        // 新参数页拥有运行修改保护；兼容页不得覆盖它的守卫。
-        if (parameterView_) access.setDiscardGuard = {};
-        auto *legacy = catalog_->createView(p->describe().id, stack, access);
-        if (legacy) {
-            stack->addWidget(legacy);
-            if (parameterView_) {
-                auto *compatibility = new QPushButton(QStringLiteral("兼容操作页"), pages);
-                compatibility->setCheckable(true);
-                pageLayout->addWidget(compatibility);
-                connect(compatibility, &QPushButton::toggled, stack, [stack, legacy, parameters = parameterView_](bool checked) {
-                    stack->setCurrentWidget(checked ? legacy : parameters);
-                });
-            }
+        if (!parameterView_) {
+            if (auto *fallback = catalog_->createView(p->describe().id, stack, access)) stack->addWidget(fallback);
         }
         pageLayout->addWidget(stack, 1);
         view_ = pages;
@@ -181,7 +170,7 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     status->setObjectName("status");
     status->setWordWrap(true);
     auto *diagnostics = new QLabel(catalog_->diagnostics().join('\n'), this);
-    diagnostics->setWordWrap(true);
+    diagnostics->setWordWrap(true); diagnostics->setVisible(!diagnostics->text().isEmpty());
     auto *controls = new QHBoxLayout;
     controls->addWidget(start); controls->addWidget(stop); controls->addWidget(configure);
     outer->addLayout(controls);

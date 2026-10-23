@@ -18,7 +18,7 @@ SessionRecords::SessionRecords(DebugSession &session, QWidget *parent) : QWidget
     auto *owner = new QLabel(QStringLiteral("记录所属会话 %1").arg(session.sessionId()), this);
     owner->setWordWrap(true); owner->setAccessibleName(QStringLiteral("记录所属会话"));
     header->addWidget(toggle); header->addWidget(owner, 1); layout->addLayout(header);
-    auto *tabs = new QTabWidget(this); tabs->setMinimumHeight(180); tabs->setMaximumHeight(220);
+    auto *tabs = new QTabWidget(this); tabs->setMinimumHeight(100); tabs->setMaximumHeight(150);
     tabs->setAccessibleName(QStringLiteral("通信记录页面"));
     layout->addWidget(tabs);
     auto *summary = new QPlainTextEdit(tabs);
@@ -33,7 +33,7 @@ SessionRecords::SessionRecords(DebugSession &session, QWidget *parent) : QWidget
     addPage(new TracePanel(session, tabs, false), QStringLiteral("回溯与导出"));
     addPage(new RecordingPanel(session, tabs, false), QStringLiteral("磁盘与历史"));
     connect(toggle, &QPushButton::toggled, tabs, &QWidget::setVisible);
-    connect(tabs, &QTabWidget::currentChanged, tabs, [tabs](int index) { tabs->setMaximumHeight(index == 0 ? 220 : 420); });
+    connect(tabs, &QTabWidget::currentChanged, tabs, [tabs](int index) { tabs->setMaximumHeight(index == 0 ? 150 : 420); });
     auto refresh = [&session, summary] {
         const auto records = session.traces();
         QStringList lines;

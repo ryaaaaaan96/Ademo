@@ -85,10 +85,7 @@ private slots:
         QVERIFY(records);
         QTRY_VERIFY(records->toPlainText().contains("local-sent"));
         QTRY_VERIFY(records->toPlainText().contains("rx"));
-        auto *compatibility = button(window, QStringLiteral("兼容操作页"));
-        QVERIFY(compatibility);
-        QTest::mouseClick(compatibility, Qt::LeftButton);
-        QTest::mouseClick(compatibility, Qt::LeftButton);
+        QVERIFY(!button(window, QStringLiteral("兼容操作页")));
         auto *parameters = window.parameterView(0);
         QVERIFY(parameters);
         QCOMPARE(parameters->devices().size(), 2);

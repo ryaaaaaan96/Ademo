@@ -12,6 +12,15 @@
 
 using namespace debugger;
 namespace {
+template<class T> T *accessible(QWidget &root, const QString &name) {
+    for (auto *widget : root.findChildren<T *>()) if (widget->accessibleName() == name) return widget;
+    return nullptr;
+}
+QPushButton *button(QWidget &root, const QString &text) {
+    for (auto *widget : root.findChildren<QPushButton *>()) if (widget->text() == text) return widget;
+    return nullptr;
+}
+
 SessionConfig serialConfig(const QString &baud = "9600")
 {
     return {"modbus.rtu", "serial", "master", {{"port", "COM9999"}, {"baud", baud},
@@ -495,30 +504,26 @@ private slots:
             QTimer::singleShot(10, &window, [&, bytes] { wire.events.received(bytes); });
         };
         window.resize(940, 900); window.show();
-        auto *read = window.findChild<QPushButton *>("readHolding");
-        auto *area = window.findChild<QComboBox *>("readArea");
-        auto *table = window.findChild<QTableWidget *>("masterObservations");
-        auto *result = window.findChild<QLabel *>("readResult");
-        QVERIFY(read && area && table && result);
-        QTest::mouseClick(window.findChild<QPushButton *>("start"), Qt::LeftButton);
-        QTRY_VERIFY(read->isEnabled());
-        area->setCurrentIndex(0);
-        QCOMPARE(window.findChild<QSpinBox *>("registerCount")->maximum(), 2000);
+        auto config = serialConfig();
+        config.protocol["parameterRows"] = QJsonArray{
+            QJsonObject{{"unit",1},{"area","coils"},{"address",0}},
+            QJsonObject{{"unit",2},{"area","input"},{"address",0}}};
+        const int index = window.addSession(config);
+        auto *view = window.parameterView(index); QVERIFY(view);
+        auto *read = button(*view, QStringLiteral("读取当前组"));
+        auto *devices = accessible<QComboBox>(*view, QStringLiteral("当前设备"));
+        auto *table = accessible<QTableWidget>(*view, QStringLiteral("参数表"));
+        QVERIFY(read && devices && table);
+        QVERIFY(window.session(index)->start(config)); QTRY_VERIFY(read->isEnabled());
         QTest::mouseClick(read, Qt::LeftButton);
-        QTRY_VERIFY(result->text().contains("true"));
-        QTRY_COMPARE(table->rowCount(), 1);
-        QCOMPARE(table->item(0, 0)->text(), "1");
-        QCOMPARE(table->item(0, 1)->text(), "coils");
-        QTRY_VERIFY(read->isEnabled());
-        area->setCurrentIndex(3);
-        window.findChild<QSpinBox *>("unit")->setValue(2);
-        QCOMPARE(window.findChild<QSpinBox *>("registerCount")->maximum(), 125);
+        QTRY_COMPARE(table->item(0, 3)->text(), QString("true"));
+        QCOMPARE(wire.writes.last().second.left(6).toHex(), QByteArray("010100000001"));
+        devices->setCurrentIndex(devices->findData("2")); QTRY_COMPARE(view->selectedDevice(), QString("2")); QTRY_VERIFY(read->isEnabled());
         QTest::mouseClick(read, Qt::LeftButton);
-        QTRY_VERIFY(result->text().contains("65535"));
-        QTRY_COMPARE(table->rowCount(), 2);
-        QCOMPARE(table->item(1, 1)->text(), "input");
-        QCOMPARE(table->item(1, 0)->text(), "2");
-        QVERIFY(table->item(0, 3)->text().contains("true"));
+        QTRY_COMPARE(table->item(0, 3)->text(), QString("65535"));
+        QCOMPARE(wire.writes.last().second.left(6).toHex(), QByteArray("020400000001"));
+        devices->setCurrentIndex(devices->findData("1")); QTRY_COMPARE(view->selectedDevice(), QString("1"));
+        QCOMPARE(table->item(0, 3)->text(), QString("true"));
         const auto output = qEnvironmentVariable("DEBUGGER_EVIDENCE_DIR");
         if (!output.isEmpty()) QVERIFY(window.grab().save(output + "/four-area-observations-controlled.png"));
     }
@@ -526,12 +531,9 @@ private slots:
         QFETCH(QString, outcome);
         Wire wire;
         Workbench window(catalog, nullptr, wire.factory());
-        QTest::mouseClick(window.findChild<QPushButton *>("pollSettings"), Qt::LeftButton);
-        auto *settings = window.findChild<QWidget *>("pollSettingsDialog");
-        QVERIFY(settings);
-        settings->findChild<QSpinBox *>("extraReadRetries")->setValue(0);
-        QTest::mouseClick(settings->findChild<QPushButton *>("applyPollSettings"), Qt::LeftButton);
-        settings->close();
+        window.session(0)->configure({{"extraReadRetries", 0}});
+        auto *advanced = button(*window.parameterView(0), QStringLiteral("按功能码操作…")); QVERIFY(advanced);
+        QTest::mouseClick(advanced, Qt::LeftButton);
         wire.onWrite = [&](quint64 id) {
             wire.events.sent(id, true, {});
             if (outcome != "timeout") QTimer::singleShot(10, &window, [&] {
@@ -554,9 +556,10 @@ private slots:
         QCOMPARE(wire.writes.size(), 1);
         QCOMPARE(wire.writes.last().second.toHex(), "1103006b00037687");
         if (outcome == "success") QVERIFY(result->text().contains("PDU 107 = 555"));
-        auto *details = window.findChild<QPlainTextEdit *>("operationTrace");
-        QVERIFY(details->toPlainText().contains("send-request"));
-        QVERIFY(details->toPlainText().contains("local-sent"));
+        QStringList traceKinds;
+        for (const auto &trace : window.session(0)->traces()) traceKinds.append(trace.kind);
+        QVERIFY(traceKinds.contains("send-request"));
+        QVERIFY(traceKinds.contains("local-sent"));
         const auto output = qEnvironmentVariable("DEBUGGER_EVIDENCE_DIR");
         if (!output.isEmpty()) QVERIFY(window.grab().save(output + "/read-" + outcome + "-controlled.png"));
     }

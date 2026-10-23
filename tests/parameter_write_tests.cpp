@@ -19,6 +19,9 @@ template<class T> T *accessible(QWidget &root, const QString &name) {
     return nullptr;
 }
 QPushButton *button(QWidget &root, const QString &text) {
+    if (text == QStringLiteral("添加参数") || text == QStringLiteral("加载并应用到设备"))
+        for (auto *toggle : root.findChildren<QPushButton *>())
+            if (toggle->text() == QStringLiteral("参数来源与地址调试") && !toggle->isChecked()) toggle->click();
     for (auto *widget : root.findChildren<QPushButton *>())
         if (widget->text() == text && widget->isVisibleTo(&root)) return widget;
     return nullptr;

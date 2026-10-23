@@ -14,6 +14,15 @@
 
 using namespace debugger;
 namespace {
+template<class T> T *accessible(QWidget &root, const QString &name) {
+    for (auto *widget : root.findChildren<T *>()) if (widget->accessibleName() == name) return widget;
+    return nullptr;
+}
+QPushButton *button(QWidget &root, const QString &text) {
+    for (auto *widget : root.findChildren<QPushButton *>()) if (widget->text() == text) return widget;
+    return nullptr;
+}
+
 const QJsonObject readOne{{"unit", 1}, {"start", 0}, {"count", 1}};
 struct Wire {
     EndpointEvents events;
@@ -250,34 +259,31 @@ private slots:
             QTimer::singleShot(10, &window, [&, response] { wire.events.received(response); });
         };
         window.resize(1000, 900); window.show();
-        QTest::mouseClick(window.findChild<QPushButton *>("pollSettings"), Qt::LeftButton);
-        auto *dialog = window.findChild<QDialog *>("pollSettingsDialog"); QVERIFY(dialog);
-        QCOMPARE(dialog->findChild<QSpinBox *>("extraReadRetries")->value(), 2);
-        QCOMPARE(dialog->findChild<QSpinBox *>("responseTimeoutMs")->value(), 1000);
-        QCOMPARE(dialog->findChild<QSpinBox *>("retryIntervalMs")->value(), 100);
-        dialog->findChild<QSpinBox *>("extraReadRetries")->setValue(0);
-        dialog->findChild<QSpinBox *>("pollIntervalMs")->setValue(500);
-        QTest::mouseClick(dialog->findChild<QPushButton *>("addPollTask"), Qt::LeftButton);
-        window.findChild<QSpinBox *>("unit")->setValue(2);
-        QTest::mouseClick(dialog->findChild<QPushButton *>("addPollTask"), Qt::LeftButton);
-        QCOMPARE(dialog->findChild<QTableWidget *>("pollTasks")->rowCount(), 2);
-        QTest::mouseClick(dialog->findChild<QPushButton *>("applyPollSettings"), Qt::LeftButton);
-        QVERIFY(dialog->findChild<QLabel *>("pollSettingsStatus")->text().contains(QStringLiteral("启动后生效")));
-        const auto output = qEnvironmentVariable("DEBUGGER_EVIDENCE_DIR");
-        if (!output.isEmpty()) QVERIFY(dialog->grab().save(output + "/poll-configuration-controlled.png"));
-        dialog->close();
-        QTest::mouseClick(window.findChild<QPushButton *>("start"), Qt::LeftButton);
-        auto *table = window.findChild<QTableWidget *>("masterObservations");
-        QTRY_COMPARE(table->rowCount(), 2);
+        SessionConfig config{"modbus.rtu", "serial", "master", {{"port", "COM120"}, {"baud", "115200"}, {"dataBits", "8"}, {"parity", "even"}, {"stopBits", "1"}},
+            {{"extraReadRetries", 0}, {"parameterRows", QJsonArray{
+                QJsonObject{{"unit",1},{"area","holding"},{"address",0}},
+                QJsonObject{{"unit",2},{"area","holding"},{"address",0}}}}}, {}};
+        const int index = window.addSession(config);
+        auto *view = window.parameterView(index); QVERIFY(view);
+        auto *devices = accessible<QComboBox>(*view, QStringLiteral("当前设备"));
+        auto *table = accessible<QTableWidget>(*view, QStringLiteral("参数表"));
+        auto *scope = accessible<QComboBox>(*view, QStringLiteral("轮询范围"));
+        auto *interval = accessible<QSpinBox>(*view, QStringLiteral("轮询周期"));
+        auto *poll = button(*view, QStringLiteral("开始轮询"));
+        QVERIFY(devices && table && scope && interval && poll);
+        interval->setValue(500); scope->setCurrentText(QStringLiteral("当前组"));
+        QVERIFY(window.session(index)->start(config)); QTRY_VERIFY(poll->isEnabled());
+        QTest::mouseClick(poll, Qt::LeftButton);
+        QTRY_COMPARE(table->item(0, 3)->text(), QString("10"));
+        devices->setCurrentIndex(devices->findData("2")); QTRY_COMPARE(view->selectedDevice(), QString("2")); QTRY_VERIFY(poll->isEnabled());
+        QTest::mouseClick(poll, Qt::LeftButton);
+        QTRY_COMPARE(table->item(0, 3)->text(), QString("20"));
+        QCOMPARE(window.session(index)->config().protocol["polls"].toArray().size(), 2);
         QVERIFY(wire.writes.size() >= 2);
-        QCOMPARE(table->item(0, 0)->text(), "1");
-        QCOMPARE(table->item(1, 0)->text(), "2");
-        QVERIFY(table->item(0, 3)->text().contains("10")); QVERIFY(table->item(1, 3)->text().contains("20"));
-        auto *scroll = window.findChild<QScrollArea *>(); QVERIFY(scroll);
-        scroll->ensureWidgetVisible(table);
-        QTest::qWait(50);
+        devices->setCurrentIndex(devices->findData("1")); QTRY_COMPARE(view->selectedDevice(), QString("1")); QCOMPARE(table->item(0, 3)->text(), QString("10"));
+        const auto output = qEnvironmentVariable("DEBUGGER_EVIDENCE_DIR");
         if (!output.isEmpty()) QVERIFY(window.grab().save(output + "/poll-observations-controlled.png"));
-        QTest::mouseClick(window.findChild<QPushButton *>("stop"), Qt::LeftButton);
+        window.session(index)->stop();
         const auto count = wire.writes.size(); QTest::qWait(600); QCOMPARE(wire.writes.size(), count);
     }
     void expiredManualResultDoesNotDisableWidgetsOrPolling() {
