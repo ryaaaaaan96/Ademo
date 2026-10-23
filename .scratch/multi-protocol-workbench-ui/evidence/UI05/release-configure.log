@@ -1,0 +1,29 @@
+Preset CMake variables:
+
+  CMAKE_BUILD_TYPE="Release"
+  CMAKE_CXX_COMPILER="C:/Qt/Tools/llvm-mingw2217_64/bin/clang++.exe"
+  CMAKE_MAKE_PROGRAM="C:/Qt/Tools/Ninja/ninja.exe"
+  CMAKE_PREFIX_PATH="C:/Qt/6.12.0/llvm-mingw_64"
+
+Preset environment variables:
+
+  PATH="C:/Qt/6.12.0/llvm-mingw_64/bin;C:/Qt/Tools/llvm-mingw2217_64/bin;C:/Qt/Tools/Ninja;C:\Users\81966\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell;C:\Users\81966\.codex\tmp\arg0-windows\codex-arg0kxB1Iw;C:\Users\81966\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\libheif\libheif\bin;C:\Users\81966\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\jxrlib\jxrlib\bin;C:\Users\81966\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\poppler\Library\bin;C:\Users\81966\.cache\codex-runtimes\codex-primary-runtime\dependencies\bin\override;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\WSL\;C:\Program Files\Git\cmd;C:\Users\81966\AppData\Local\Programs\Python\Python315\Scripts\;C:\Users\81966\AppData\Local\Programs\Python\Python315\;C:\Users\81966\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell;C:\Users\81966\AppData\Local\Microsoft\WindowsApps;C:\Users\81966\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\81966\.cache\codex-runtimes\codex-primary-runtime\dependencies\bin\fallback;C:\Users\81966\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin;C:\Users\81966\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\git\cmd;C:\Users\81966\AppData\Local\OpenAI\Codex\bin\874bdd774e432e12;C:\Users\81966\AppData\Local\OpenAI\Codex\bin\6257d9e8f63c0f2b"
+
+-- The CXX compiler identification is Clang 22.1.7
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Qt/Tools/llvm-mingw2217_64/bin/clang++.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Check if compiler accepts -pthread
+-- Check if compiler accepts -pthread - yes
+-- Found Threads: TRUE
+-- Performing Test HAVE_STDATOMIC
+-- Performing Test HAVE_STDATOMIC - Success
+-- Found WrapAtomic: TRUE
+-- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+-- Configuring done (4.1s)
+-- Generating done (0.6s)
+-- Build files have been written to: C:/Users/81966/Documents/Ademo/build/worktrees/ui05/build/qt-llvm-release
