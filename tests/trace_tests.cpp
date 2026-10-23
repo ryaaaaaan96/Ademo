@@ -103,6 +103,45 @@ private slots:
         QVERIFY(byOperation.operations.first().observedRefs.size() <= 512);
         QVERIFY(session.queryTrace({999999}).requestedOperationMissing);
     }
+    void evictedOperationIgnoresLateSendResult_data() {
+        QTest::addColumn<bool>("shrink");
+        QTest::newRow("configure-shrink") << true;
+        QTest::newRow("submit-eviction") << false;
+    }
+    void evictedOperationIgnoresLateSendResult() {
+        QFETCH(bool, shrink);
+        auto production = std::make_shared<PluginCatalog>();
+        production->discover(QCoreApplication::applicationDirPath() + "/plugins");
+        Wire wire; qint64 time = 0;
+        DebugSession session(production, nullptr, wire.factory(), [&] { return time; });
+        QVERIFY(session.configureTrace({256, 256, shrink ? 2 : 1}));
+        auto selected = config(); selected.protocolId = "modbus.rtu";
+        QVERIFY(session.start(selected)); QCoreApplication::processEvents();
+        const auto old = session.submit("read-holding", {{"unit", 1}, {"start", 0}, {"count", 1}});
+        time += 5000; session.poll(); QCOMPARE(wire.writes.size(), 1);
+        // 本地发送完成始终未到：协议按发送期限终结，但端点仍可迟到回调。
+        time += 1000001; session.poll();
+        QVERIFY(session.operation(old).finished);
+        QCOMPARE(session.operation(old).update.state, "transport-error");
+        if (shrink) {
+            const auto retained = session.submit("unsupported", {});
+            QVERIFY(session.operation(retained).finished);
+            QVERIFY(session.configureTrace({256, 256, 1}));
+        }
+        const auto current = session.submit("configure-polling", {});
+        QVERIFY(current); QVERIFY(session.queryTrace({old}).requestedOperationMissing);
+        const auto before = session.operation(current);
+        const auto recordsBefore = session.traces().size();
+        wire.events.sent(old, true, {}); QCoreApplication::processEvents();
+        QCOMPARE(session.traces().size(), recordsBefore + 1);
+        const auto late = session.traces().last();
+        QCOMPARE(late.kind, "stale-send-result"); QCOMPARE(late.operationId, quint64(0));
+        QCOMPARE(session.operation(current).update.state, before.update.state);
+        QCOMPARE(session.operation(current).localSent, before.localSent);
+        QCOMPARE(session.operation(current).finished, before.finished);
+        QCOMPARE(session.operation(current).update.result, before.update.result);
+        for (const auto &record : session.traces(current)) QVERIFY(record.kind != "local-sent");
+    }
     void timeFilterAndMissingIdentity() {
         Wire wire; DebugSession session(catalog, nullptr, wire.factory());
         QVERIFY(session.start(config())); QCoreApplication::processEvents();

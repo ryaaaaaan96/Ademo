@@ -51,3 +51,7 @@ Blocked by: [05 多设备轮询与会话级读取重试](05-rtu-polling-read-ret
 ### 2026-10-23：停止未确认操作的归档终态补强
 
 修复04/08/12交互：协议stop可先发布领域取消终态，避免被宿主过早finished吞掉；宿主fallback也显式recordOperation并保留已提交操作的不确定信息。新增公开会话→停止→重启不补发→归档查询→JSONL导出回归，两种本地发送阶段都保留cancelled、uncertain及明确说明；另验证无协议终态时的宿主fallback归档。定向Debug含原08后台保存跨停止保护共5/5 CTest、98项通过，0失败/跳过。见[停止终态修复证据](../evidence/stop-uncertain-reviewfix/acceptance.md)，最终全量双配置由集成统一执行，原验收历史不改写。
+
+### 2026-10-23：整体审查的缩容有界性修复
+
+整体 Standards 审查确认 configureTrace 缩容淘汰 finished 操作时遗漏发送尝试表清理。现与 submit 普通淘汰统一，删除操作前同步移除对应发送尝试；停止/恢复整体清理路径也已核对。新增公开双路径回归，真实 Modbus 本地发送超时后淘汰并交付旧回调，验证只产生旧令牌诊断，不污染新操作或伪造发送证据。修复前缩容失败、普通淘汰通过；修复后必要 Debug 3/3 CTest、51 项通过，0 失败/跳过。见[独立修复验收与哈希](../evidence/trace-eviction-reviewfix/acceptance.md)；未跑全量/Release，最终组合验证由集成执行，原验收证据保留。

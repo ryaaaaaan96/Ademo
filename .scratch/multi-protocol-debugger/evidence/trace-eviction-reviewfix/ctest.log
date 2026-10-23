@@ -1,0 +1,45 @@
+UpdateCTestConfiguration  from :C:/Users/81966/Documents/Ademo/.worktrees/rtu-records/DartConfiguration.tcl
+UpdateCTestConfiguration  from :C:/Users/81966/Documents/Ademo/.worktrees/rtu-records/build/qt-llvm-debug/DartConfiguration.tcl
+Test project C:/Users/81966/Documents/Ademo/.worktrees/rtu-records/build/qt-llvm-debug
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 3
+    Start  3: session_lifecycle
+
+3: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-records\build\qt-llvm-debug\bin\session_tests.exe "-o" "test-results.txt,txt"
+3: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-records/build/qt-llvm-debug
+3: Environment variables: 
+3:  QT_QPA_PLATFORM=windows
+3: Test timeout computed to be: 30
+1/3 Test  #3: session_lifecycle ................   Passed    7.37 sec
+test 9
+    Start  9: trace_query_export
+
+9: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-records\build\qt-llvm-debug\bin\trace_tests.exe "-o" "trace-results.txt,txt"
+9: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-records/build/qt-llvm-debug
+9: Environment variables: 
+9:  QT_QPA_PLATFORM=windows
+9: Test timeout computed to be: 30
+2/3 Test  #9: trace_query_export ...............   Passed    3.96 sec
+test 11
+    Start 11: bounded_disk_recording
+
+11: Test command: C:\Users\81966\Documents\Ademo\.worktrees\rtu-records\build\qt-llvm-debug\bin\recording_tests.exe "-o" "recording-results.txt,txt"
+11: Working Directory: C:/Users/81966/Documents/Ademo/.worktrees/rtu-records/build/qt-llvm-debug
+11: Environment variables: 
+11:  QT_QPA_PLATFORM=windows
+11: Test timeout computed to be: 60
+3/3 Test #11: bounded_disk_recording ...........   Passed   14.56 sec
+
+The following tests passed:
+	session_lifecycle
+	trace_query_export
+	bounded_disk_recording
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =  25.94 sec
