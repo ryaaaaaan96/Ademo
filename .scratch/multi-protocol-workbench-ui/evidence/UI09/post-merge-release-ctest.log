@@ -1,0 +1,15 @@
+Test project C:/Users/81966/Documents/Ademo/build/worktrees/ui09/build/qt-llvm-release
+    Start  1: window_trace_workflow
+1/5 Test  #1: window_trace_workflow ............   Passed    4.99 sec
+    Start  2: parameter_pending_write
+2/5 Test  #2: parameter_pending_write ..........   Passed    3.97 sec
+    Start  5: parallel_sessions_recovery
+3/5 Test  #5: parallel_sessions_recovery .......   Passed    4.37 sec
+    Start 13: trace_query_export
+4/5 Test #13: trace_query_export ...............   Passed    1.80 sec
+    Start 15: bounded_disk_recording
+5/5 Test #15: bounded_disk_recording ...........   Passed    7.79 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Total Test time (real) =  23.00 sec

@@ -10,14 +10,12 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <QTabWidget>
 #include <QSignalBlocker>
 #include <QScrollArea>
 #include <QFileDialog>
 #include <QDir>
 #include <QDialog>
 #include <QDialogButtonBox>
-#include <QPlainTextEdit>
 #include <QStackedWidget>
 #include <QTreeWidget>
 #include <QToolBar>
@@ -183,34 +181,7 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     outer->addWidget(diagnostics);
     outer->addWidget(scroll, 1);
     updateProtocol();
-    auto *basicRecords = new QPlainTextEdit(this);
-    basicRecords->setAccessibleName(QStringLiteral("本会话通信记录"));
-    basicRecords->setReadOnly(true); basicRecords->setMaximumBlockCount(100);
-    basicRecords->setMinimumHeight(100); basicRecords->setMaximumHeight(160);
-    basicRecords->setStyleSheet("QPlainTextEdit { background: white; color: #223344; }");
-    auto *recordToggle = new QPushButton(QStringLiteral("通信记录"), this);
-    recordToggle->setCheckable(true); recordToggle->setChecked(true);
-    recordToggle->setToolTip(QStringLiteral("展开或折叠本会话记录，不停止通信"));
-    connect(recordToggle, &QPushButton::toggled, basicRecords, &QWidget::setVisible);
-    outer->addWidget(recordToggle);
-    outer->addWidget(basicRecords);
-    auto updateBasicRecords = [this, basicRecords] {
-        const auto records = session_.traces();
-        QStringList lines;
-        if (session_.expiredTraceCount()) lines << QStringLiteral("较早的 %1 条原始记录已过期").arg(session_.expiredTraceCount());
-        const auto start = qMax(qsizetype(0), records.size() - 80);
-        for (auto i = start; i < records.size(); ++i) {
-            const auto &r = records[i];
-            lines << QStringLiteral("%1 · #%2 · %3 · %4 · %5").arg(r.observedUtc.toLocalTime().toString("HH:mm:ss.zzz"))
-                .arg(r.id).arg(r.kind, QString::fromLatin1(r.bytes.toHex(' ')), r.detail);
-        }
-        const auto text = lines.join('\n');
-        if (text != basicRecords->toPlainText()) basicRecords->setPlainText(text);
-    };
-    connect(&session_, &DebugSession::changed, basicRecords, updateBasicRecords);
-    updateBasicRecords();
-    layout->addWidget(new TracePanel(session_, this));
-    layout->addWidget(new RecordingPanel(session_, this));
+    outer->addWidget(new SessionRecords(session_, this));
     auto refresh = [this, formWidget, endpointWidget, protocol, transport, role, start, stop, reconnect, status] {
 
         const bool active = session_.state() == SessionState::Starting || session_.state() == SessionState::Running;

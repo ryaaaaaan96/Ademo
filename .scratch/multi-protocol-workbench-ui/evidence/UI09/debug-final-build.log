@@ -1,0 +1,20 @@
+[1/22] Automatic MOC for target debugger_host
+[2/21] Building CXX object CMakeFiles/debugger_host.dir/src/workbench.cpp.obj
+[3/21] Linking CXX static library libdebugger_host.a
+[4/21] Linking CXX executable bin\multi_protocol_debugger.exe
+[5/21] Linking CXX executable bin\parameter_definition_tests.exe
+[6/21] Linking CXX executable bin\trace_tests.exe
+[7/21] Linking CXX executable bin\parameter_window_tests.exe
+[8/21] Linking CXX executable bin\session_recovery_tests.exe
+[9/21] Linking CXX executable bin\slave_edit_tests.exe
+[10/21] Linking CXX executable bin\rtu_read_tests.exe
+[11/21] Linking CXX executable bin\rtu_poll_tests.exe
+[12/21] Linking CXX executable bin\rtu_write_tests.exe
+[13/21] Automatic MOC for target window_trace_tests
+[14/20] Linking CXX executable bin\rtu_slave_tests.exe
+[15/20] Linking CXX executable bin\session_tests.exe
+[16/20] Linking CXX executable bin\rtu_slave_write_tests.exe
+[17/20] Linking CXX executable bin\workspace_tests.exe
+[18/20] Linking CXX executable bin\recording_tests.exe
+[19/20] Building CXX object CMakeFiles/window_trace_tests.dir/tests/window_trace_tests.cpp.obj
+[20/20] Linking CXX executable bin\window_trace_tests.exe
