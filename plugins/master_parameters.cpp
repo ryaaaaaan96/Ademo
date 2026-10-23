@@ -1,4 +1,5 @@
 #include "master_parameters.h"
+#include "master_trends.h"
 #include "parameter_definition.h"
 #include "parameter_read_scope.h"
 #include "debugger/parameter_table.h"
@@ -75,6 +76,17 @@ public:
         readSelected_ = new QPushButton(QStringLiteral("读取选中项"), this);
         readGroup_ = new QPushButton(QStringLiteral("读取当前组"), this);
         readControls->addWidget(readSelected_); readControls->addWidget(readGroup_);
+        auto *plot = new QPushButton(QStringLiteral("绘制选中参数"), this); readControls->addWidget(plot);
+        connect(plot, &QPushButton::clicked, this, [this] {
+            const auto selected = table_->selectedParameterIds(); QList<ModbusTrendParameter> parameters;
+            for (const auto &row : rows_) if (selected.contains(row.id()) && QString::number(row.unit) == selectedDevice()
+                && row.area >= 2) parameters.append({row.id(), row.name.isEmpty() ? row.id() : row.name, row.displayUnit, areas[row.area], row.unit, row.address});
+            if (parameters.isEmpty()) { status_->setText(QStringLiteral("请先选择同设备的数值寄存器参数。")); return; }
+            if (parameters.size() > 32) { status_->setText(QStringLiteral("每个趋势窗口最多 32 个参数，请缩小选择范围；未打开或截断曲线。")); return; }
+            plots_.removeIf([](const auto &plot) { return plot.isNull(); });
+            if (plots_.size() >= 8) { status_->setText(QStringLiteral("每个会话最多 8 个趋势窗口，请先关闭不再使用的窗口。")); return; }
+            plots_.append(openParameterTrends(access_, parameters, this));
+        });
         layout->addLayout(readControls);
         connect(readSelected_, &QPushButton::clicked, this, [this] { readScope(true); });
         connect(readGroup_, &QPushButton::clicked, this, [this] { readScope(false); });
@@ -198,6 +210,7 @@ public:
         device_->setCurrentIndex(index); return alive && selectedDevice() == id;
     }
 private:
+    QList<QPointer<QWidget>> plots_;
     void configurePolling(bool starting) {
         if (!access_.running || !access_.running() || !access_.config || !access_.submit) return;
         auto settings = access_.config().protocol;
