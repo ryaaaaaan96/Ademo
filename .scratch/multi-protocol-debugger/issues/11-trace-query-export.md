@@ -47,3 +47,7 @@ Blocked by: [02 完成一次 RTU 保持寄存器读取](02-rtu-first-register-re
 ### 2026-10-23：整体审查修复操作缓存淘汰后的界面状态
 
 已关闭 P2：缺失操作快照不再被当作未完成，UI 提示过期并继续接受手动读写、跟踪后续轮询；真实在途操作仍禁用重复提交。公开 Widgets 回归覆盖 operations=1 的手动读→轮询淘汰→继续读写和 stop/restart，Debug 定向 1/1 CTest、17 项 Qt 检查通过。见 [修复证据](../evidence/operation-cache-reviewfix/acceptance.md)，最终双配置由集成分支统一执行。
+
+### 2026-10-23：最终软件集成验收
+
+本项已随 03–12 逐项合入集成分支，最终运行源码为 `762d85d`。Debug/Release 各 CTest 11/11、238 项通过，0 失败/跳过；114 项产物与证据 SHA256 全部匹配。整体 Standards / Spec 独立审查及修复复核均无剩余问题，见[最终集成验收](../evidence/rtu-03-12/acceptance.md)与[审查报告](../evidence/rtu-03-12/review.md)。分项原证据保留；13 等真实硬件条件，14–19 未启动。

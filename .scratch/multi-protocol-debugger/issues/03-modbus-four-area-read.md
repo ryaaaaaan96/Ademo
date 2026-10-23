@@ -40,3 +40,7 @@ Blocked by: [02 完成一次 RTU 保持寄存器读取](02-rtu-first-register-re
 在 `codex/rtu-master`、独立 `rtu-master` worktree 基于 `abb5169` 实施 03，复用 01/02 的主站、统一通道和工具链。新增四区读取选择、按设备/区保留最近成功观测，补齐 01/02/04；位值为布尔、寄存器为 16 位原值，PDU 地址从 0 开始。异常、错误长度/功能码/CRC 与位填充错误不能形成有效观测。
 
 Debug、Release 均 CTest 2/2 通过；每配置生命周期 13 项、读取 43 项，共 56 passed、0 failed、0 skipped（含初始化/清理）。固定规范 PDU 向量、边界、异常、跨块和实际 Widgets 流程见 [03 验收证据](../evidence/03/acceptance.md)。未验证真实硬件互通；13 仍待外部条件。普通分诊标签不代替完成状态，完成以本勾选及证据为准。
+
+### 2026-10-23：最终软件集成验收
+
+本项已随 03–12 逐项合入集成分支，最终运行源码为 `762d85d`。Debug/Release 各 CTest 11/11、238 项通过，0 失败/跳过；114 项产物与证据 SHA256 全部匹配。整体 Standards / Spec 独立审查及修复复核均无剩余问题，见[最终集成验收](../evidence/rtu-03-12/acceptance.md)与[审查报告](../evidence/rtu-03-12/review.md)。分项原证据保留；13 等真实硬件条件，14–19 未启动。

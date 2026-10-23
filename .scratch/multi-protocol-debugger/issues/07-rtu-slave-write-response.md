@@ -40,3 +40,7 @@ Blocked by: [04 执行不会自动重试的设备写入](04-modbus-explicit-writ
 独立 worktree/分支 `rtu-slave` / `codex/rtu-slave`，以前置共享基线 `e0d3ce8` 实施。四种写入共用 04 的 PDU 语义，完整校验后一次更新目标设备，再应答；每次成功更新 dirty/revision，界面及后续读取反映同份数据。广播写入逐设备校验且不应答；错误、不匹配设备及 pending 时的新请求不会部分改值。应答失败不撤回已执行写入，不自动重发或保存文件。
 
 Debug、Release 均通过 6/6 CTest，各 156 项 Qt Test 检查、0 failed / 0 skipped；本项从站写入套件 25 项，含正常/异常、单播隔离、广播、整体更新、最大合法数量、来源关联、发送失败与原生 UI。详细日志、截图、SHA-256、过程修复和环境限制见 [07 验收证据](../evidence/07/acceptance.md)。真实硬件留待 13；08 运行编辑和未保存保护不在本项。Status 保留分诊标签。
+
+### 2026-10-23：最终软件集成验收
+
+本项已随 03–12 逐项合入集成分支，最终运行源码为 `762d85d`。Debug/Release 各 CTest 11/11、238 项通过，0 失败/跳过；114 项产物与证据 SHA256 全部匹配。整体 Standards / Spec 独立审查及修复复核均无剩余问题，见[最终集成验收](../evidence/rtu-03-12/acceptance.md)与[审查报告](../evidence/rtu-03-12/review.md)。分项原证据保留；13 等真实硬件条件，14–19 未启动。

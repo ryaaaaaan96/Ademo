@@ -1,0 +1,36 @@
+[1/53] Automatic MOC for target debugger_host
+[2/52] Automatic MOC for target trace_fixture_plugin
+[3/50] Automatic MOC for target serial_plugin
+[4/48] Automatic MOC for target incompatible_plugin
+[5/46] Automatic MOC for target modbus_plugin
+[6/45] Building CXX object CMakeFiles/debugger_host.dir/src/trace_query.cpp.obj
+[7/45] Linking CXX static library libdebugger_host.a
+[8/45] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/rtu_slave.cpp.obj
+[9/45] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_edit.cpp.obj
+[10/45] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/rtu_session.cpp.obj
+[11/45] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/modbus.cpp.obj
+[12/45] Linking CXX shared module bin\plugins\libmodbus_plugin.dll
+[13/45] Automatic MOC for target session_recovery_tests
+[14/44] Linking CXX executable bin\multi_protocol_debugger.exe
+[15/44] Automatic MOC for target session_tests
+[16/43] Automatic MOC for target rtu_read_tests
+[17/42] Automatic MOC for target rtu_slave_tests
+[18/41] Automatic MOC for target rtu_slave_write_tests
+[19/40] Automatic MOC for target rtu_write_tests
+[20/39] Linking CXX executable bin\workspace_tests.exe
+[21/39] Linking CXX executable bin\session_recovery_tests.exe
+[22/39] Linking CXX executable bin\rtu_read_tests.exe
+[23/39] Linking CXX executable bin\rtu_slave_tests.exe
+[24/39] Linking CXX executable bin\rtu_slave_write_tests.exe
+[25/39] Linking CXX executable bin\session_tests.exe
+[26/39] Linking CXX executable bin\rtu_write_tests.exe
+[27/39] Automatic MOC for target trace_tests
+[28/38] Automatic MOC for target slave_edit_tests
+[29/37] Automatic MOC for target rtu_poll_tests
+[30/36] Building CXX object CMakeFiles/trace_tests.dir/tests/trace_tests.cpp.obj
+[31/36] Linking CXX executable bin\trace_tests.exe
+[32/36] Building CXX object CMakeFiles/rtu_poll_tests.dir/tests/rtu_poll_tests.cpp.obj
+[33/36] Linking CXX executable bin\recording_tests.exe
+[34/36] Building CXX object CMakeFiles/slave_edit_tests.dir/tests/slave_edit_tests.cpp.obj
+[35/36] Linking CXX executable bin\rtu_poll_tests.exe
+[36/36] Linking CXX executable bin\slave_edit_tests.exe

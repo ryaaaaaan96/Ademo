@@ -41,3 +41,7 @@ Blocked by: [03 读取四类 Modbus 数据区](03-modbus-four-area-read.md)
 独立分支 `codex/rtu-slave` / worktree `rtu-slave` 完成后台外部 JSON 准备、全部校验后打开通道、多设备四区读取与异常、被动发送统一记录及来源区间、文件绑定和模拟数据 Widgets 页面。格式及资源边界见 [从站数据 v1](../slave-data-format.md)。运行中文件不热加载，重启重新校验；取消或销毁准备不会迟到打开端点。
 
 Debug、Release 均通过 5/5 CTest，各 131 项 Qt Test 检查、0 failed / 0 skipped，其中本项从站套件 29 项；覆盖缺失/不可读/无效文件、规范向量、隔离、异常、文件重启、准备取消/上限/插件租约、被动发送失败期限及原生 UI。详见 [06 验收证据](../evidence/06/acceptance.md)。真实串口与独立硬件主站尚未验证，13 保持未启动；07/08 功能未在本项实施。Status 作为分诊标签保留。
+
+### 2026-10-23：最终软件集成验收
+
+本项已随 03–12 逐项合入集成分支，最终运行源码为 `762d85d`。Debug/Release 各 CTest 11/11、238 项通过，0 失败/跳过；114 项产物与证据 SHA256 全部匹配。整体 Standards / Spec 独立审查及修复复核均无剩余问题，见[最终集成验收](../evidence/rtu-03-12/acceptance.md)与[审查报告](../evidence/rtu-03-12/review.md)。分项原证据保留；13 等真实硬件条件，14–19 未启动。

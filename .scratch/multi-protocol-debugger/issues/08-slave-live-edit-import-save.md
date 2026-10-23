@@ -43,3 +43,7 @@ Blocked by: [06 从外部 JSON 启动多设备 RTU 从站并读取](06-rtu-slave
 ### 2026-10-23：整体审查修复设备绑定未知字段保留
 
 已关闭 P2：从站保存/导入成功后按 unit 在原 devices 条目中仅更新 path，保留 vendor/future 等扩展字段、原顺序与未编辑设备，不把运行 snapshot 写入工作区。新增公开 save→import→workspace 保存/加载组合回归，两个设备的完整绑定均保留；Debug 定向 1/1 CTest、10 项 Qt 检查通过，见 [修复证据](../evidence/binding-extensions-reviewfix/acceptance.md)。最终双配置由根集成分支统一执行。
+
+### 2026-10-23：最终软件集成验收
+
+本项已随 03–12 逐项合入集成分支，最终运行源码为 `762d85d`。Debug/Release 各 CTest 11/11、238 项通过，0 失败/跳过；114 项产物与证据 SHA256 全部匹配。整体 Standards / Spec 独立审查及修复复核均无剩余问题，见[最终集成验收](../evidence/rtu-03-12/acceptance.md)与[审查报告](../evidence/rtu-03-12/review.md)。分项原证据保留；13 等真实硬件条件，14–19 未启动。

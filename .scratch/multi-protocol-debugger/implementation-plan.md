@@ -51,7 +51,7 @@ Qt/LLVM-MinGW、Debug/Release 与 LLDB 验证已完成，见 [环境证据](tool
 | 11 | `a4dec16` | [11 验收](evidence/11/acceptance.md)，Debug/Release 各 59 项通过 | 整合 03/04/11 后 Debug 构建与 CTest 4/4 通过 |
 | 12 | `522336e`、`8be3807`、`8bd8c60`、`4c7d651` | [12 验收](evidence/12/acceptance.md)、[09/12 组合](evidence/integration09-12/acceptance.md) | 两配置各 CTest 10/10、218 项；两个专项 P2 修复并独立复核，108 项哈希匹配 |
 
-03–12 已逐项合入。停止写操作的终态保护已以 `6d69845` 修复合入，[定向 Debug 验收](evidence/stop-uncertain-reviewfix/acceptance.md) 5/5、98 项通过。整体 Standards / Spec 审查与最终双配置验收进行中。13 等待真实硬件条件，14–19 不启动。
+03–12 已逐项合入并完成最终软件验收。停止写操作的终态保护已以 `6d69845` 修复合入，[定向 Debug 验收](evidence/stop-uncertain-reviewfix/acceptance.md) 5/5、98 项通过。最终源码 `762d85d` 的 Debug/Release 均 CTest 11/11、238 项通过，0 失败/跳过，114 项产物与证据哈希一致；[整体验收](evidence/rtu-03-12/acceptance.md)、[Standards / Spec 审查](evidence/rtu-03-12/review.md) 均已记录，两轴剩余问题均为 0。13 等待真实硬件条件，14–19 不启动。
 
 ## 依赖与状态规则
 

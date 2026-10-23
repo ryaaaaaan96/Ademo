@@ -44,3 +44,7 @@ Debug、Release 均通过 3/3 CTest；生命周期 13、读取 36、写入 36，
 ### 2026-10-23：停止未确认写入的公开终态修复
 
 集成审查发现宿主先finished再protocol.stop，导致协议发布的cancelled/uncertain被忽略。现协议先发布终态，宿主仅兜底剩余未完成操作，已提交未确认时明确标记uncertain；保留08的后台localOnly操作及preparing保护。新增公开回归覆盖停止时等待本地完成/设备确认、排队未发送、重启不补发，以及宿主fallback与归档JSONL。定向Debug 5/5 CTest、98项通过，0失败/跳过；最终集成双配置另由根代理验证。详见[停止终态修复证据](../evidence/stop-uncertain-reviewfix/acceptance.md)。
+
+### 2026-10-23：最终软件集成验收
+
+本项已随 03–12 逐项合入集成分支，最终运行源码为 `762d85d`。Debug/Release 各 CTest 11/11、238 项通过，0 失败/跳过；114 项产物与证据 SHA256 全部匹配。整体 Standards / Spec 独立审查及修复复核均无剩余问题，见[最终集成验收](../evidence/rtu-03-12/acceptance.md)与[审查报告](../evidence/rtu-03-12/review.md)。分项原证据保留；13 等真实硬件条件，14–19 未启动。
