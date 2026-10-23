@@ -1,4 +1,5 @@
 #include "debugger/host.h"
+#include "trace_presentation.h"
 #include <QComboBox>
 #include <QFileDialog>
 #include <QFormLayout>
@@ -12,12 +13,13 @@
 #include <QVBoxLayout>
 
 namespace debugger {
-RecordingPanel::RecordingPanel(DebugSession &session, QWidget *parent) : QWidget(parent)
+RecordingPanel::RecordingPanel(DebugSession &session, QWidget *parent, bool collapsible) : QWidget(parent)
 {
     auto *layout = new QVBoxLayout(this);
     auto *expand = new QPushButton(QStringLiteral("磁盘记录与历史归档 / 展开或收起"), this); expand->setObjectName("recordingExpand");
+    expand->setVisible(collapsible);
     auto *status = new QLabel(this); status->setWordWrap(true); status->setObjectName("recordingStatus");
-    auto *group = new QGroupBox(QStringLiteral("用户主动开启；队列丢失与正常轮换分别统计"), this); group->hide();
+    auto *group = new QGroupBox(QStringLiteral("用户主动开启；队列丢失与正常轮换分别统计"), this); group->setVisible(!collapsible);
     layout->addWidget(expand); layout->addWidget(status); layout->addWidget(group);
     auto *form = new QFormLayout(group);
     auto *directory = new QLineEdit(group); directory->setObjectName("recordingDirectory");
@@ -35,18 +37,26 @@ RecordingPanel::RecordingPanel(DebugSession &session, QWidget *parent) : QWidget
     auto *stop = new QPushButton(QStringLiteral("停止记录并后台排空"), group); stop->setObjectName("recordingStop");
     form->addRow(start); form->addRow(stop);
     auto *sessions = new QComboBox(group); sessions->setEditable(true); sessions->setObjectName("archiveSession");
+    sessions->setCurrentText(session.sessionId());
+    sessions->setAccessibleName(QStringLiteral("历史目标会话 UUID"));
+    sessions->setToolTip(QStringLiteral("默认查询所属窗口的会话；选择其他 UUID 将明确查询该历史会话，不随工作台选择变化。"));
     auto *list = new QPushButton(QStringLiteral("读取可用历史会话列表"), group); list->setObjectName("archiveList");
     auto *operation = new QLineEdit(group); operation->setObjectName("archiveOperation");
     auto *message = new QLineEdit(group); message->setObjectName("archiveMessage");
     auto *from = new QLineEdit(group); from->setObjectName("archiveFromUtc"); from->setPlaceholderText("ISO UTC / Z");
     auto *to = new QLineEdit(group); to->setObjectName("archiveToUtc"); to->setPlaceholderText("ISO UTC / Z");
     form->addRow(list); form->addRow(QStringLiteral("会话 UUID（必须明确选择）"), sessions);
+    auto *scope = new QLabel(QStringLiteral("默认所属会话；若需查询其他历史，请明确选择其 UUID。导出使用结果中标明的会话快照。"), group);
+    scope->setWordWrap(true); form->addRow(scope);
     form->addRow(QStringLiteral("操作 ID（留空为全部）"), operation); form->addRow(QStringLiteral("消息 ID（留空为全部）"), message);
     form->addRow(QStringLiteral("起始 UTC（含）"), from); form->addRow(QStringLiteral("结束 UTC（含）"), to);
     auto *query = new QPushButton(QStringLiteral("后台查询历史"), group); query->setObjectName("archiveQuery"); form->addRow(query);
     auto *output = new QPlainTextEdit(group); output->setReadOnly(true); output->setMaximumBlockCount(2000); output->setObjectName("archiveResult");
+    output->setAccessibleName(QStringLiteral("历史查询结果"));
+    output->setStyleSheet("QPlainTextEdit { background: white; color: #223344; }");
     form->addRow(output);
     auto *path = new QLineEdit(group); path->setObjectName("archiveExportPath");
+    path->setAccessibleName(QStringLiteral("历史证据导出路径"));
     auto *chooseExport = new QPushButton(QStringLiteral("选择历史导出文件"), group);
     auto *format = new QComboBox(group); format->addItems({"jsonl", "csv"}); format->setObjectName("archiveExportFormat");
     auto *exportButton = new QPushButton(QStringLiteral("后台导出已查询的历史快照"), group); exportButton->setObjectName("archiveExport"); exportButton->setEnabled(false);
@@ -67,7 +77,8 @@ RecordingPanel::RecordingPanel(DebugSession &session, QWidget *parent) : QWidget
     auto future = std::make_shared<std::shared_future<ArchiveResult>>();
     auto exporting = std::make_shared<std::shared_future<ExportResult>>();
     auto listOnly = std::make_shared<bool>(false);
-    auto launch = [directory, sessions, operation, message, from, to, output, list, query, future, listOnly](bool listing) {
+    auto launch = [directory, sessions, operation, message, from, to, output, list, query, future, listOnly, result, exportButton](bool listing) {
+        result->reset(); exportButton->setEnabled(false);
         TraceFilter filter; bool ok = true;
         if (!operation->text().isEmpty()) { filter.operationId = operation->text().toULongLong(&ok); if (!ok || !filter.operationId) { output->setPlainText(QStringLiteral("操作 ID 无效")); return; } }
         if (!message->text().isEmpty()) { filter.messageId = message->text().toULongLong(&ok); if (!ok || !filter.messageId) { output->setPlainText(QStringLiteral("消息 ID 无效")); return; } }
@@ -108,10 +119,11 @@ RecordingPanel::RecordingPanel(DebugSession &session, QWidget *parent) : QWidget
             if (!value.ok) { output->setPlainText(value.error); return; }
             if (*listOnly) {
                 const auto selected = sessions->currentText(); sessions->clear(); sessions->addItems(value.sessions);
-                if (!selected.isEmpty() && value.sessions.contains(selected)) sessions->setCurrentText(selected);
+                // 所属会话尚无归档时也不悄悄改选另一会话。
+                if (!selected.isEmpty()) sessions->setCurrentText(selected);
                 output->setPlainText(QStringLiteral("可用历史会话 %1 个；请选择 UUID 后查询。\n").arg(value.sessions.size()) + value.error);
             } else {
-                *result = std::make_shared<ArchiveResult>(value); exportButton->setEnabled(true);
+                *result = std::make_shared<ArchiveResult>(value); exportButton->setEnabled(!exporting->valid());
                 const auto retention = value.snapshot.retention;
                 QString text = QStringLiteral("历史会话 %1：原始 %2 / 消息 %3 / 操作 %4\n")
                     .arg(value.snapshot.sessionId).arg(value.snapshot.records.size()).arg(value.snapshot.messages.size()).arg(value.snapshot.operations.size());
@@ -123,10 +135,14 @@ RecordingPanel::RecordingPanel(DebugSession &session, QWidget *parent) : QWidget
                 if (retention.value("segmentsUnavailableDuringQuery").toBool()) text += QStringLiteral("查询期间部分分段已不可用。\n");
                 if (retention.value("corruptOrIncompleteSegment").toBool() || retention.value("archiveGap").toBool()) text += QStringLiteral("存在损坏、未完整提交或无法证明的历史分段。\n");
                 if (!retention.value("recordingError").toString().isEmpty()) text += QStringLiteral("历史写入错误：") + retention.value("recordingError").toString() + '\n';
-                for (const auto &operation : value.snapshot.operations.mid(0, 100)) text += QStringLiteral("操作 #%1 %2 %3\n").arg(operation.request.id).arg(operation.update.state, operation.update.detail);
+                for (const auto &operation : value.snapshot.operations.mid(0, 100)) text += operationSummary(operation);
                 for (const auto &message : value.snapshot.messages.mid(0, 100)) text += QStringLiteral("消息 #%1 操作 #%2 %3\n").arg(message.id).arg(message.operationId).arg(message.status);
                 for (const auto &source : value.snapshot.sources.mid(0, 100)) text += QStringLiteral("来源 #%1 %2 offset=%3 length=%4 %5\n")
                     .arg(source.range.recordId).arg(source.availability).arg(source.range.offset).arg(source.range.length).arg(QString::fromLatin1(source.bytes.left(64).toHex(' ')));
+                text += QStringLiteral("面板最多显示 100 项各类概要、每条原始 128 字节；完整内容通过后台导出。\n");
+                for (const auto &record : value.snapshot.records.mid(0, 100)) text += QStringLiteral("原始 #%1 run=%2 %3 %4 %5\n")
+                    .arg(record.id).arg(record.generation).arg(record.observedUtc.toString(Qt::ISODateWithMs),
+                         record.kind, QString::fromLatin1(record.bytes.left(128).toHex(' ')));
                 if (!value.error.isEmpty()) text += value.error;
                 output->setPlainText(text);
             }

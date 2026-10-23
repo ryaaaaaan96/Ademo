@@ -13,7 +13,7 @@ target_compile_definitions(debugger_sdk INTERFACE
   DEBUGGER_BUILD_KEY="sdk10-product0.2-qt${Qt6_VERSION}-${CMAKE_CXX_COMPILER_ID}${CMAKE_CXX_COMPILER_VERSION}-${CMAKE_SYSTEM_PROCESSOR}-$<CONFIG>")
 add_library(debugger_widgets STATIC src/parameter_table.cpp)
 target_link_libraries(debugger_widgets PUBLIC debugger_sdk)
-add_library(debugger_host STATIC src/workspace.cpp src/session_recovery.cpp src/host.cpp src/workbench.cpp src/session_window.cpp src/trace_query.cpp src/trace_panel.cpp
+add_library(debugger_host STATIC src/workspace.cpp src/session_recovery.cpp src/host.cpp src/workbench.cpp src/session_window.cpp src/trace_query.cpp src/trace_panel.cpp src/session_records.cpp
   src/trace_codec.cpp src/recording.cpp src/archive_query.cpp src/archive_format.cpp src/recording_panel.cpp include/debugger/host.h)
 
 target_link_libraries(debugger_host PUBLIC debugger_sdk)
@@ -36,6 +36,11 @@ add_executable(multi_protocol_debugger WIN32 src/main.cpp)
 target_link_libraries(multi_protocol_debugger PRIVATE debugger_host)
 add_dependencies(multi_protocol_debugger modbus_plugin serial_plugin)
 enable_testing()
+add_executable(window_trace_tests tests/window_trace_tests.cpp)
+target_link_libraries(window_trace_tests PRIVATE debugger_host Qt6::Test)
+add_dependencies(window_trace_tests trace_tests)
+add_test(NAME window_trace_workflow COMMAND window_trace_tests -o window-trace-results.txt,txt)
+set_tests_properties(window_trace_workflow PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=windows" TIMEOUT 30)
 add_executable(parameter_definition_tests tests/parameter_definition_tests.cpp)
 target_link_libraries(parameter_definition_tests PRIVATE debugger_host Qt6::Test)
 add_dependencies(parameter_definition_tests modbus_plugin serial_plugin)

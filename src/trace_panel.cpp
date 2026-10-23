@@ -1,4 +1,5 @@
 #include "debugger/host.h"
+#include "trace_presentation.h"
 #include <QComboBox>
 #include <QFileDialog>
 #include <QFormLayout>
@@ -12,17 +13,18 @@
 #include <QVBoxLayout>
 
 namespace debugger {
-TracePanel::TracePanel(DebugSession &session, QWidget *parent) : QWidget(parent)
+TracePanel::TracePanel(DebugSession &session, QWidget *parent, bool collapsible) : QWidget(parent)
 {
     auto *layout = new QVBoxLayout(this);
     auto *expand = new QPushButton(QStringLiteral("展开回溯 / 收起"), this);
     expand->setObjectName("traceExpand");
+    expand->setVisible(collapsible);
     auto *summary = new QLabel(this);
     summary->setObjectName("traceSummary");
     layout->addWidget(expand);
     layout->addWidget(summary);
     auto *details = new QGroupBox(QStringLiteral("操作、消息与原始证据"), this);
-    details->hide();
+    details->setVisible(!collapsible);
     layout->addWidget(details);
     auto *form = new QFormLayout(details);
     auto *operation = new QLineEdit(details);
@@ -30,6 +32,7 @@ TracePanel::TracePanel(DebugSession &session, QWidget *parent) : QWidget(parent)
     auto *from = new QLineEdit(details);
     auto *to = new QLineEdit(details);
     operation->setObjectName("traceOperation"); message->setObjectName("traceMessage");
+    operation->setAccessibleName(QStringLiteral("近期操作 ID")); message->setAccessibleName(QStringLiteral("近期消息 ID"));
     from->setObjectName("traceFromUtc"); to->setObjectName("traceToUtc");
     operation->setPlaceholderText(QStringLiteral("留空表示全部"));
     message->setPlaceholderText(QStringLiteral("留空表示全部"));
@@ -48,8 +51,11 @@ TracePanel::TracePanel(DebugSession &session, QWidget *parent) : QWidget(parent)
     apply->setObjectName("traceApplyCapacity"); query->setObjectName("traceQuery");
     form->addRow(apply); form->addRow(query);
     auto *output = new QPlainTextEdit(details); output->setReadOnly(true); output->setObjectName("traceQueryResult");
+    output->setAccessibleName(QStringLiteral("回溯查询结果"));
+    output->setStyleSheet("QPlainTextEdit { background: white; color: #223344; }");
     output->setMaximumBlockCount(2000); form->addRow(output);
     auto *path = new QLineEdit(details); path->setObjectName("traceExportPath");
+    path->setAccessibleName(QStringLiteral("近期证据导出路径"));
     auto *choose = new QPushButton(QStringLiteral("选择导出文件"), details);
     auto *format = new QComboBox(details); format->addItems({"jsonl", "csv"}); format->setObjectName("traceExportFormat");
     auto *exportButton = new QPushButton(QStringLiteral("后台导出当前筛选"), details); exportButton->setObjectName("traceExport");
@@ -79,7 +85,7 @@ TracePanel::TracePanel(DebugSession &session, QWidget *parent) : QWidget(parent)
             .arg(snapshot.expiredRecords).arg(snapshot.expiredMessages).arg(snapshot.expiredOperations).arg(snapshot.omittedObservedRefs);
         if (snapshot.requestedMessageMissing || snapshot.requestedOperationMissing) text += QStringLiteral("指定操作或消息已过期或不存在\n");
         text += QStringLiteral("面板最多显示 100 项各类概要、每条原始 128 字节；完整内容通过后台导出。\n");
-        for (const auto &operation : snapshot.operations.mid(0, 100)) text += QStringLiteral("操作 #%1 %2 %3：%4\n").arg(operation.request.id).arg(operation.request.action, operation.update.state, operation.update.detail);
+        for (const auto &operation : snapshot.operations.mid(0, 100)) text += operationSummary(operation);
         for (const auto &message : snapshot.messages.mid(0, 100)) {
             text += QStringLiteral("消息 #%1 操作 #%2 %3：%4\n").arg(message.id).arg(message.operationId).arg(message.status, message.detail);
             for (const auto &range : message.sourceRanges) text += QStringLiteral("  来源 #%1 offset=%2 length=%3\n").arg(range.recordId).arg(range.offset).arg(range.length);

@@ -1,0 +1,24 @@
+********* Start testing of WindowTraceTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : WindowTraceTests::initTestCase()
+QWARN  : WindowTraceTests::eachWindowQueriesAndExportsItsEvidenceAfterMoving() QFontDatabase: Cannot find font directory C:/Qt/6.12.0/llvm-mingw_64/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+QWARN  : WindowTraceTests::eachWindowQueriesAndExportsItsEvidenceAfterMoving() This plugin does not support propagateSizeHints()
+QWARN  : WindowTraceTests::eachWindowQueriesAndExportsItsEvidenceAfterMoving() This plugin does not support raise()
+QWARN  : WindowTraceTests::eachWindowQueriesAndExportsItsEvidenceAfterMoving() This plugin does not support raise()
+QWARN  : WindowTraceTests::eachWindowQueriesAndExportsItsEvidenceAfterMoving() This plugin does not support propagateSizeHints()
+QWARN  : WindowTraceTests::eachWindowQueriesAndExportsItsEvidenceAfterMoving() This plugin does not support propagateSizeHints()
+QWARN  : WindowTraceTests::eachWindowQueriesAndExportsItsEvidenceAfterMoving() This plugin does not support propagateSizeHints()
+QWARN  : WindowTraceTests::eachWindowQueriesAndExportsItsEvidenceAfterMoving() This plugin does not support raise()
+QWARN  : WindowTraceTests::eachWindowQueriesAndExportsItsEvidenceAfterMoving() This plugin does not support propagateSizeHints()
+QWARN  : WindowTraceTests::eachWindowQueriesAndExportsItsEvidenceAfterMoving() This plugin does not support propagateSizeHints()
+PASS   : WindowTraceTests::eachWindowQueriesAndExportsItsEvidenceAfterMoving()
+QWARN  : WindowTraceTests::historyDefaultsToOwningWindowAndExportsUnknownData() This plugin does not support propagateSizeHints()
+QWARN  : WindowTraceTests::historyDefaultsToOwningWindowAndExportsUnknownData() This plugin does not support raise()
+QWARN  : WindowTraceTests::historyDefaultsToOwningWindowAndExportsUnknownData() This plugin does not support raise()
+QWARN  : WindowTraceTests::historyDefaultsToOwningWindowAndExportsUnknownData() This plugin does not support raise()
+QWARN  : WindowTraceTests::historyDefaultsToOwningWindowAndExportsUnknownData() This plugin does not support raise()
+PASS   : WindowTraceTests::historyDefaultsToOwningWindowAndExportsUnknownData()
+PASS   : WindowTraceTests::cleanupTestCase()
+Totals: 4 passed, 0 failed, 0 skipped, 0 blacklisted, 1134ms
+********* Finished testing of WindowTraceTests *********

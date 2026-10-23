@@ -81,3 +81,9 @@ SDK10 的 `ProtocolPlugin::createParameterView` 是可选工厂，返回 `Parame
 左侧“会话与设备”导航按插件公开的设备身份定位目标窗口。窗口移动、最小化、选择设备、切换页面或折叠“通信记录”均不停止通信，记录始终属于原会话。关闭只停止对应会话、释放端点并保留配置；点击导航可重开，重开保持停止。关闭整个工作台或替换工作区继续执行未保存保护，并复查其他会话模态提示期间的新修改。
 
 宿主提供 `sessionView/sessionWindow/sessionTitle` 访问当前界面，以及 `isSessionOpen/isSessionFloating/floatSession/dockSession/tileSessions/selectDevice` 控制窗口呈现。`closeSession` 不再删除会话配置，`sessionCount` 包含关闭的会话；工作区替换负责替换整组配置。现有工作区往返已适配新容器，窗口布局持久化由 UI11 完成。软件验证及实际桌面验收边界见 [UI03 验收记录](.scratch/multi-protocol-workbench-ui/evidence/UI03/acceptance.md)。
+
+## 所属窗口的回溯与历史（UI09）
+
+每窗底部“通信记录”包含通信概要、回溯与导出、磁盘与历史三页。折叠、浮动及切换工作台选择不改变来源。近期查询可按操作、消息和UTC筛选并后台导出，未知原始数据、正常过期与缺失来源仍可查阅；操作摘要区分传输提交、本地发送完成和协议结果。
+
+磁盘记录仍由用户主动开启，队列过载丢失与正常轮换分别说明。历史默认查询该窗口的会话UUID，选择其他历史须明确指定；列表刷新不会自动改选。导出使用已成功查询并标明来源的快照，重新查询或失败时不继续提供旧结果导出。记录输出保持白底；完整数据通过后台导出，概要和视图显示有上限。验证见 [UI09验收记录](.scratch/multi-protocol-workbench-ui/evidence/UI09/acceptance.md)。
