@@ -131,7 +131,7 @@ public:
     QVector<Device> devices; int selected = 0, editorDevice = 0, editingRow = -1, step = 0;
     bool fileDirty = false, updating = false; QJsonObject editorBase; QString editorPath;
     QComboBox *deviceBox, *groups, *pollScope, *outcome; QSpinBox *period;
-    QPushButton *startButton, *pollButton; QLabel *sessionState, *notice, *editorTarget, *fileState, *recordSummary;
+    QPushButton *startButton, *pollButton; QLabel *sessionState, *endpointSummary, *notice, *editorTarget, *fileState, *recordSummary;
     QTabWidget *pages; QTableWidget *table, *editor; QPlainTextEdit *records;
     QTimer pollTimer; QHash<int, QVector<int>> polling; QVector<QPointer<PlotDialog>> plots;
     QVector<int> visibleRows; std::function<void()> changed;
@@ -140,7 +140,9 @@ public:
         : QWidget(parent), sessionName(name), protocol(proto), endpoint(port), slave(isSlave) {
         auto *root = new QVBoxLayout(this); root->setContentsMargins(12, 10, 12, 8); root->setSpacing(8);
         auto *header = new QHBoxLayout; sessionState = new QLabel("● 已停止"); sessionState->setObjectName("connectionState");
-        header->addWidget(sessionState); header->addWidget(new QLabel(endpoint + " · " + (slave ? "从站模拟" : "主站") + " · " + protocol), 1);
+        endpointSummary = new QLabel(endpoint + " · " + (slave ? "从站模拟" : "主站") + " · " + protocol);
+        endpointSummary->setWordWrap(true);
+        header->addWidget(sessionState); header->addWidget(endpointSummary, 1);
         startButton = button("启动", header, [this] { if (running) stop(); else start(); });
         button("连接配置", header, [this] { configure(); }); root->addLayout(header);
         auto *deviceBar = new QHBoxLayout; deviceBar->addWidget(new QLabel("设备")); deviceBox = new QComboBox; deviceBox->setMinimumContentsLength(12);
@@ -177,12 +179,12 @@ public:
         notice = new QLabel(slave ? "双击值立即修改模拟数据；保存文件独立执行。" : "双击值 → 编辑 → 点击设置。黄色值尚未提交，轮询不会覆盖。 ");
         notice->setWordWrap(true); notice->setObjectName("hint"); op->addWidget(notice); pages->addTab(operationPage, "参数操作");
         makeEditor();
-        auto *logHeader = new QHBoxLayout; auto *toggle = new QToolButton; toggle->setText("通信记录 ▾"); toggle->setCheckable(true); toggle->setChecked(true);
+        auto *logHeader = new QHBoxLayout; auto *toggle = new QToolButton; toggle->setText("通信记录（收起）"); toggle->setCheckable(true); toggle->setChecked(true);
         logHeader->addWidget(toggle); recordSummary = new QLabel("本会话 · 仅模拟事件"); logHeader->addWidget(recordSummary, 1);
         button("清空显示", logHeader, [this] { records->clear(); }); root->addLayout(logHeader);
         records = new QPlainTextEdit; records->setReadOnly(true); records->setMaximumBlockCount(300); records->setFixedHeight(112);
         records->setObjectName("records"); root->addWidget(records);
-        connect(toggle, &QToolButton::toggled, this, [this, toggle](bool on) { records->setVisible(on); toggle->setText(on ? "通信记录 ▾" : "通信记录 ▸"); });
+        connect(toggle, &QToolButton::toggled, this, [this, toggle](bool on) { records->setVisible(on); toggle->setText(on ? "通信记录（收起）" : "通信记录（展开）"); });
         connect(groups, &QComboBox::currentTextChanged, this, [this] { render(); });
         connect(deviceBox, &QComboBox::currentIndexChanged, this, [this](int index) { selectDevice(index); });
         connect(pages, &QTabWidget::currentChanged, this, [this](int page) { if (page == 1 && !fileDirty) loadEditor(selected); });
@@ -506,7 +508,11 @@ void SessionPane::configure() {
     layout->addRow(new QLabel("原型仅保存端点标签，串口参数和真实连接由正式实现承接。"));
     auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel); layout->addRow(buttons);
     connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept); connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
-    if (dialog.exec() == QDialog::Accepted) { endpoint = port->text(); notice->setText("端点配置已改为 " + endpoint + " · 未启动通信"); if (changed) changed(); }
+    if (dialog.exec() == QDialog::Accepted) {
+        endpoint = port->text();
+        endpointSummary->setText(endpoint + " · " + (slave ? "从站模拟" : "主站") + " · " + protocol);
+        notice->setText("端点配置已改为 " + endpoint + " · 未启动通信"); if (changed) changed();
+    }
 }
 void SessionPane::addDeviceDialog() {
     if (running) { notice->setText("原型请先停止此会话，再添加设备。"); return; }
@@ -523,8 +529,10 @@ class SessionDock : public QDockWidget {
 public:
     SessionPane *pane;
     SessionDock(SessionPane *p, QWidget *parent) : QDockWidget(p->sessionName, parent), pane(p) {
-        setWidget(pane); setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-        setMinimumSize(550, 420); setAllowedAreas(Qt::AllDockWidgetAreas);
+        auto *scroll = new QScrollArea(this); scroll->setWidgetResizable(true); scroll->setFrameShape(QFrame::NoFrame);
+        scroll->setWidget(pane); setWidget(scroll);
+        setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+        setMinimumSize(420, 320); setAllowedAreas(Qt::AllDockWidgetAreas);
     }
     void closeEvent(QCloseEvent *event) override {
         if (!pane->canClose()) { event->ignore(); return; }
@@ -536,7 +544,9 @@ public:
     QVector<SessionDock *> docks; QTreeWidget *tree; QDockWidget *navigation; QLabel *layoutLabel;
     int layoutIndex = 0, nextId = 1; bool shuttingDown = false;
     Workbench() {
-        setWindowTitle("多协议调试工作台 · 界面原型（模拟数据）"); resize(1660, 980);
+        setWindowTitle("多协议调试工作台 · 界面原型（模拟数据）");
+        const auto available = QGuiApplication::primaryScreen()->availableGeometry();
+        resize(qMin(1660, available.width() - 48), qMin(980, available.height() - 64));
         setDockNestingEnabled(true); setDockOptions(QMainWindow::AllowNestedDocks | QMainWindow::AnimatedDocks);
         auto *toolbar = addToolBar("工作区"); toolbar->setMovable(false); toolbar->setObjectName("workspaceBar");
         auto *brand = new QLabel("  多协议调试工作台  "); brand->setObjectName("brand"); toolbar->addWidget(brand);
@@ -646,10 +656,10 @@ public:
 };
 
 static const char *style = R"(
-QWidget { font-family: 'Microsoft YaHei UI', 'Segoe UI'; font-size: 12px; color: #22344a; }
+QWidget { font-family: 'Microsoft YaHei UI', 'Segoe UI'; font-size: 13px; color: #22344a; }
 QMainWindow { background: #e8eef4; }
 QToolBar#workspaceBar { background: #142b46; padding: 10px; spacing: 8px; border: 0; }
-QToolBar#workspaceBar QToolButton { color: #eaf3ff; padding: 7px 10px; border-radius: 4px; }
+QToolBar#workspaceBar QToolButton { color: #eaf3ff; background: #223f5b; border: 1px solid #49617b; padding: 7px 10px; border-radius: 4px; }
 QToolBar#workspaceBar QToolButton:hover { background: #294663; }
 QLabel#brand { color: white; font-size: 17px; font-weight: 600; }
 QLabel#prototypeBadge { color: #80dbcc; }

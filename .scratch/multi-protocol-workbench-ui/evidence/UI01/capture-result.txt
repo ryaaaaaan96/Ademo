@@ -1,0 +1,1 @@
+QQuickWidget Ready; captures completed. No hardware used.

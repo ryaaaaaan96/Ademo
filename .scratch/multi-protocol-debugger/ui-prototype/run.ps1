@@ -1,4 +1,4 @@
-param([switch]$Capture, [switch]$BuildOnly)
+param([switch]$Capture, [switch]$NativeCapture, [switch]$BuildOnly)
 $ErrorActionPreference = 'Stop'
 $prototypeRoot = $PSScriptRoot
 $qtRoot = 'C:/Qt/6.12.0/llvm-mingw_64'
@@ -13,14 +13,15 @@ try {
     if ($LASTEXITCODE -ne 0) { throw '原型构建失败' }
     if ($BuildOnly) { return }
     $app = "$prototypeRoot/build/debugger_ui_prototype.exe"
-    if ($Capture) {
+    if ($Capture -or $NativeCapture) {
         $oldPlatform = $env:QT_QPA_PLATFORM
         $oldBackend = $env:QT_QUICK_BACKEND
         try {
-            $env:QT_QPA_PLATFORM = 'offscreen'
-            $env:QT_QUICK_BACKEND = 'software'
-            & $app --capture
-            if ($LASTEXITCODE -ne 0) { throw '原型截图运行失败' }
+            $env:QT_QPA_PLATFORM = if ($NativeCapture) { 'windows' } else { 'offscreen' }
+            $env:QT_QUICK_BACKEND = if ($NativeCapture) { $null } else { 'software' }
+            $windowStyle = if ($NativeCapture) { 'Normal' } else { 'Hidden' }
+            $captureProcess = Start-Process -FilePath $app -ArgumentList '--capture' -WorkingDirectory $prototypeRoot -WindowStyle $windowStyle -Wait -PassThru
+            if ($captureProcess.ExitCode -ne 0) { throw "原型截图运行失败：$($captureProcess.ExitCode)" }
         } finally { $env:QT_QPA_PLATFORM = $oldPlatform; $env:QT_QUICK_BACKEND = $oldBackend }
     } else {
         # 用户直接操作的原型窗口需要可见；没有后台服务。
