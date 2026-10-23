@@ -1,0 +1,17 @@
+49f143e59b804b871725f27278b2357894df876f4843de4896a1a9c87739fcef  build/qt-llvm-debug/bin/trace_tests.exe
+7647232fe761d0afdb0e63b559d55c6f7483c35843c7eb79a2fe719c3d982d7d  build/qt-llvm-debug/bin/session_tests.exe
+4f5e6c61d1d19746258667c84692614cc120b7a631ce0e787bce4d47aa0f0a7c  build/qt-llvm-debug/bin/recording_tests.exe
+26080b515ea5bd1ab0089ac55eaa9dacac4508145c553dbcbaba1cc9b1d93e5b  .scratch/multi-protocol-debugger/evidence/trace-eviction-reviewfix/01-open-error.png
+ba68e3c02f1b0d7a4489dded44931bb36d53249eed88e67e4b5fe35b1c7e5848  .scratch/multi-protocol-debugger/evidence/trace-eviction-reviewfix/02-running-controlled.png
+d3bbf811e56ebe555f05909e928727e04ca5d5a85a6ddbd423cbc4b02599e070  .scratch/multi-protocol-debugger/evidence/trace-eviction-reviewfix/03-stopped-controlled.png
+35131390c28d71d79f09c80fd464f52d7b9afbd8544597b60f89fbbd20adb478  .scratch/multi-protocol-debugger/evidence/trace-eviction-reviewfix/acceptance.md
+34eb3c41796ed10a60e06bb61cafee16dd36552ceae33a4fd91efd97fefb8b1c  .scratch/multi-protocol-debugger/evidence/trace-eviction-reviewfix/build-red.log
+f8f5a9331ccb6884804b6af82486e84070328b76d6c20dbd3b2a0267c228e6e5  .scratch/multi-protocol-debugger/evidence/trace-eviction-reviewfix/build.log
+7e01a77ab8fbd8b50be27bbb83548d8d5e83bd73f440f37e0a6888602dba40a2  .scratch/multi-protocol-debugger/evidence/trace-eviction-reviewfix/configure.log
+451952e1ad946fd3e69ab4c35ab7c97c790107170f20f3e306717e82fdc7a41b  .scratch/multi-protocol-debugger/evidence/trace-eviction-reviewfix/ctest.log
+8f22a50a8e06b2e83f1d0c4c3017d2a4d7023040fb57cb9bd61ed67a90cff9be  .scratch/multi-protocol-debugger/evidence/trace-eviction-reviewfix/recording-archive-controlled.png
+b7a5ca405a35a5581bd79c07a15c9637fc3c1f6cc1c7cc491d75a9fdb865fd4f  .scratch/multi-protocol-debugger/evidence/trace-eviction-reviewfix/recording-results.txt
+0fdee8cb1f0afaf01a84114248c89c4cf6f44bae8c2199d3871af60bf08c75c1  .scratch/multi-protocol-debugger/evidence/trace-eviction-reviewfix/red-results.txt
+2963b0e6d739a77d4a9079dd0fa5c698caa899045ec12fd7cb943b25bcf7cafc  .scratch/multi-protocol-debugger/evidence/trace-eviction-reviewfix/test-results.txt
+318eede61f90026017289bb5123b958537b6baf917c33d0d59478168398cff75  .scratch/multi-protocol-debugger/evidence/trace-eviction-reviewfix/trace-query-export.png
+ebcbec1c08fc6f3d6a6ac64da65f4986d59c2763d92f741cb2a7773ef81dec0b  .scratch/multi-protocol-debugger/evidence/trace-eviction-reviewfix/trace-results.txt

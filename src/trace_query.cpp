@@ -26,7 +26,10 @@ bool DebugSession::configureTrace(TraceLimits limits, QString *error)
     while (traces_.size() > limits.records) { traces_.removeFirst(); ++expiredTraces_; }
     while (messages_.size() > limits.messages) { messages_.removeFirst(); ++expiredMessages_; }
     for (qsizetype i = 0; operations_.size() > limits.operations && i < operations_.size();) {
-        if (operations_[i].finished) { operations_.removeAt(i); ++expiredOperations_; }
+        if (operations_[i].finished) {
+            sendAttempts_.remove(operations_[i].request.id);
+            operations_.removeAt(i); ++expiredOperations_;
+        }
         else ++i;
     }
     if (!notificationTimer_.isActive()) notificationTimer_.start();

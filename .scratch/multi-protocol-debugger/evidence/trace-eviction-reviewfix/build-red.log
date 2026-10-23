@@ -1,0 +1,54 @@
+[1/48] Automatic MOC for target trace_fixture_plugin
+[2/48] Automatic MOC for target incompatible_plugin
+[3/48] Automatic MOC for target serial_plugin
+[4/48] Automatic MOC for target debugger_host
+[5/48] Building CXX object CMakeFiles/trace_fixture_plugin.dir/trace_fixture_plugin_autogen/mocs_compilation.cpp.obj
+[6/48] Building CXX object CMakeFiles/incompatible_plugin.dir/incompatible_plugin_autogen/mocs_compilation.cpp.obj
+[7/48] Automatic MOC for target modbus_plugin
+[8/48] Building CXX object CMakeFiles/serial_plugin.dir/serial_plugin_autogen/mocs_compilation.cpp.obj
+[9/48] Building CXX object CMakeFiles/trace_fixture_plugin.dir/tests/trace_fixture_plugin.cpp.obj
+[10/48] Building CXX object CMakeFiles/incompatible_plugin.dir/tests/incompatible_plugin.cpp.obj
+[11/48] Building CXX object CMakeFiles/debugger_host.dir/debugger_host_autogen/mocs_compilation.cpp.obj
+[12/48] Building CXX object CMakeFiles/debugger_host.dir/src/session_recovery.cpp.obj
+[13/48] Building CXX object CMakeFiles/serial_plugin.dir/plugins/serial.cpp.obj
+[14/48] Building CXX object CMakeFiles/debugger_host.dir/src/workspace.cpp.obj
+[15/48] Building CXX object CMakeFiles/modbus_plugin.dir/modbus_plugin_autogen/mocs_compilation.cpp.obj
+[16/48] Building CXX object CMakeFiles/debugger_host.dir/src/trace_query.cpp.obj
+[17/48] Building CXX object CMakeFiles/debugger_host.dir/src/workbench.cpp.obj
+[18/48] Building CXX object CMakeFiles/debugger_host.dir/src/trace_panel.cpp.obj
+[19/48] Building CXX object CMakeFiles/debugger_host.dir/src/trace_codec.cpp.obj
+[20/48] Building CXX object CMakeFiles/debugger_host.dir/src/archive_format.cpp.obj
+[21/48] Building CXX object CMakeFiles/debugger_host.dir/src/host.cpp.obj
+[22/48] Building CXX object CMakeFiles/debugger_host.dir/src/recording.cpp.obj
+[23/48] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/write_pdu.cpp.obj
+[24/48] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/rtu_slave.cpp.obj
+[25/48] Building CXX object CMakeFiles/debugger_host.dir/src/recording_panel.cpp.obj
+[26/48] Linking CXX shared module bin\fixtures\libincompatible_plugin.dll
+[27/48] Linking CXX shared module bin\trace-fixtures\libtrace_fixture_plugin.dll
+[28/48] Linking CXX shared module bin\plugins\libserial_plugin.dll
+[29/48] Building CXX object CMakeFiles/debugger_host.dir/src/archive_query.cpp.obj
+[30/48] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/rtu_session.cpp.obj
+[31/48] Linking CXX static library libdebugger_host.a
+[32/48] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/modbus.cpp.obj
+[33/48] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_edit.cpp.obj
+[34/48] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_view.cpp.obj
+[35/48] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_edit_view.cpp.obj
+[36/48] Linking CXX shared module bin\plugins\libmodbus_plugin.dll
+[37/48] Automatic MOC for target trace_tests
+[38/48] Automatic MOC for target session_tests
+[39/48] Building CXX object CMakeFiles/trace_tests.dir/trace_tests_autogen/mocs_compilation.cpp.obj
+[40/48] Building CXX object CMakeFiles/session_tests.dir/session_tests_autogen/mocs_compilation.cpp.obj
+[41/48] Building CXX object CMakeFiles/session_tests.dir/tests/session_tests.cpp.obj
+[42/48] Building CXX object CMakeFiles/trace_tests.dir/tests/trace_tests.cpp.obj
+[43/48] Linking CXX executable bin\trace_tests.exe
+[44/48] Linking CXX executable bin\session_tests.exe
+[45/48] Automatic MOC for target recording_tests
+[46/48] Building CXX object CMakeFiles/recording_tests.dir/recording_tests_autogen/mocs_compilation.cpp.obj
+[47/48] Building CXX object CMakeFiles/recording_tests.dir/tests/recording_tests.cpp.obj
+[48/48] Linking CXX executable bin\recording_tests.exe
+[1/13] Automatic MOC for target modbus_plugin
+[2/11] Automatic MOC for target serial_plugin
+[3/9] Automatic MOC for target trace_fixture_plugin
+[4/7] Automatic MOC for target trace_tests
+[5/6] Building CXX object CMakeFiles/trace_tests.dir/tests/trace_tests.cpp.obj
+[6/6] Linking CXX executable bin\trace_tests.exe
