@@ -18,7 +18,7 @@ d5460cc10bc0a3e7d8912b471951cc590f0b60fd072d9ba2b401c7de68c00fbb  .scratch/multi
 d019073e45c6c6427e53829f4405205c84d093caa77fa3969c19b9f30ac381e6  .scratch/multi-protocol-workbench-ui/evidence/UI01/09-qmainwindow-session-content.png
 0058854177a4fa65f4c2c31e9d3b9a226187e890249ad90d45d080ca6624c952  .scratch/multi-protocol-workbench-ui/evidence/UI01/10-qmainwindow-plot-content.png
 32a81526e05c17de38ea6d26426f82ca8a5984f9b81045eaec99439f871f8aba  .scratch/multi-protocol-workbench-ui/evidence/UI01/11-drag-docked-workbench.png
-fbc80af038e6aa24ccd30946bf86d8f1547682a80b5c3cf6f828f2f886839cdc  .scratch/multi-protocol-workbench-ui/evidence/UI01/acceptance.md
+0d3a30a932afdf4b991b204c9a647d98ebc494869c8574bf95eb7993db0cedfe  .scratch/multi-protocol-workbench-ui/evidence/UI01/acceptance.md
 8e89bcbff81cadfb959ef9934baafe397fe99e2c56b6d7d9cde80d2a183c24fb  .scratch/multi-protocol-workbench-ui/evidence/UI01/capture-result.txt
 b0c5f7baa4a9693af987da0c4deb602520a633ca11409fd0cbae3bcff32cf254  .scratch/multi-protocol-workbench-ui/evidence/UI01/centered-floating-placement.txt
 8e89bcbff81cadfb959ef9934baafe397fe99e2c56b6d7d9cde80d2a183c24fb  .scratch/multi-protocol-workbench-ui/evidence/UI01/drag-dock-capture-result.txt

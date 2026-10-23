@@ -16,7 +16,7 @@ Status: ready-for-agent
 
 | 编号 | 可交付流程 | Status | Blocked by | 执行记录 |
 | --- | --- | --- | --- | --- |
-| [UI01](issues/01-prototype-layout-and-flow.md) | 确认可操作原型的布局与关键流程 | ready-for-agent | 无 | 原型已修正并启动，待用户操作确认 |
+| [UI01](issues/01-prototype-layout-and-flow.md) | 确认可操作原型的布局与关键流程 | ready-for-agent | 无 | 已完成；2026-10-23 用户确认，原型 bb3aa81 |
 | [UI02](issues/02-window-first-rtu-read.md) | 在新的调试窗口完成一次 RTU 读取 | ready-for-agent | UI01 | 未启动 |
 | [UI03](issues/03-dockable-session-lifecycle.md) | 同时运行并管理多个可停靠调试窗口 | ready-for-agent | UI02 | 未启动 |
 | [UI04](issues/04-parameter-json-groups-read.md) | 加载 JSON 分组并按参数或地址读取设备 | ready-for-agent | UI02 | 未启动 |
@@ -39,7 +39,7 @@ Status: ready-for-agent
 
 ## 执行门槛
 
-- 本轮仅继续 UI01：复用现有独立 Qt 原型，必要修正、启动供用户操作。用户明确确认界面前，不开始 UI02 或其他正式产品改造。
+- 用户于 2026-10-23 明确确认 UI01，批准进入 UI02–UI13 正式实施。以 codex/workbench-ui-integration 为集成分支，每项使用独立 worktree 和分支，按依赖验证并合入。UI13 正式产品操作验收单独记录。
 - UI02 后 UI03/UI04 可分别推进；UI05 后 UI06/UI07 可分别推进；按真实依赖逐项验证，不人为增加框架前置。
 - UI13 祖先覆盖全部新界面软件流程。UI13 后旧13仍需独立对端、真实串口与拓扑，不能用模拟替代。
 - 旧14/15等待真实 UPP/CAN 规范与硬件；TCP 不越过既定 UPP 阶段；旧19仍需正式交付环境。本轮不启动旧13–19。
@@ -54,3 +54,7 @@ Status: ready-for-agent
 ### 2026-10-23：UI01 已具备操作入口，尚未完成用户验收
 
 复用并修正已有原型，原生 Qt/QML 截图冒烟通过；空从站保存崩溃已修复并独立复核。既有产品完整 Debug CTest 11/11、238项通过，产品代码未变。已通过 CMD 入口重新打开原型供用户操作，见 [UI01 准备证据与反馈项](evidence/UI01/acceptance.md)。Standards / Spec 代码审查均无剩余问题，但用户确认项仍未勾选；UI02–UI13及旧13–19未启动。
+
+### 2026-10-23：UI01 用户确认并授权正式实施
+
+用户明确表示“前端完成了可以开始接下来的实施了”，并调用 implement-spec。UI01 以 bb3aa81 原型为接受基准：白底通信记录、会话和绘图的 QMainWindow 系统三按钮、拖动悬停停靠／平铺、点击浮动居中。按综合实施索引进入 UI02–UI13，每项独立 worktree 和分支，验证后合入 codex/workbench-ui-integration。该确认来自用户反馈，不把程序冒烟扩称为人工逐步测试，也不代替 UI13 正式产品验收。旧13等待真实硬件，旧14–19不启动。
