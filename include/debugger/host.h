@@ -26,6 +26,7 @@ public:
     ProtocolPlugin *protocol(const QString &) const;
     TransportPlugin *transport(const QString &) const;
     QWidget *createView(const QString &, QWidget *parent, SessionAccess = {});
+    ParameterView *createParameterView(const QString &, QWidget *parent, SessionAccess = {});
     bool acquire(const QString &key);
     void release(const QString &key);
 private:
@@ -150,6 +151,7 @@ public:
     bool closeSession(int index);
     int sessionCount() const;
     DebugSession *session(int index) const;
+    ParameterView *parameterView(int index) const;
     SessionConfig sessionConfiguration(int index) const;
     int currentSessionIndex() const;
     void selectSession(int index);

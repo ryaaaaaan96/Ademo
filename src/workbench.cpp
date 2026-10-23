@@ -14,6 +14,10 @@
 #include <QScrollArea>
 #include <QFileDialog>
 #include <QDir>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QPlainTextEdit>
+#include <QStackedWidget>
 
 namespace debugger {
 class SessionPane final : public QWidget {
@@ -23,6 +27,7 @@ public:
     void loadConfiguration(const SessionConfig &);
     SessionConfig configuration() const;
     DebugSession session_;
+    ParameterView *parameterView_ = nullptr;
 private:
     std::shared_ptr<PluginCatalog> catalog_;
     QWidget *view_ = nullptr;
@@ -36,6 +41,11 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     setWindowTitle(QStringLiteral("多协议调试工具 · RTU 会话"));
     resize(680, 540);
     auto *outer = new QVBoxLayout(this);
+    auto *connection = new QDialog(this);
+    connection->setWindowTitle(QStringLiteral("连接配置"));
+    auto *connectionLayout = new QVBoxLayout(connection);
+    auto *configure = new QPushButton(QStringLiteral("连接配置…"), this);
+    connect(configure, &QPushButton::clicked, connection, [connection] { connection->show(); connection->raise(); });
     auto *scroll = new QScrollArea(this);
     scroll->setObjectName("sessionContent");
     scroll->setWidgetResizable(true);
@@ -55,10 +65,10 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     form->addRow(QStringLiteral("协议"), protocol);
     form->addRow(QStringLiteral("传输"), transport);
     form->addRow(QStringLiteral("角色"), role);
-    layout->addWidget(formWidget);
+    connectionLayout->addWidget(formWidget);
     auto *endpointWidget = new QWidget(this);
     auto *endpointForm = new QFormLayout(endpointWidget);
-    layout->addWidget(endpointWidget);
+    connectionLayout->addWidget(endpointWidget);
     auto editors = std::make_shared<QMap<QString, QWidget *>>();
     auto updateTransport = [this, transport, endpointForm, editors] {
         while (endpointForm->rowCount()) endpointForm->removeRow(0);
@@ -94,11 +104,30 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
         role->clear();
         delete view_;
         view_ = nullptr;
+        parameterView_ = nullptr;
         auto *p = catalog_->protocol(protocol->currentData().toString());
         if (!p) return;
         for (const auto &r : p->describe().roles) role->addItem(r, r);
-        view_ = catalog_->createView(p->describe().id, this, session_.access());
-        if (view_) layout->addWidget(view_);
+        auto *pages = new QWidget(this);
+        auto *pageLayout = new QVBoxLayout(pages);
+        auto *stack = new QStackedWidget(pages);
+        parameterView_ = catalog_->createParameterView(p->describe().id, stack, session_.access());
+        if (parameterView_) stack->addWidget(parameterView_);
+        auto *legacy = catalog_->createView(p->describe().id, stack, session_.access());
+        if (legacy) {
+            stack->addWidget(legacy);
+            if (parameterView_) {
+                auto *compatibility = new QPushButton(QStringLiteral("兼容操作页"), pages);
+                compatibility->setCheckable(true);
+                pageLayout->addWidget(compatibility);
+                connect(compatibility, &QPushButton::toggled, stack, [stack, legacy, parameters = parameterView_](bool checked) {
+                    stack->setCurrentWidget(checked ? legacy : parameters);
+                });
+            }
+        }
+        pageLayout->addWidget(stack, 1);
+        view_ = pages;
+        layout->insertWidget(0, view_, 1);
     };
     rebuildProtocol_ = updateProtocol;
     connect(transport, &QComboBox::currentIndexChanged, this, updateTransport);
@@ -115,9 +144,10 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     status->setWordWrap(true);
     auto *diagnostics = new QLabel(catalog_->diagnostics().join('\n'), this);
     diagnostics->setWordWrap(true);
-    outer->addWidget(start);
-    outer->addWidget(stop);
-    outer->addWidget(reconnect);
+    auto *controls = new QHBoxLayout;
+    controls->addWidget(start); controls->addWidget(stop); controls->addWidget(configure);
+    outer->addLayout(controls);
+    connectionLayout->addWidget(reconnect);
     auto *recovery = new QHBoxLayout;
     auto *automatic = new QCheckBox(QStringLiteral("断线自动重连"), this);
     automatic->setObjectName("autoReconnect");
@@ -127,7 +157,10 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     interval->setObjectName("reconnectIntervalMs"); interval->setRange(10, 60000); interval->setValue(1000);
     interval->setSuffix(QStringLiteral(" ms"));
     recovery->addWidget(automatic); recovery->addWidget(restore); recovery->addWidget(interval);
-    outer->addLayout(recovery);
+    connectionLayout->addLayout(recovery);
+    auto *done = new QDialogButtonBox(QDialogButtonBox::Close, connection);
+    connect(done, &QDialogButtonBox::rejected, connection, &QDialog::hide);
+    connectionLayout->addWidget(done);
     auto updateRecovery = [this, automatic, restore, interval] {
         auto policy = session_.config().recovery;
         policy["autoReconnect"] = automatic->isChecked(); policy["restorePolling"] = restore->isChecked();
@@ -140,6 +173,28 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     outer->addWidget(diagnostics);
     outer->addWidget(scroll, 1);
     updateProtocol();
+    auto *basicRecords = new QPlainTextEdit(this);
+    basicRecords->setAccessibleName(QStringLiteral("本会话通信记录"));
+    basicRecords->setReadOnly(true); basicRecords->setMaximumBlockCount(100);
+    basicRecords->setMinimumHeight(100); basicRecords->setMaximumHeight(160);
+    basicRecords->setStyleSheet("QPlainTextEdit { background: white; color: #223344; }");
+    outer->addWidget(new QLabel(QStringLiteral("本会话通信记录"), this));
+    outer->addWidget(basicRecords);
+    auto updateBasicRecords = [this, basicRecords] {
+        const auto records = session_.traces();
+        QStringList lines;
+        if (session_.expiredTraceCount()) lines << QStringLiteral("较早的 %1 条原始记录已过期").arg(session_.expiredTraceCount());
+        const auto start = qMax(qsizetype(0), records.size() - 80);
+        for (auto i = start; i < records.size(); ++i) {
+            const auto &r = records[i];
+            lines << QStringLiteral("%1 · #%2 · %3 · %4 · %5").arg(r.observedUtc.toLocalTime().toString("HH:mm:ss.zzz"))
+                .arg(r.id).arg(r.kind, QString::fromLatin1(r.bytes.toHex(' ')), r.detail);
+        }
+        const auto text = lines.join('\n');
+        if (text != basicRecords->toPlainText()) basicRecords->setPlainText(text);
+    };
+    connect(&session_, &DebugSession::changed, basicRecords, updateBasicRecords);
+    updateBasicRecords();
     layout->addWidget(new TracePanel(session_, this));
     layout->addWidget(new RecordingPanel(session_, this));
     auto refresh = [this, formWidget, endpointWidget, protocol, transport, role, start, stop, reconnect, status] {
@@ -290,6 +345,11 @@ DebugSession *Workbench::session(int index) const
 {
     auto *pane = dynamic_cast<SessionPane *>(tabs_->widget(index));
     return pane ? &pane->session_ : nullptr;
+}
+ParameterView *Workbench::parameterView(int index) const
+{
+    auto *pane = dynamic_cast<SessionPane *>(tabs_->widget(index));
+    return pane ? pane->parameterView_ : nullptr;
 }
 SessionConfig Workbench::sessionConfiguration(int index) const
 {
