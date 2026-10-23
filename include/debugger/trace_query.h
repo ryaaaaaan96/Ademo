@@ -23,6 +23,7 @@ struct ResolvedSource {
 struct TraceSnapshot {
     QString sessionId;
     QJsonObject retention; // 归档丢失/轮换及查询完整性；进程内查询为空。
+    QJsonObject sessionConfiguration;
     QList<TraceRecord> records;
     QList<Message> messages;
     QList<OperationSnapshot> operations;

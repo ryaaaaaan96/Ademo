@@ -271,6 +271,10 @@ void DiskRecorder::State::run()
         if (healthy) { std::lock_guard<std::mutex> guard(mutex); if (!stopping) stats.state = "running"; }
     }
     const bool initialized = healthy;
+    if (!initialized) {
+        // 初始化失败后仅排空已接纳事件并结束后台任务；不等待不可写的 dirty 标记。
+        std::lock_guard<std::mutex> guard(mutex); stopping = true; lossDirty = false;
+    }
     while (true) {
         std::deque<Entry> batch;
         bool stop = false;
@@ -282,7 +286,7 @@ void DiskRecorder::State::run()
             }
             stats.queuedItems = int(queue.size()); stop = stopping && queue.empty();
         }
-        if (!batch.empty() && beforeBatch) beforeBatch(); // 注入慢存储的测试 seam，不持有队列锁。
+        if (healthy && !batch.empty() && beforeBatch) beforeBatch(); // 注入慢存储的测试 seam，不持有队列锁。
         for (const auto &entry : batch) {
             if (!healthy) { lost(entry.identity); continue; }
             if (!current.isOpen() || current.size() + entry.line.size() > options.segmentBytes) {
@@ -334,8 +338,7 @@ bool DebugSession::startRecording(RecordingOptions options, QString *error, std:
         if (error) *error = QStringLiteral("上一记录器仍在清理文件，请稍后重试"); return false;
     }
     recorder_ = std::make_unique<DiskRecorder>(std::move(options), sessionId_, std::move(beforeBatch));
-    recorder_->append({{"type", "session"}, {"protocolId", config_.protocolId}, {"transportId", config_.transportId},
-        {"role", config_.role}, {"endpoint", config_.endpoint}, {"protocol", config_.protocol}});
+    recordSessionConfiguration();
     for (const auto &operation : operations_) recordOperation(operation);
     emit changed(); return true;
 }
@@ -356,5 +359,10 @@ void DebugSession::recordTrace(const TraceRecord &record)
 void DebugSession::recordOperation(const OperationSnapshot &operation)
 {
     if (recorder_) recorder_->append(tracecodec::encode(operation));
+}
+void DebugSession::recordSessionConfiguration()
+{
+    if (recorder_) recorder_->append({{"type", "session"}, {"protocolId", config_.protocolId}, {"transportId", config_.transportId},
+        {"role", config_.role}, {"endpoint", config_.endpoint}, {"protocol", config_.protocol}, {"recovery", config_.recovery}});
 }
 }

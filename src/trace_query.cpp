@@ -36,6 +36,8 @@ TraceSnapshot DebugSession::queryTrace(const TraceFilter &filter) const
 {
     TraceSnapshot all;
     all.sessionId = sessionId_; all.records = traces_; all.messages = messages_; all.operations = operations_;
+    all.sessionConfiguration = {{"protocolId", config_.protocolId}, {"transportId", config_.transportId}, {"role", config_.role},
+        {"endpoint", config_.endpoint}, {"protocol", config_.protocol}, {"recovery", config_.recovery}};
     all.expiredRecords = expiredTraces_; all.expiredMessages = expiredMessages_; all.expiredOperations = expiredOperations_;
     return filterSnapshot(all, filter);
 }
@@ -160,6 +162,7 @@ ExportResult writeSnapshot(const TraceSnapshot &snapshot, const QString &path, c
     if (format == "csv") row({"type", "id", "operationId", "utc", "state", "detail", "sourceRefs", "availability"});
     QJsonObject summary{{"type", "manifest"}, {"schemaVersion", 1}, {"snapshot", true},
         {"sessionId", snapshot.sessionId}, {"retention", snapshot.retention},
+        {"sessionConfiguration", snapshot.sessionConfiguration},
         {"expiredRecords", idString(snapshot.expiredRecords)}, {"expiredMessages", idString(snapshot.expiredMessages)},
         {"expiredOperations", idString(snapshot.expiredOperations)}, {"omittedObservedRefs", idString(snapshot.omittedObservedRefs)},
         {"requestedOperationMissing", snapshot.requestedOperationMissing}, {"requestedMessageMissing", snapshot.requestedMessageMissing}};

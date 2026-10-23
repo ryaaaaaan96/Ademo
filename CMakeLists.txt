@@ -10,8 +10,8 @@ target_include_directories(debugger_sdk INTERFACE include)
 target_link_libraries(debugger_sdk INTERFACE Qt6::Widgets)
 # 配套交付指纹：SDK、产品、Qt、编译器与配置必须一致。
 target_compile_definitions(debugger_sdk INTERFACE
-  DEBUGGER_BUILD_KEY="sdk6-product0.2-qt${Qt6_VERSION}-${CMAKE_CXX_COMPILER_ID}${CMAKE_CXX_COMPILER_VERSION}-${CMAKE_SYSTEM_PROCESSOR}-$<CONFIG>")
-add_library(debugger_host STATIC src/host.cpp src/workbench.cpp src/trace_query.cpp src/trace_panel.cpp
+  DEBUGGER_BUILD_KEY="sdk7-product0.2-qt${Qt6_VERSION}-${CMAKE_CXX_COMPILER_ID}${CMAKE_CXX_COMPILER_VERSION}-${CMAKE_SYSTEM_PROCESSOR}-$<CONFIG>")
+add_library(debugger_host STATIC src/session_recovery.cpp src/host.cpp src/workbench.cpp src/trace_query.cpp src/trace_panel.cpp
   src/trace_codec.cpp src/recording.cpp src/archive_query.cpp src/archive_format.cpp src/recording_panel.cpp include/debugger/host.h)
 target_link_libraries(debugger_host PUBLIC debugger_sdk)
 foreach(plugin IN ITEMS modbus serial)
@@ -28,6 +28,11 @@ add_executable(multi_protocol_debugger WIN32 src/main.cpp)
 target_link_libraries(multi_protocol_debugger PRIVATE debugger_host)
 add_dependencies(multi_protocol_debugger modbus_plugin serial_plugin)
 enable_testing()
+add_executable(session_recovery_tests tests/session_recovery_tests.cpp)
+target_link_libraries(session_recovery_tests PRIVATE debugger_host Qt6::Test)
+add_dependencies(session_recovery_tests modbus_plugin serial_plugin)
+add_test(NAME parallel_sessions_recovery COMMAND session_recovery_tests -o recovery-results.txt,txt)
+set_tests_properties(parallel_sessions_recovery PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=windows" TIMEOUT 30)
 target_sources(modbus_plugin PRIVATE plugins/slave_edit.cpp plugins/slave_edit_view.cpp)
 add_executable(slave_edit_tests tests/slave_edit_tests.cpp)
 target_link_libraries(slave_edit_tests PRIVATE debugger_host Qt6::Test)

@@ -248,7 +248,7 @@ private:
         QList<quint64> available;
         for (const auto &record : records) {
             available.append(record.id);
-            lines << QStringLiteral("#%1 run=%2 %3 us %4 %5 %6")
+            lines << QStringLiteral("#%1 epoch=%2 %3 us %4 %5 %6")
                 .arg(record.id).arg(record.generation).arg(record.monotonicUs)
                 .arg(record.kind, QString::fromLatin1(record.bytes.toHex(' ')), record.detail);
         }
@@ -294,6 +294,7 @@ public:
     }
     QWidget *createView(SessionAccess access, QWidget *parent) override {
         auto *tabs = new QTabWidget(parent);
+        tabs->setObjectName("protocolTabs");
         tabs->addTab(new RtuView(access, tabs), QStringLiteral("主站观测与设备写入"));
         tabs->addTab(createSlaveView(std::move(access), tabs), QStringLiteral("从站文件与模拟数据"));
         return tabs;

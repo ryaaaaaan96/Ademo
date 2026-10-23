@@ -13,6 +13,8 @@ public:
     LocalState localState() const override { return slave_ ? slave_->localState() : LocalState{}; }
     void activate() override;
     void stop() override;
+    void connectionLost(const QString &) override;
+    void connectionRestored(bool resumePolling) override;
     void submit(const OperationRequest &) override;
     void onInput(const TraceRecord &) override;
     void onSent(quint64, bool, const QString &, qint64 observedUs) override;
@@ -62,6 +64,7 @@ private:
     QMap<QString, quint64> uncertainReads_; // 有界：记录曾耗尽的响应形状，不假定隔离能排除任意迟到。
     bool freshnessUncertain_ = false;
     bool allReadsUncertain_ = false;
+    bool pollingPaused_ = false;
     QMap<quint64, qsizetype> pollOperations_;
     QString responseShape() const;
 };

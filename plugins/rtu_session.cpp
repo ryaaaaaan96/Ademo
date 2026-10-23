@@ -71,6 +71,7 @@ QString RtuSession::configureSettings(const QJsonObject &settings)
     retryIntervalUs_ = qint64(interval) * 1000;
     polls_ = std::move(polls);
     nextPoll_ = 0;
+    pollingPaused_ = false;
     return {};
 }
 void RtuSession::activate()
@@ -91,6 +92,31 @@ void RtuSession::stop()
     buffer_.clear();
     sources_.clear();
     sourceRanges_.clear();
+}
+void RtuSession::connectionLost(const QString &reason)
+{
+    if (slave_) { slave_->stop(); return; } // 只清连接IO，模拟设备与后台文件任务留在原实例。
+    active_ = false;
+    if (request_.id && !write_.function) {
+        if (uncertainReads_.size() >= 64 && !uncertainReads_.contains(responseShape())) allReadsUncertain_ = true;
+        else uncertainReads_[responseShape()] = request_.id;
+    }
+    if (request_.id) finish("transport-error", reason);
+    for (const auto &request : pending_) services_.publish({request.id, "transport-error", reason, {}});
+    pending_.clear();
+    pollOperations_.clear();
+    buffer_.clear(); sources_.clear(); sourceRanges_.clear();
+    brokenFrame_ = oversizedFrame_ = haveInput_ = false;
+    phase_ = Phase::Idle;
+}
+void RtuSession::connectionRestored(bool resumePolling)
+{
+    if (slave_) { slave_->activate(); return; }
+    active_ = true;
+    uncertain_ = false;
+    pollingPaused_ = !resumePolling;
+    lastActivityUs_ = services_.nowUs();
+    for (auto &task : polls_) task.dueUs = lastActivityUs_;
 }
 void RtuSession::submit(const OperationRequest &request)
 {
@@ -364,7 +390,7 @@ void RtuSession::tick()
     if (phase_ == Phase::Quarantine && now >= retryReadyUs_) phase_ = Phase::Idle;
     if (phase_ == Phase::Idle && !request_.id) {
         if (!pending_.isEmpty()) begin(pending_.takeFirst());
-        else if (!polls_.isEmpty() && services_.submit) {
+        else if (!pollingPaused_ && !polls_.isEmpty() && services_.submit) {
             for (qsizetype i = 0; i < polls_.size(); ++i) {
                 const auto index = (nextPoll_ + i) % polls_.size();
                 auto &task = polls_[index];

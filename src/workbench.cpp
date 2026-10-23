@@ -1,20 +1,43 @@
 #include "debugger/host.h"
 #include <QComboBox>
 #include <QCloseEvent>
+#include <QCheckBox>
+#include <QSpinBox>
+#include <QHBoxLayout>
 #include <QFormLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QTabWidget>
+#include <QSignalBlocker>
+#include <QScrollArea>
 
 namespace debugger {
-Workbench::Workbench(std::shared_ptr<PluginCatalog> catalog, QWidget *parent,
+class SessionPane final : public QWidget {
+public:
+    SessionPane(std::shared_ptr<PluginCatalog>, QWidget *, DebugSession::EndpointFactory, std::function<qint64()>);
+    ~SessionPane() override;
+    void loadConfiguration(const SessionConfig &);
+    SessionConfig configuration() const;
+    DebugSession session_;
+private:
+    std::shared_ptr<PluginCatalog> catalog_;
+    QWidget *view_ = nullptr;
+};
+SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent,
                      DebugSession::EndpointFactory factory, std::function<qint64()> clock)
-    : QWidget(parent), catalog_(std::move(catalog)), session_(catalog_, nullptr, std::move(factory), std::move(clock))
+    : QWidget(parent), session_(catalog, nullptr, std::move(factory), std::move(clock)), catalog_(std::move(catalog))
 {
     setWindowTitle(QStringLiteral("多协议调试工具 · RTU 会话"));
     resize(680, 540);
-    auto *layout = new QVBoxLayout(this);
+    auto *outer = new QVBoxLayout(this);
+    auto *scroll = new QScrollArea(this);
+    scroll->setObjectName("sessionContent");
+    scroll->setWidgetResizable(true);
+    auto *content = new QWidget(scroll);
+    scroll->setWidget(content);
+    auto *layout = new QVBoxLayout(content);
     auto *formWidget = new QWidget(this);
     auto *form = new QFormLayout(formWidget);
     auto *protocol = new QComboBox(formWidget);
@@ -53,7 +76,14 @@ Workbench::Workbench(std::shared_ptr<PluginCatalog> catalog, QWidget *parent,
             endpointForm->addRow(field.label, editor);
         }
     };
-    auto updateProtocol = [this, protocol, role, layout] {
+    auto selectedProtocol = std::make_shared<int>(protocol->currentIndex());
+    auto updateProtocol = [this, protocol, role, layout, selectedProtocol] {
+        if (view_ && !session_.resolveUnsaved()) {
+            const QSignalBlocker blocker(protocol);
+            protocol->setCurrentIndex(*selectedProtocol);
+            return;
+        }
+        *selectedProtocol = protocol->currentIndex();
         role->clear();
         delete view_;
         view_ = nullptr;
@@ -68,6 +98,8 @@ Workbench::Workbench(std::shared_ptr<PluginCatalog> catalog, QWidget *parent,
     updateTransport();
     auto *start = new QPushButton(QStringLiteral("启动会话"), this);
     auto *stop = new QPushButton(QStringLiteral("停止并释放端点"), this);
+    auto *reconnect = new QPushButton(QStringLiteral("按当前运行配置重连（保留运行数据）"), this);
+    reconnect->setObjectName("reconnect");
     start->setObjectName("start");
     stop->setObjectName("stop");
     auto *status = new QLabel(this);
@@ -75,19 +107,39 @@ Workbench::Workbench(std::shared_ptr<PluginCatalog> catalog, QWidget *parent,
     status->setWordWrap(true);
     auto *diagnostics = new QLabel(catalog_->diagnostics().join('\n'), this);
     diagnostics->setWordWrap(true);
-    layout->addWidget(start);
-    layout->addWidget(stop);
-    layout->addWidget(status);
-    layout->addWidget(diagnostics);
+    outer->addWidget(start);
+    outer->addWidget(stop);
+    outer->addWidget(reconnect);
+    auto *recovery = new QHBoxLayout;
+    auto *automatic = new QCheckBox(QStringLiteral("断线自动重连"), this);
+    automatic->setObjectName("autoReconnect");
+    auto *restore = new QCheckBox(QStringLiteral("重连后恢复轮询（不补发写入）"), this);
+    restore->setObjectName("restorePolling"); restore->setChecked(true);
+    auto *interval = new QSpinBox(this);
+    interval->setObjectName("reconnectIntervalMs"); interval->setRange(10, 60000); interval->setValue(1000);
+    interval->setSuffix(QStringLiteral(" ms"));
+    recovery->addWidget(automatic); recovery->addWidget(restore); recovery->addWidget(interval);
+    outer->addLayout(recovery);
+    auto updateRecovery = [this, automatic, restore, interval] {
+        session_.configureRecovery({{"autoReconnect", automatic->isChecked()}, {"restorePolling", restore->isChecked()},
+            {"intervalMs", interval->value()}});
+    };
+    connect(automatic, &QCheckBox::toggled, this, updateRecovery);
+    connect(restore, &QCheckBox::toggled, this, updateRecovery);
+    connect(interval, &QSpinBox::valueChanged, this, updateRecovery);
+    outer->addWidget(status);
+    outer->addWidget(diagnostics);
+    outer->addWidget(scroll, 1);
     updateProtocol();
     layout->addWidget(new TracePanel(session_, this));
     layout->addWidget(new RecordingPanel(session_, this));
-    auto refresh = [this, formWidget, endpointWidget, protocol, transport, start, stop, status] {
+    auto refresh = [this, formWidget, endpointWidget, protocol, transport, start, stop, reconnect, status] {
         const bool active = session_.state() == SessionState::Starting || session_.state() == SessionState::Running;
         formWidget->setEnabled(!active);
         endpointWidget->setEnabled(!active);
         start->setEnabled(!active && protocol->count() && transport->count());
-        stop->setEnabled(active);
+        stop->setEnabled(active || session_.canReconnect());
+        reconnect->setEnabled(session_.canReconnect());
         status->setText(stateText(session_.state()) + "\n" + session_.diagnostic());
     };
     connect(&session_, &DebugSession::changed, this, refresh);
@@ -97,6 +149,7 @@ Workbench::Workbench(std::shared_ptr<PluginCatalog> catalog, QWidget *parent,
         config.transportId = transport->currentData().toString();
         config.role = role->currentData().toString();
         config.protocol = session_.config().protocol;
+        config.recovery = session_.config().recovery;
         for (auto it = editors->cbegin(); it != editors->cend(); ++it) {
             if (auto *line = qobject_cast<QLineEdit *>(it.value())) config.endpoint[it.key()] = line->text();
             else if (auto *combo = qobject_cast<QComboBox *>(it.value())) config.endpoint[it.key()] = combo->currentText();
@@ -104,17 +157,118 @@ Workbench::Workbench(std::shared_ptr<PluginCatalog> catalog, QWidget *parent,
         session_.start(config);
     });
     connect(stop, &QPushButton::clicked, &session_, &DebugSession::stop);
+    connect(reconnect, &QPushButton::clicked, this, [this] { session_.reconnect(); });
     refresh();
 }
-Workbench::~Workbench()
+SessionPane::~SessionPane()
 {
     // 在会话与 DLL 租约释放前销毁插件视图。
     delete view_;
     session_.stop();
 }
+SessionConfig SessionPane::configuration() const
+{
+    auto config = session_.config();
+    config.protocolId = findChild<QComboBox *>("protocol")->currentData().toString();
+    config.transportId = findChild<QComboBox *>("transport")->currentData().toString();
+    config.role = findChild<QComboBox *>("role")->currentData().toString();
+    if (auto *transport = catalog_->transport(config.transportId)) for (const auto &field : transport->describe().fields) {
+        if (auto *line = findChild<QLineEdit *>(field.key)) config.endpoint[field.key] = line->text();
+        else if (auto *combo = findChild<QComboBox *>(field.key)) config.endpoint[field.key] = combo->currentText();
+    }
+    return config;
+}
+void SessionPane::loadConfiguration(const SessionConfig &config)
+{
+    for (const auto &item : QList<QPair<const char *, QString>>{{"protocol", config.protocolId}, {"transport", config.transportId}, {"role", config.role}}) {
+        auto *combo = findChild<QComboBox *>(item.first);
+        const int index = combo->findData(item.second);
+        if (index >= 0) combo->setCurrentIndex(index);
+    }
+    if (auto *transport = catalog_->transport(config.transportId)) for (const auto &field : transport->describe().fields) {
+        if (!config.endpoint.contains(field.key)) continue;
+        if (auto *line = findChild<QLineEdit *>(field.key)) line->setText(config.endpoint.value(field.key).toString());
+        else if (auto *combo = findChild<QComboBox *>(field.key)) combo->setCurrentText(config.endpoint.value(field.key).toString());
+    }
+    session_.configure(config.protocol);
+    const QSignalBlocker a(findChild<QCheckBox *>("autoReconnect"));
+    const QSignalBlocker b(findChild<QCheckBox *>("restorePolling"));
+    const QSignalBlocker c(findChild<QSpinBox *>("reconnectIntervalMs"));
+    findChild<QCheckBox *>("autoReconnect")->setChecked(config.recovery.value("autoReconnect").toBool());
+    findChild<QCheckBox *>("restorePolling")->setChecked(config.recovery.value("restorePolling").toBool(true));
+    findChild<QSpinBox *>("reconnectIntervalMs")->setValue(config.recovery.value("intervalMs").toInt(1000));
+    session_.configureRecovery(config.recovery);
+}
+Workbench::Workbench(std::shared_ptr<PluginCatalog> catalog, QWidget *parent,
+                     DebugSession::EndpointFactory factory, std::function<qint64()> clock)
+    : QWidget(parent), catalog_(std::move(catalog)), factory_(std::move(factory)), clock_(std::move(clock))
+{
+    setWindowTitle(QStringLiteral("多协议调试工具 · 多会话工作台"));
+    resize(1000, 900);
+    auto *layout = new QVBoxLayout(this);
+    auto *add = new QPushButton(QStringLiteral("新增独立会话"), this);
+    add->setObjectName("addSession");
+    layout->addWidget(add);
+    auto *status = new QLabel(this);
+    status->setObjectName("workspaceStatus");
+    status->setWordWrap(true);
+    layout->addWidget(status);
+    tabs_ = new QTabWidget(this);
+    tabs_->setObjectName("sessionTabs");
+    tabs_->setTabsClosable(true);
+    tabs_->setUsesScrollButtons(true);
+    layout->addWidget(tabs_);
+    connect(add, &QPushButton::clicked, this, [this] { addSession(); });
+    connect(tabs_, &QTabWidget::tabCloseRequested, this, [this](int index) { closeSession(index); });
+    addSession();
+}
+Workbench::~Workbench()
+{
+    while (tabs_->count()) { auto *pane = tabs_->widget(0); tabs_->removeTab(0); delete pane; }
+}
+int Workbench::addSession(const SessionConfig &config, const QString &title)
+{
+    if (tabs_->count() >= 16) return -1;
+    auto *pane = new SessionPane(catalog_, tabs_, factory_, clock_);
+    pane->loadConfiguration(config);
+    const int index = tabs_->addTab(pane, title.isEmpty() ? QStringLiteral("会话 %1").arg(nextSessionNumber_++) : title);
+    tabs_->setCurrentIndex(index);
+    findChild<QPushButton *>("addSession")->setEnabled(tabs_->count() < 16);
+    return index;
+}
+int Workbench::sessionCount() const { return tabs_->count(); }
+DebugSession *Workbench::session(int index) const
+{
+    auto *pane = dynamic_cast<SessionPane *>(tabs_->widget(index));
+    return pane ? &pane->session_ : nullptr;
+}
+SessionConfig Workbench::sessionConfiguration(int index) const
+{
+    auto *pane = dynamic_cast<SessionPane *>(tabs_->widget(index));
+    return pane ? pane->configuration() : SessionConfig{};
+}
+int Workbench::currentSessionIndex() const { return tabs_->currentIndex(); }
+void Workbench::selectSession(int index) { tabs_->setCurrentIndex(index); }
+bool Workbench::closeSession(int index)
+{
+    auto *pane = dynamic_cast<SessionPane *>(tabs_->widget(index));
+    if (!pane || !pane->session_.resolveUnsaved()) return false;
+    tabs_->removeTab(index);
+    delete pane;
+    findChild<QPushButton *>("addSession")->setEnabled(true);
+    return true;
+}
 void Workbench::closeEvent(QCloseEvent *event)
 {
-    if (session_.resolveUnsaved()) QWidget::closeEvent(event);
-    else event->ignore();
+    for (int i = 0; i < tabs_->count(); ++i) if (!session(i)->resolveUnsaved()) { event->ignore(); return; }
+    // 之前的会话可能在后续模态确认期间被设备再次修改；此处不再泵事件或重复弹窗。
+    for (int i = 0; i < tabs_->count(); ++i) if (session(i)->hasUnsavedOrBusy()) {
+        findChild<QLabel *>("workspaceStatus")->setText(QStringLiteral("关闭已取消：确认期间出现新的未保存修改或后台任务，数据已保留。"));
+        tabs_->setCurrentIndex(i);
+        event->ignore();
+        return;
+    }
+    for (int i = 0; i < tabs_->count(); ++i) session(i)->stop();
+    event->accept();
 }
 }

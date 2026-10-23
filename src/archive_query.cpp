@@ -49,6 +49,7 @@ ArchiveResult readArchive(const QString &path, const QString &sessionId, const T
     qint64 messageBytes = 0, operationBytes = 0, recordBytes = 0;
     QMap<quint64, QPair<QString, quint64>> operationPositions;
     quint64 queryOmissions = 0;
+    QJsonObject sessionConfiguration;
     auto inTime = [&filter](const QDateTime &time) {
         return (!filter.fromUtc.isValid() || time >= filter.fromUtc) && (!filter.toUtc.isValid() || time <= filter.toUtc);
     };
@@ -78,11 +79,11 @@ ArchiveResult readArchive(const QString &path, const QString &sessionId, const T
         const auto owner = event.value("sessionId").toString(); sessions.insert(owner);
         if (owner != sessionId || sessionId.isEmpty()) return;
         const auto type = event.value("type").toString();
-        if (type == "message") {
+        if (type == "session") sessionConfiguration = event;
+        else if (type == "message") {
             const auto message = tracecodec::decodeMessage(event);
             if (!message.id || !message.observedUtc.isValid()) { corrupt = true; return; }
             if (filter.messageId && message.id != filter.messageId) return;
-            if (filter.operationId && message.operationId && message.operationId != filter.operationId) return;
             if (!inTime(message.observedUtc)) return;
             messageBytes -= messageCosts.value(message.id); messageCosts[message.id] = cost; messageBytes += cost;
             messages.insert(message.id, message);
@@ -103,7 +104,7 @@ ArchiveResult readArchive(const QString &path, const QString &sessionId, const T
         }
     });
     result.sessions = sessions.values(); result.sessions.sort();
-    TraceSnapshot all; all.sessionId = sessionId;
+    TraceSnapshot all; all.sessionId = sessionId; all.sessionConfiguration = sessionConfiguration;
     QSet<quint64> refs;
     for (const auto &message : messages) for (auto source : message.sources) refs.insert(source);
     for (const auto &operation : operations) for (auto source : operation.observedRefs) refs.insert(source);

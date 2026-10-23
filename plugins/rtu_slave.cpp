@@ -116,7 +116,7 @@ QJsonObject RtuSlave::snapshot() const
     return {{"role", "slave"}, {"devices", devices}};
 }
 void RtuSlave::activate() { active_ = true; lastActivity_ = services_.nowUs(); }
-void RtuSlave::stop() { active_ = false; buffer_.clear(); sources_.clear(); sourceRanges_.clear(); response_.clear(); pendingSend_ = 0; responseSources_.clear(); sentSources_.clear(); }
+void RtuSlave::stop() { active_ = false; broken_ = oversized_ = false; buffer_.clear(); sources_.clear(); sourceRanges_.clear(); response_.clear(); pendingSend_ = 0; responseSources_.clear(); sentSources_.clear(); }
 void RtuSlave::onInput(const TraceRecord &record)
 {
     if (!active_ || record.bytes.isEmpty()) return;

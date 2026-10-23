@@ -198,6 +198,68 @@ private slots:
         auto one = first.stopRecording(), two = second.stopRecording(); QTRY_VERIFY(ready(one)); QTRY_VERIFY(ready(two));
         auto broken = queryArchive(directory.filePath("absent"), "unknown"); QTRY_VERIFY(ready(broken)); QVERIFY(!broken.get().ok);
     }
+    void initializationFailuresReleaseBackgroundCapacity() {
+        QTemporaryDir directory; auto plugins = catalog(); DebugSession owner(plugins);
+        QVERIFY(owner.startRecording(options(directory.path()))); QTRY_COMPARE(owner.recordingStats().state, "running");
+        std::vector<std::unique_ptr<DebugSession>> failed;
+        for (int i = 0; i < 12; ++i) {
+            auto session = std::make_unique<DebugSession>(plugins);
+            QVERIFY(session->startRecording(options(directory.path())));
+            QTRY_COMPARE(session->recordingStats().state, "error");
+            QVERIFY(session->recordingStats().error.contains(QStringLiteral("占用")));
+            failed.push_back(std::move(session));
+            QTest::qWait(10); // 失败对象继续存活，不调用 stop，后台容量应自行释放。
+        }
+        DebugSession other(plugins); QVERIFY(other.startRecording(options(directory.filePath("other"))));
+        QTRY_COMPARE(other.recordingStats().state, "running");
+        auto first = owner.stopRecording(), second = other.stopRecording(); QTRY_VERIFY(ready(first)); QTRY_VERIFY(ready(second));
+    }
+    void queuedOperationsKeepSameLiveAndArchivedMessages() {
+        QTemporaryDir directory; Wire wire; qint64 time = 0;
+        DebugSession session(catalog(true), nullptr, wire.factory(), [&] { return time; });
+        auto selected = config("modbus.rtu"); selected.protocol = {{"extraReadRetries", 0}};
+        QVERIFY(session.start(selected)); QCoreApplication::processEvents(); QVERIFY(session.startRecording(options(directory.path())));
+        const auto first = session.submit("read-holding", {{"unit", 1}, {"start", 0}, {"count", 1}});
+        const auto second = session.submit("read-holding", {{"unit", 2}, {"start", 0}, {"count", 1}});
+        time += 1750; session.poll(); wire.events.sent(wire.writes.last().first, true, {}); QCoreApplication::processEvents();
+        wire.receive(QByteArray::fromHex("010302000a3843")); time += 1750; session.poll(); QCoreApplication::processEvents();
+        QCOMPARE(session.operation(first).update.state, "success");
+        const auto live = session.queryTrace({second}); QVERIFY(!live.messages.isEmpty());
+        QCOMPARE(live.messages.first().operationId, first);
+        session.stop(); auto stopped = session.stopRecording(); QTRY_VERIFY(ready(stopped));
+        auto query = queryArchive(directory.path(), session.sessionId(), {second}); QTRY_VERIFY(ready(query)); QVERIFY(query.get().ok);
+        const auto archived = query.get().snapshot; QCOMPARE(archived.messages.size(), live.messages.size());
+        for (qsizetype i = 0; i < live.messages.size(); ++i) {
+            QCOMPARE(archived.messages[i].id, live.messages[i].id);
+            QCOMPARE(archived.messages[i].operationId, live.messages[i].operationId);
+        }
+    }
+    void disconnectedWriteAndRecoveryPolicySurviveArchive() {
+        QTemporaryDir directory; Wire wire; qint64 time = 0;
+        DebugSession session(catalog(true), nullptr, wire.factory(), [&] { return time; });
+        QVERIFY(session.startRecording(options(directory.path()))); // 先记录，再启动，配置不得一直为空。
+        auto selected = config("modbus.rtu"); selected.protocol = {{"extraReadRetries", 0}};
+        selected.recovery = {{"autoReconnect", true}, {"restorePolling", false}, {"intervalMs", 10}};
+        QVERIFY(session.start(selected)); QCoreApplication::processEvents();
+        const auto op = session.submit("write-single-register", {{"unit", 1}, {"start", 0}, {"value", 7}});
+        time += 1750; session.poll(); QCOMPARE(wire.writes.size(), 1);
+        wire.events.sent(wire.writes.last().first, true, {}); QCoreApplication::processEvents();
+        wire.events.failed(QStringLiteral("受控断线：未确认写入")); QCoreApplication::processEvents();
+        QCOMPARE(session.operation(op).update.state, "transport-error"); QVERIFY(session.operation(op).update.result.value("uncertain").toBool());
+        time += 10000; session.poll(); QCoreApplication::processEvents(); QCOMPARE(session.state(), SessionState::Running);
+        QCOMPARE(wire.writes.size(), 1); // 重连不补发未确认写入。
+        const QJsonObject policy{{"autoReconnect", true}, {"restorePolling", true}, {"intervalMs", 20}};
+        QVERIFY(session.configureRecovery(policy)); session.stop(); auto stopped = session.stopRecording(); QTRY_VERIFY(ready(stopped));
+        auto query = queryArchive(directory.path(), session.sessionId(), {op}); QTRY_VERIFY(ready(query)); const auto result = query.get(); QVERIFY(result.ok);
+        QCOMPARE(result.snapshot.operations.size(), 1); QCOMPARE(result.snapshot.operations.first().update.state, "transport-error");
+        QVERIFY(result.snapshot.operations.first().update.result.value("uncertain").toBool());
+        QCOMPARE(result.snapshot.sessionConfiguration.value("recovery").toObject(), policy);
+        QCOMPARE(result.snapshot.sessionConfiguration.value("protocolId").toString(), "modbus.rtu");
+        auto exported = exportSnapshot([result] { return result.snapshot; }, directory.filePath("recovery.jsonl"), "jsonl");
+        QTRY_VERIFY(ready(exported)); QVERIFY(exported.get().ok); const auto bytes = fileBytes(directory.filePath("recovery.jsonl"));
+        QVERIFY(bytes.contains("\"state\":\"transport-error\"")); QVERIFY(bytes.contains("\"uncertain\":true"));
+        QVERIFY(bytes.contains("\"recovery\":{\"autoReconnect\":true,\"intervalMs\":20,\"restorePolling\":true}"));
+    }
     void deletedAndCorruptSegmentsAreExplicit() {
         QTemporaryDir directory; QCOMPARE(archiveChild(directory.path()), 0);
         const auto index = QJsonDocument::fromJson(fileBytes(directory.filePath("manifest.json"))).object();

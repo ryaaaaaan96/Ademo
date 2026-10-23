@@ -30,6 +30,7 @@ struct SessionConfig {
     QString role;
     QJsonObject endpoint;
     QJsonObject protocol;
+    QJsonObject recovery; // 宿主通用重连策略，与协议字段分开保存。
 };
 struct OperationRequest {
     quint64 id = 0;
@@ -44,7 +45,7 @@ struct OperationUpdate {
 };
 struct TraceRecord {
     quint64 id = 0;
-    quint64 generation = 0;
+    quint64 generation = 0; // 连接/启停代次；重连不会替换协议运行实例。
     quint64 operationId = 0; // RX 未经协议确认归属时为 0。
     qint64 monotonicUs = 0;
     QDateTime observedUtc;
@@ -138,6 +139,8 @@ public:
     virtual LocalState localState() const { return {}; }
     virtual void activate() = 0;
     virtual void stop() = 0;
+    virtual void connectionLost(const QString &) {} // 丢弃连接交互，保留协议运行数据。
+    virtual void connectionRestored(bool) {} // 仅恢复允许的后台读取，不重发用户写入。
     virtual void submit(const OperationRequest &) = 0;
     virtual void onInput(const TraceRecord &) = 0;
     virtual void onSent(quint64, bool, const QString &, qint64 observedUs) = 0;
@@ -159,7 +162,7 @@ public:
     virtual std::unique_ptr<Endpoint> createEndpoint(const QJsonObject &, EndpointEvents) = 0;
 };
 }
-#define DebuggerProtocolIid "org.ademo.debugger.Protocol/6.0"
-#define DebuggerTransportIid "org.ademo.debugger.Transport/6.0"
+#define DebuggerProtocolIid "org.ademo.debugger.Protocol/7.0"
+#define DebuggerTransportIid "org.ademo.debugger.Transport/7.0"
 Q_DECLARE_INTERFACE(debugger::ProtocolPlugin, DebuggerProtocolIid)
 Q_DECLARE_INTERFACE(debugger::TransportPlugin, DebuggerTransportIid)
