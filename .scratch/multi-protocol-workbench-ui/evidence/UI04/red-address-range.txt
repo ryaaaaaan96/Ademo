@@ -1,0 +1,9 @@
+********* Start testing of ParameterDefinitionTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : ParameterDefinitionTests::initTestCase()
+PASS   : ParameterDefinitionTests::fileGroupsAndMetadataReadFromExplicitTarget()
+FAIL!  : ParameterDefinitionTests::addressRangeIsAtomicAndReadsSelectedArea() 'count' returned FALSE. (地址调试应能按起址和数量生成范围)
+C:/Users/81966/Documents/Ademo/build/worktrees/ui04/tests/parameter_definition_tests.cpp(103) : failure location
+PASS   : ParameterDefinitionTests::cleanupTestCase()
+Totals: 3 passed, 1 failed, 0 skipped, 0 blacklisted, 453ms
+********* Finished testing of ParameterDefinitionTests *********

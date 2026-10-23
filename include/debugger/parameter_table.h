@@ -1,6 +1,8 @@
 #pragma once
 #include <QTableWidget>
 #include <QMap>
+#include <QHash>
+#include <QPersistentModelIndex>
 #include <functional>
 
 namespace debugger {
@@ -22,5 +24,6 @@ public:
     std::function<void(QString parameterId, QString actionId)> onAction;
 private:
     QList<ParameterColumn> columns_;
+    QHash<QString, QPersistentModelIndex> rowPositions_;
 };
 }

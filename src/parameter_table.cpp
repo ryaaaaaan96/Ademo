@@ -14,14 +14,14 @@ ParameterTable::ParameterTable(QWidget *parent) : QTableWidget(parent)
 }
 void ParameterTable::setColumns(const QList<ParameterColumn> &columns)
 {
-    clear(); setRowCount(0); columns_ = columns;
+    rowPositions_.clear(); clear(); setRowCount(0); columns_ = columns;
     QStringList titles;
     for (const auto &column : columns_) titles << column.title;
     setColumnCount(titles.size()); setHorizontalHeaderLabels(titles);
 }
 void ParameterTable::setRows(const QList<ParameterRow> &rows)
 {
-    setRowCount(0);
+    rowPositions_.clear(); setRowCount(0);
     for (const auto &row : rows) {
         const int index = rowCount(); insertRow(index);
         for (int c = 0; c < columns_.size(); ++c) {
@@ -41,12 +41,14 @@ void ParameterTable::setRows(const QList<ParameterRow> &rows)
             setCellWidget(index, c, container);
         }
         setRowHeight(index, 36);
+        if (columnCount()) rowPositions_.insert(row.id, model()->index(index, 0));
     }
 }
 void ParameterTable::updateRow(const ParameterRow &row)
 {
-    for (int r = 0; r < rowCount(); ++r) {
-        if (!item(r, 0) || item(r, 0)->data(Qt::UserRole).toString() != row.id) continue;
+    const auto position = rowPositions_.value(row.id);
+    if (position.isValid()) {
+        const int r = position.row();
         for (int c = 0; c < columns_.size(); ++c) {
             auto *cell = item(r, c);
             const auto text = row.cells.value(columns_[c].id);
@@ -55,7 +57,6 @@ void ParameterTable::updateRow(const ParameterRow &row)
                 for (const auto &action : row.actions) if (button->property("parameterAction") == action.id)
                     button->setEnabled(action.enabled);
         }
-        return;
     }
 }
 QStringList ParameterTable::selectedParameterIds() const
