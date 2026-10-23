@@ -1,0 +1,13 @@
+Test project C:/Users/81966/Documents/Ademo/build/worktrees/ui-review-fixes/build/qt-llvm-release
+    Start  2: workspace_window_layout
+1/4 Test  #2: workspace_window_layout ..........   Passed    7.74 sec
+    Start  6: parameter_file_edit_save_apply
+2/4 Test  #6: parameter_file_edit_save_apply ...   Passed    4.07 sec
+    Start  9: parameter_pending_write
+3/4 Test  #9: parameter_pending_write ..........   Passed    3.99 sec
+    Start 10: parameter_definition_read
+4/4 Test #10: parameter_definition_read ........   Passed    5.61 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =  21.43 sec

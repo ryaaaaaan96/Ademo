@@ -3,9 +3,11 @@
 #include <QComboBox>
 #include <QDir>
 #include <QFile>
+#include <QFileDialog>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QLabel>
 #include <QPushButton>
 #include <QSpinBox>
@@ -193,6 +195,99 @@ private slots:
         view.reset(); session.reset(); localCatalog.reset();
         QVERIFY2(!lease.expired(), "后台文件代码和待回调仍须保持插件 DLL 租约");
         QTRY_VERIFY(lease.expired());
+    }
+    void fileApplyConfirmationCanDestroyParameterView() {
+        QTemporaryDir dir; const auto path = dir.filePath("parameters.json"); QVERIFY(save(path, definition()));
+        Wire wire; DebugSession session(catalog, nullptr, wire.factory());
+        const QJsonObject original{{"parameterRows", QJsonArray{QJsonObject{{"unit", 17}, {"area", "holding"}, {"address", 107}}}}};
+        QVERIFY(session.configure(original));
+        std::unique_ptr<ParameterView> view(catalog->createParameterView("modbus.rtu", nullptr, session.access()));
+        view->resize(1200, 700); view->show();
+        auto *table = accessible<QTableWidget>(*view, QStringLiteral("参数表")); QVERIFY(table);
+        table->editItem(table->item(0, 3));
+        auto *editor = table->findChild<QLineEdit *>(); QVERIFY(editor);
+        QTest::keyClicks(editor, "123"); QTest::keyClick(editor, Qt::Key_Return);
+        QTRY_VERIFY(session.hasUnsavedOrBusy());
+        accessible<QLineEdit>(*view, QStringLiteral("参数文件"))->setText(path);
+        bool confirmed = false;
+        QTimer timer; timer.setInterval(5);
+        connect(&timer, &QTimer::timeout, &timer, [&] {
+            if (qobject_cast<QMessageBox *>(QApplication::activeModalWidget())) {
+                confirmed = true; timer.stop(); view.reset();
+            }
+        }); timer.start();
+        QTest::mouseClick(button(*view, QStringLiteral("加载并应用到设备")), Qt::LeftButton);
+        QTRY_VERIFY(!view); QVERIFY(confirmed);
+        QCOMPARE(session.config().protocol, original); QVERIFY(wire.requests.isEmpty());
+        QVERIFY(!session.hasUnsavedOrBusy());
+    }
+    void sourcePickerBlocksQueuedWorkspaceReplacementAndReleasesOnCancel() {
+        QTemporaryDir dir; const auto path = dir.filePath("empty-workspace.json");
+        QVERIFY(save(path, {{"version", 1}, {"sessions", QJsonArray{}}}));
+        QList<std::function<void()>> jobs;
+        Workbench workbench(catalog, nullptr, {}, {}, [&](auto job) { jobs.append(std::move(job)); });
+        workbench.resize(1300, 850); workbench.show();
+        QPointer<ParameterView> view = workbench.parameterView(0); QVERIFY(view);
+        auto *session = workbench.session(0); const auto original = session->config().protocol;
+        auto *toggle = button(*view, QStringLiteral("参数来源与地址调试")); QVERIFY(toggle); toggle->setChecked(true);
+        const auto operation = workbench.openWorkspace(path); QVERIFY(operation); QCOMPARE(jobs.size(), 1);
+        bool pickerShown = false;
+        QTimer timer; timer.setInterval(5);
+        connect(&timer, &QTimer::timeout, &timer, [&] {
+            if (auto *dialog = qobject_cast<QFileDialog *>(QApplication::activeModalWidget())) {
+                pickerShown = true;
+                if (!jobs.isEmpty()) { auto job = jobs.takeFirst(); job(); }
+                else if (workbench.workspaceOperation(operation).state != "working") { dialog->reject(); timer.stop(); }
+            }
+        }); timer.start();
+        auto *browse = button(*view, QStringLiteral("选择参数文件…")); QVERIFY(browse);
+        QTest::mouseClick(browse, Qt::LeftButton);
+        QVERIFY(pickerShown); QCOMPARE(workbench.workspaceOperation(operation).state, QString("cancelled"));
+        QVERIFY(view); QCOMPARE(workbench.sessionCount(), 1); QCOMPARE(workbench.session(0), session);
+        QCOMPARE(session->config().protocol, original); QVERIFY(!session->hasUnsavedOrBusy());
+        // 取消选择后不遗留 busy，下一次用户明确打开工作区可以完成。
+        const auto retry = workbench.openWorkspace(path); QVERIFY(retry); QCOMPARE(jobs.size(), 1);
+        auto job = jobs.takeFirst(); job();
+        QTRY_COMPARE(workbench.workspaceOperation(retry).state, QString("success"));
+        QVERIFY(!view); QCOMPARE(workbench.sessionCount(), 0);
+    }
+    void pendingConfirmationRejectsReentrantConfiguration() {
+        DebugSession session(catalog);
+        const QJsonObject original{{"parameterRows", QJsonArray{
+            QJsonObject{{"unit", 17}, {"area", "holding"}, {"address", 107}},
+            QJsonObject{{"unit", 18}, {"area", "holding"}, {"address", 107}}}}};
+        QVERIFY(session.configure(original));
+        std::unique_ptr<ParameterView> view(catalog->createParameterView("modbus.rtu", nullptr, session.access()));
+        view->resize(1200, 700); view->show();
+        auto *table = accessible<QTableWidget>(*view, QStringLiteral("参数表")); QVERIFY(table);
+        table->editItem(table->item(0, 3));
+        auto *editor = table->findChild<QLineEdit *>(); QVERIFY(editor);
+        QTest::keyClicks(editor, "123"); QTest::keyClick(editor, Qt::Key_Return);
+        QTRY_VERIFY(session.hasUnsavedOrBusy());
+        bool guardShown = false, nestedGuard = false, configured = true;
+        QTimer observer; observer.setInterval(5);
+        connect(&observer, &QTimer::timeout, &observer, [&] {
+            auto *outer = qobject_cast<QMessageBox *>(QApplication::activeModalWidget());
+            if (!outer) return;
+            guardShown = true; observer.stop();
+            QTimer nestedCloser; nestedCloser.setInterval(5);
+            connect(&nestedCloser, &QTimer::timeout, &nestedCloser, [&] {
+                if (auto *inner = qobject_cast<QMessageBox *>(QApplication::activeModalWidget()); inner && inner != outer) {
+                    nestedGuard = true; inner->button(QMessageBox::Cancel)->click();
+                }
+            }); nestedCloser.start();
+            configured = session.configure({}); nestedCloser.stop();
+            outer->button(QMessageBox::Cancel)->click();
+        }); observer.start();
+        QVERIFY(!view->selectDevice("18"));
+        QVERIFY(guardShown); QVERIFY(!nestedGuard); QVERIFY(!configured);
+        QCOMPARE(view->selectedDevice(), QString("17")); QCOMPARE(session.config().protocol, original);
+        QCOMPARE(table->item(0, 3)->text(), QString("123"));
+        // 正常取消退出后仍可明确放弃草稿，不能遗留 busy。
+        QTimer::singleShot(0, [] {
+            if (auto *box = qobject_cast<QMessageBox *>(QApplication::activeModalWidget())) box->button(QMessageBox::Discard)->click();
+        });
+        QVERIFY(view->selectDevice("18")); QVERIFY(!session.hasUnsavedOrBusy());
     }
     void fileJobsAreBoundedAndReturnValuesOnTheSessionThread() {
         DebugSession session(catalog); auto access = session.access(); QVERIFY(access.background);
