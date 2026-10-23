@@ -1,0 +1,21 @@
+Test project C:/Users/81966/Documents/Ademo/build/worktrees/ui06/build/qt-llvm-release
+    Start  1: parameter_group_polling
+1/8 Test  #1: parameter_group_polling ..........   Passed    6.29 sec
+    Start  3: parameter_pending_write
+2/8 Test  #3: parameter_pending_write ..........   Passed    5.69 sec
+    Start  4: parameter_definition_read
+3/8 Test  #4: parameter_definition_read ........   Passed    3.09 sec
+    Start  5: parameter_window_read
+4/8 Test  #5: parameter_window_read ............   Passed    3.33 sec
+    Start  6: parallel_sessions_recovery
+5/8 Test  #6: parallel_sessions_recovery .......   Passed    5.60 sec
+    Start 10: rtu_polling
+6/8 Test #10: rtu_polling ......................   Passed    2.71 sec
+    Start 11: rtu_explicit_write
+7/8 Test #11: rtu_explicit_write ...............   Passed    3.68 sec
+    Start 15: workspace_roundtrip
+8/8 Test #15: workspace_roundtrip ..............   Passed    5.40 sec
+
+100% tests passed, 0 tests failed out of 8
+
+Total Test time (real) =  35.82 sec
