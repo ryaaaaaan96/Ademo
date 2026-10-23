@@ -9,9 +9,13 @@
 #include <QSet>
 #include <QElapsedTimer>
 #include <QTimer>
+#include <QMainWindow>
 #include <optional>
 #include <vector>
-class QTabWidget;
+class QTreeWidget;
+class QDockWidget;
+class QLabel;
+class QShowEvent;
 class QCloseEvent;
 
 namespace debugger {
@@ -141,7 +145,9 @@ private:
     std::unique_ptr<DiskRecorder> recorder_;
 };
 class SessionPane;
-class Workbench : public QWidget {
+class SessionDock;
+enum class DockDragPhase;
+class Workbench : public QMainWindow {
 public:
     explicit Workbench(std::shared_ptr<PluginCatalog>, QWidget *parent = nullptr,
                        DebugSession::EndpointFactory endpointFactory = {}, std::function<qint64()> clock = {},
@@ -152,6 +158,15 @@ public:
     int sessionCount() const;
     DebugSession *session(int index) const;
     ParameterView *parameterView(int index) const;
+    QWidget *sessionView(int index) const;
+    QMainWindow *sessionWindow(int index) const;
+    QString sessionTitle(int index) const;
+    bool isSessionOpen(int index) const;
+    bool isSessionFloating(int index) const;
+    void floatSession(int index);
+    void dockSession(int index);
+    void tileSessions(Qt::Orientation orientation);
+    bool selectDevice(int index, const QString &deviceId);
     SessionConfig sessionConfiguration(int index) const;
     int currentSessionIndex() const;
     void selectSession(int index);
@@ -160,12 +175,22 @@ public:
     WorkspaceOperation workspaceOperation(quint64 id) const;
 protected:
     void closeEvent(QCloseEvent *) override;
+    void showEvent(QShowEvent *) override;
 private:
     friend class WorkspaceController;
     std::shared_ptr<PluginCatalog> catalog_;
     DebugSession::EndpointFactory factory_;
     std::function<qint64()> clock_;
-    QTabWidget *tabs_ = nullptr;
+    void clearSessions();
+    void refreshNavigation();
+    void dragSession(SessionDock *, QPoint, DockDragPhase);
+    QList<SessionDock *> docks_;
+    QTreeWidget *navigation_ = nullptr;
+    QDockWidget *navigationDock_ = nullptr;
+    QLabel *dockPreview_ = nullptr;
+    int currentSession_ = -1;
+    QString navigationSignature_;
+    bool presented_ = false;
     int nextSessionNumber_ = 1;
     std::unique_ptr<WorkspaceController> workspace_;
 };
