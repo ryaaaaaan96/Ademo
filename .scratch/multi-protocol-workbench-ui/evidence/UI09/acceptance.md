@@ -34,3 +34,18 @@
 Release 的实际 Windows Qt 截图运行 [windows-capture.txt](windows-capture.txt) 为4项通过；[所属窗口回溯页](window-trace-query.png)、[回溯结果客户区](window-trace-result.png)、[历史页](window-history-export.png)、[历史结果客户区](window-history-result.png)已目视检查。结果显示所属 UUID、白底深字和分阶段状态；长表单和输出可滚动。截图由 QWidget::grab 取得，不包含系统标题栏，不替代用户产品验收。
 
 本项没有启动旧13硬件联调或旧14–19；多显示器拖动手感及正式产品整体操作确认继续由 UI13 记录。自检确认原有后端和容量策略未改、各页引用同一会话、后台导出捕获有界值快照且查询失败不沿用旧目标。最终独立双轴审查由集成阶段执行。
+
+## 最新集成同步复核（SDK11）
+
+实施提交 `a2af256`；合并提交 `33706f9` 纳入当时最新集成 `a45a940`（含 UI05、SDK11 多视图 guard）。唯一文本冲突为 CMake 的新增测试段，保留 UI05 与 UI09 两个目标。记录实现没有改写参数表、host 租约或既有记录后端。
+
+两配置以 `--parallel 3` 完整重编成功，见 [Debug 构建](post-merge-debug-build.log)、[Release 构建](post-merge-release-build.log)。其后串行运行 Windows 平台关联 CTest：`window_trace_workflow|parameter_pending_write|parallel_sessions_recovery|trace_query_export|bounded_disk_recording`。
+
+| 配置 | CTest | QtTest | 时间 | 证据 |
+| --- | --- | --- | --- | --- |
+| Debug（SDK11） | 5/5 通过 | 76 通过，0 失败／跳过 | 30.28 秒 | [日志](post-merge-debug-ctest.log)、`post-merge-debug/*results.txt` |
+| Release（SDK11） | 5/5 通过 | 76 通过，0 失败／跳过 | 23.00 秒 | [日志](post-merge-release-ctest.log)、`post-merge-release/*results.txt` |
+
+关联验证覆盖新窗口记录流程、UI05 待写及租约守卫、UI03 原生窗口恢复、近期查询导出与磁盘有界服务。未重复无关协议全量；上表与之前 SDK10 的 14/14 全量结果明确区分。桌面已释放，自检 `git diff --check` 通过。
+
+[SHA256 清单](SHA256SUMS.txt)固定本目录证据（不包含清单本身）；文本按 UTF-8/LF 归一化，PNG 使用原始字节，源码由 Git 提交固定。构建产物不入 Git。
