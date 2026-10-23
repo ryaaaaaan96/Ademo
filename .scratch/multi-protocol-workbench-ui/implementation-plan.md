@@ -18,8 +18,8 @@ Status: ready-for-agent
 | --- | --- | --- | --- | --- |
 | [UI01](issues/01-prototype-layout-and-flow.md) | 确认可操作原型的布局与关键流程 | ready-for-agent | 无 | 已完成；2026-10-23 用户确认，原型 bb3aa81 |
 | [UI02](issues/02-window-first-rtu-read.md) | 在新的调试窗口完成一次 RTU 读取 | ready-for-agent | UI01 | 已完成：58fa24c；合入 85619ae；[验收与集成复测](evidence/UI02/integration.md) |
-| [UI03](issues/03-dockable-session-lifecycle.md) | 同时运行并管理多个可停靠调试窗口 | ready-for-agent | UI02 | 前置已完成，待调度 |
-| [UI04](issues/04-parameter-json-groups-read.md) | 加载 JSON 分组并按参数或地址读取设备 | ready-for-agent | UI02 | 前置已完成，待调度 |
+| [UI03](issues/03-dockable-session-lifecycle.md) | 同时运行并管理多个可停靠调试窗口 | ready-for-agent | UI02 | 实施中：codex/ui03-session-windows；基于 eaba0d9 |
+| [UI04](issues/04-parameter-json-groups-read.md) | 加载 JSON 分组并按参数或地址读取设备 | ready-for-agent | UI02 | 实施中：codex/ui04-parameter-files；基于 eaba0d9 |
 | [UI05](issues/05-inline-pending-value-write.md) | 在单值列编辑并明确设置设备参数 | ready-for-agent | UI04 | 未启动 |
 | [UI06](issues/06-selected-group-polling.md) | 按选中项或参数组读取并持续轮询多个设备 | ready-for-agent | UI05 | 未启动 |
 | [UI07](issues/07-file-editor-save-apply.md) | 在独立文件页编辑、保存并应用参数配置 | ready-for-agent | UI05 | 未启动 |
