@@ -18,7 +18,7 @@ QString writeFile(const QString &path, const QJsonObject &document) {
     if (file.write(bytes) != bytes.size() || !file.commit()) return file.errorString();
     return {};
 }
-QJsonObject fileTask(QString action, QString path, SlaveDevice captured, bool saveFirst, QStringList otherPaths) {
+QJsonObject fileTask(QString action, QString path, SlaveDevice captured, bool saveFirst, QStringList otherPaths, QJsonValue expectedDocument) {
     QJsonObject result;
     const auto canonical = QFileInfo(path).canonicalFilePath();
     for (const auto &other : otherPaths)
@@ -44,6 +44,8 @@ QJsonObject fileTask(QString action, QString path, SlaveDevice captured, bool sa
     const auto document = QJsonDocument::fromJson(bytes, &parse);
     QString error = parse.error == QJsonParseError::NoError && document.isObject()
         ? validateSlaveDocument(document.object()) : QStringLiteral("JSON 无效：") + parse.errorString();
+    if (error.isEmpty() && expectedDocument.isObject() && expectedDocument.toObject() != document.object())
+        error = QStringLiteral("磁盘文件与编辑页确认的内容不同，请重新打开文件后再应用；原运行数据保留");
     if (!error.isEmpty()) result["error"] = error;
     else result["document"] = document.object();
     return result;
@@ -143,8 +145,8 @@ void RtuSlave::submit(const OperationRequest &request) {
     fileJobs_.insert(unit);
     fileTargets_[unit] = normalized;
     const bool accepted = services_.background(
-        [captured, action = request.action, normalized, otherPaths, saveFirst = importing && device.dirty && decision == "save"] {
-            return fileTask(action, normalized, captured, saveFirst, otherPaths);
+        [captured, action = request.action, normalized, otherPaths, saveFirst = importing && device.dirty && decision == "save", expectedDocument = request.parameters.value("expectedDocument")] {
+            return fileTask(action, normalized, captured, saveFirst, otherPaths, expectedDocument);
         },
         [this, request, captured, normalized, importing](QJsonObject result) {
             fileJobs_.remove(captured.unit);

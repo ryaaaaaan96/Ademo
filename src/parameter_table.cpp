@@ -4,6 +4,7 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <QStyledItemDelegate>
+#include <QTimer>
 
 namespace debugger {
 namespace {
@@ -11,10 +12,16 @@ class ParameterDelegate final : public QStyledItemDelegate {
 public:
     using QStyledItemDelegate::QStyledItemDelegate;
     std::function<void(QWidget *, QModelIndex)> opened;
+    std::function<void(QModelIndex, QString)> committed;
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &index) const override {
         auto *editor = new QLineEdit(parent);
         if (opened) opened(editor, index);
         return editor;
+    }
+    void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override {
+        const auto text = static_cast<QLineEdit *>(editor)->text();
+        QStyledItemDelegate::setModelData(editor, model, index);
+        if (committed) committed(index, text);
     }
 };
 }
@@ -29,6 +36,10 @@ ParameterTable::ParameterTable(QWidget *parent) : QTableWidget(parent)
         connect(static_cast<QLineEdit *>(editor), &QLineEdit::textEdited, this, [this, id, column](const QString &text) {
             if (onEdit) onEdit(id, column, text);
         });
+    };
+    delegate->committed = [this](const QModelIndex &index, const QString &text) {
+        const auto id = index.data(Qt::UserRole).toString(), column = columns_[index.column()].id;
+        QTimer::singleShot(0, this, [this, id, column, text] { if (onCommit) onCommit(id, column, text); });
     };
     setItemDelegate(delegate);
     setSelectionBehavior(QAbstractItemView::SelectRows);

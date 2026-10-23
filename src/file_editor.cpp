@@ -27,7 +27,9 @@ QString chooseFile(QWidget *parent, const QString &title, const QString &path, b
 }
 }
 FileEditorPage::FileEditorPage(SessionAccess access, FileDocumentEditor *editor, Apply apply, QWidget *parent)
-    : QWidget(parent), access_(std::move(access)), editor_(editor), apply_(std::move(apply))
+    : FileEditorPage(std::move(access), editor, std::move(apply), Options{}, parent) {}
+FileEditorPage::FileEditorPage(SessionAccess access, FileDocumentEditor *editor, Apply apply, Options options, QWidget *parent)
+    : QWidget(parent), access_(std::move(access)), editor_(editor), apply_(std::move(apply)), options_(std::move(options))
 {
     auto *layout = new QVBoxLayout(this);
     targetLabel_ = new QLabel(this); targetLabel_->setAccessibleName(QStringLiteral("文件目标设备"));
@@ -133,12 +135,12 @@ void FileEditorPage::open()
     if (!alive || revision != revision_ || selected.isEmpty()) return;
     const auto path = QFileInfo(selected).absoluteFilePath();
     busy_ = true; refresh(); QPointer<FileEditorPage> self(this);
-    const bool accepted = access_.background && access_.background([path] {
+    const bool accepted = access_.background && access_.background([path, limit = options_.maximumBytes] {
         QFile file(path);
         if (!file.open(QIODevice::ReadOnly)) return QJsonObject{{"error", file.errorString()}};
-        const auto bytes = file.read(1024 * 1024 + 1);
-        if (bytes.size() > 1024 * 1024 || !file.atEnd() || file.error() != QFileDevice::NoError)
-            return QJsonObject{{"error", QStringLiteral("文件读取失败或超过 1 MiB")}};
+        const auto bytes = file.read(limit + 1);
+        if (bytes.size() > limit || !file.atEnd() || file.error() != QFileDevice::NoError)
+            return QJsonObject{{"error", QStringLiteral("文件读取失败或超过 %1 字节").arg(limit)}};
         QJsonParseError error; const auto document = QJsonDocument::fromJson(bytes, &error);
         if (error.error != QJsonParseError::NoError || !document.isObject())
             return QJsonObject{{"error", QStringLiteral("JSON 无效：") + error.errorString()}};
@@ -170,8 +172,15 @@ void FileEditorPage::save(const QString &destination)
     const auto selected = destination.isEmpty() ? path_->text() : destination;
     if (selected.trimmed().isEmpty()) { status_->setText(QStringLiteral("请指定文件路径。")); return; }
     const auto path = QFileInfo(selected).absoluteFilePath();
-    const auto bytes = QJsonDocument(document).toJson(QJsonDocument::Indented);
-    if (bytes.size() > 1024 * 1024) { status_->setText(QStringLiteral("文件超过 1 MiB，未保存。")); return; }
+    const auto bytes = QJsonDocument(document).toJson(QJsonDocument::Compact);
+    if (bytes.size() > options_.maximumBytes) { status_->setText(QStringLiteral("文件超过 %1 字节，未保存。").arg(options_.maximumBytes)); return; }
+    if (options_.canSave) {
+        QPointer<FileEditorPage> alive(this);
+        const auto check = options_.canSave;
+        const auto error = check(path);
+        if (!alive) return;
+        if (!error.isEmpty()) { status_->setText(error); return; }
+    }
     const auto revision = revision_;
     if (QFileInfo::exists(path)) {
         QPointer<FileEditorPage> alive(this);
@@ -181,6 +190,12 @@ void FileEditorPage::save(const QString &destination)
         if (!alive) return;
         busy_ = false; refresh();
         if (choice != QMessageBox::Yes || revision != revision_) return;
+        if (options_.canSave) {
+            const auto check = options_.canSave;
+            const auto error = check(path);
+            if (!alive) return;
+            if (!error.isEmpty()) { status_->setText(error); return; }
+        }
     }
     busy_ = true; refresh();
     QPointer<FileEditorPage> self(this);
