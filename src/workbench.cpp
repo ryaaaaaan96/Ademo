@@ -342,6 +342,7 @@ Workbench::Workbench(std::shared_ptr<PluginCatalog> catalog, QWidget *parent,
     auto *status = new QLabel(controls); status->setObjectName("workspaceStatus"); status->setWordWrap(true);
     layout->addWidget(status);
     workspace_ = std::make_unique<WorkspaceController>(*this, catalog_, std::move(workspaceExecutor));
+    addArrangement(QStringLiteral("恢复已保存布局"), [this] { workspace_->restoreLayout(); });
     auto *files = new QHBoxLayout;
     auto *path = new QLineEdit(controls); path->setObjectName("workspacePath"); path->setPlaceholderText(QStringLiteral("工作区 JSON 绝对路径"));
     auto *open = new QPushButton(QStringLiteral("打开工作区（不启动通信）"), controls); open->setObjectName("workspaceOpen");
@@ -349,14 +350,16 @@ Workbench::Workbench(std::shared_ptr<PluginCatalog> catalog, QWidget *parent,
     files->addWidget(path, 1); files->addWidget(open); files->addWidget(save); layout->addLayout(files);
     toolbar->addWidget(controls);
     connect(open, &QPushButton::clicked, this, [this, path] {
+        QPointer<Workbench> alive(this);
         auto selected = path->text();
-        if (selected.isEmpty()) selected = QFileDialog::getOpenFileName(this, QStringLiteral("打开工作区"), {}, "JSON (*.json)");
-        if (!selected.isEmpty()) { path->setText(selected); openWorkspace(selected); }
+        if (selected.isEmpty()) selected = chooseWorkspaceFile(false);
+        if (alive && !selected.isEmpty()) { path->setText(selected); openWorkspace(selected); }
     });
     connect(save, &QPushButton::clicked, this, [this, path] {
+        QPointer<Workbench> alive(this);
         auto selected = path->text();
-        if (selected.isEmpty()) selected = QFileDialog::getSaveFileName(this, QStringLiteral("保存工作区"), {}, "JSON (*.json)");
-        if (!selected.isEmpty()) { path->setText(selected); saveWorkspace(selected); }
+        if (selected.isEmpty()) selected = chooseWorkspaceFile(true);
+        if (alive && !selected.isEmpty()) { path->setText(selected); saveWorkspace(selected); }
     });
     navigationDock_ = new QDockWidget(QStringLiteral("会话与设备"), this);
     navigationDock_->setObjectName("navigation"); navigationDock_->setFeatures(QDockWidget::NoDockWidgetFeatures);
@@ -376,6 +379,19 @@ Workbench::Workbench(std::shared_ptr<PluginCatalog> catalog, QWidget *parent,
     addSession();
 }
 Workbench::~Workbench() { clearSessions(); }
+QString Workbench::chooseWorkspaceFile(bool writing)
+{
+    QPointer<Workbench> alive(this);
+    QPointer<QFileDialog> dialog = new QFileDialog(this, writing ? QStringLiteral("保存工作区") : QStringLiteral("打开工作区"), {}, "JSON (*.json)");
+    dialog->setAcceptMode(writing ? QFileDialog::AcceptSave : QFileDialog::AcceptOpen);
+    dialog->setFileMode(writing ? QFileDialog::AnyFile : QFileDialog::ExistingFile);
+    ++workspaceDialogDepth_;
+    const auto result = dialog->exec();
+    const auto selected = dialog && result == QDialog::Accepted ? dialog->selectedFiles().value(0) : QString{};
+    if (dialog) delete dialog;
+    if (alive) --workspaceDialogDepth_;
+    return selected;
+}
 void Workbench::clearSessions()
 {
     dockPreview_->hide();
