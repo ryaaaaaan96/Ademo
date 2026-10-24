@@ -1,0 +1,15 @@
+[1/16] Automatic MOC for target debugger_host
+[2/16] Building CXX object CMakeFiles/debugger_host.dir/debugger_host_autogen/mocs_compilation.cpp.obj
+[3/16] Building CXX object CMakeFiles/debugger_host.dir/src/session_recovery.cpp.obj
+[4/16] Building CXX object CMakeFiles/debugger_host.dir/src/workspace.cpp.obj
+[5/16] Building CXX object CMakeFiles/debugger_host.dir/src/trace_query.cpp.obj
+[6/16] Building CXX object CMakeFiles/debugger_host.dir/src/host.cpp.obj
+[7/16] Building CXX object CMakeFiles/debugger_host.dir/src/workbench.cpp.obj
+[8/16] Building CXX object CMakeFiles/debugger_host.dir/src/trace_panel.cpp.obj
+[9/16] Building CXX object CMakeFiles/debugger_host.dir/src/session_records.cpp.obj
+[10/16] Building CXX object CMakeFiles/debugger_host.dir/src/recording.cpp.obj
+[11/16] Building CXX object CMakeFiles/debugger_host.dir/src/recording_panel.cpp.obj
+[12/16] Linking CXX static library libdebugger_host.a
+[13/16] Automatic MOC for target upp_exchange_tests
+[14/15] Building CXX object CMakeFiles/upp_exchange_tests.dir/tests/upp_exchange_tests.cpp.obj
+[15/15] Linking CXX executable bin\upp_exchange_tests.exe

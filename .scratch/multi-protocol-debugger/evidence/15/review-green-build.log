@@ -1,0 +1,12 @@
+[1/15] Automatic MOC for target can_transport
+[2/14] Automatic MOC for target debugger_host
+[3/13] Automatic MOC for target upp_plugin
+[4/12] Building CXX object CMakeFiles/can_transport.dir/plugins/can_endpoint.cpp.obj
+[5/12] Linking CXX static library libcan_transport.a
+[6/12] Building CXX object CMakeFiles/upp_plugin.dir/plugins/upp_exchange.cpp.obj
+[7/12] Linking CXX shared module bin\plugins\libcan_plugin.dll
+[8/12] Building CXX object CMakeFiles/debugger_host.dir/src/host.cpp.obj
+[9/12] Linking CXX static library libdebugger_host.a
+[10/12] Building CXX object CMakeFiles/upp_plugin.dir/plugins/upp_request.cpp.obj
+[11/12] Linking CXX shared module bin\plugins\libupp_plugin.dll
+[12/12] Linking CXX executable bin\upp_exchange_tests.exe

@@ -113,3 +113,11 @@ Modbus 插件持有数据区和数值。工作区持有设备与外部 JSON 文�
 ## issue 10 已实现：工作区和路径重定位
 
 SDK 8 新增协议/传输插件通用 `relocateConfiguration(config, fromBase, toBase)` 纯值钩子，主体不解释协议字段；缺插件保留不透明配置及原 referenceBase。公开 Workbench `openWorkspace/saveWorkspace/workspaceOperation` 异步返回配置文件任务结果，恢复不启动通信。格式、限额、未知字段与 dirty 保护规则见 [工作区格式](workspace-format.md)，验收见 [10 证据](evidence/10/acceptance.md)。主体与全部 DLL 必须按 SDK 8 指纹配套重编译。
+
+## issue 15：SDK 15 通用发送单元
+
+协议与传输 IID 同步升至15.0，构建指纹为sdk15；宿主及所有插件DLL必须配套重编译，旧ABI继续拒绝加载。`ProtocolServices.sendUnit(operationId, bytes, metadata)` 返回 `SendReceipt{accepted, recordId}`：accepted 仅表示端点接受，recordId 是send-request原始记录供消息来源回溯，拒绝也可有记录。Endpoint新增同名通用入口，默认仅接受空metadata并转交旧send，RTU单帧路径不变。主体不按协议或传输名称分支。
+
+metadata 的 `finalUnit` 默认true，分片协议在非末片显式false，宿主只有末片本地成功才标操作localSent；协议必须按本地完成逐片发送。`protocolAttempt` 表示整报文尝试，`fragmentIndex/fragmentCount`表示片索引/数量，发送令牌仍逐片唯一。sendAccepted为累计至少一次接受，不能被后片拒绝清空。协议结果allFramesLocal进一步明确完整发送；任何本地完成均不替代设备确认。
+
+CAN端点在writeFrame之前登记令牌，至多32未完成项。writeFrame=false不发已接受完成；true也不说明已上总线，等待framesWritten。同步信号暂存至接受结果已知，已接受信号立即回调使宿主记录实际观察时间，宿主自身排队防止协议重入；首个完成结果固定，错误/关闭不覆写成功或重复回调。Qt说明见[writeFrame](https://doc.qt.io/qt-6/qcanbusdevice.html#writeFrame)、[framesWritten](https://doc.qt.io/qt-6/qcanbusdevice.html#framesWritten)；该通知只是本地传输层完成，不承诺物理ACK。禁止通过嵌套waitForFramesWritten事件循环推进。localEcho也可能来自同系统其他应用，按[Qt说明](https://doc.qt.io/qt-6/qcanbusframe.html#hasLocalEcho)过滤，不据此确认响应。

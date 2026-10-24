@@ -1,0 +1,378 @@
+Start testing: Oct 24 17:22 中国标准时间
+----------------------------------------------------------
+1/25 Testing: upp_can_exchange
+1/25 Test: upp_can_exchange
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/upp_exchange_tests.exe" "-o" "upp-exchange-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"upp_can_exchange" start time: Oct 24 17:22 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   7.82 sec
+----------------------------------------------------------
+Test Passed.
+"upp_can_exchange" end time: Oct 24 17:22 中国标准时间
+"upp_can_exchange" time elapsed: 00:00:07
+----------------------------------------------------------
+
+2/25 Testing: upp_receive
+2/25 Test: upp_receive
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/upp_receive_tests.exe" "-o" "upp-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"upp_receive" start time: Oct 24 17:22 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   4.16 sec
+----------------------------------------------------------
+Test Passed.
+"upp_receive" end time: Oct 24 17:22 中国标准时间
+"upp_receive" time elapsed: 00:00:04
+----------------------------------------------------------
+
+3/25 Testing: can_raw_observation
+3/25 Test: can_raw_observation
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/can_observation_tests.exe" "-o" "can-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"can_raw_observation" start time: Oct 24 17:22 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   3.13 sec
+----------------------------------------------------------
+Test Passed.
+"can_raw_observation" end time: Oct 24 17:22 中国标准时间
+"can_raw_observation" time elapsed: 00:00:03
+----------------------------------------------------------
+
+4/25 Testing: rtu_ui_acceptance
+4/25 Test: rtu_ui_acceptance
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/ui_acceptance_tests.exe" "-o" "ui-acceptance-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"rtu_ui_acceptance" start time: Oct 24 17:22 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   9.59 sec
+----------------------------------------------------------
+Test Passed.
+"rtu_ui_acceptance" end time: Oct 24 17:22 中国标准时间
+"rtu_ui_acceptance" time elapsed: 00:00:09
+----------------------------------------------------------
+
+5/25 Testing: workspace_window_layout
+5/25 Test: workspace_window_layout
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/workspace_layout_tests.exe" "-o" "workspace-layout-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"workspace_window_layout" start time: Oct 24 17:22 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   4.16 sec
+----------------------------------------------------------
+Test Passed.
+"workspace_window_layout" end time: Oct 24 17:22 中国标准时间
+"workspace_window_layout" time elapsed: 00:00:04
+----------------------------------------------------------
+
+6/25 Testing: slave_parameter_workflow
+6/25 Test: slave_parameter_workflow
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/slave_parameter_tests.exe" "-o" "slave-parameter-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"slave_parameter_workflow" start time: Oct 24 17:22 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   3.12 sec
+----------------------------------------------------------
+Test Passed.
+"slave_parameter_workflow" end time: Oct 24 17:22 中国标准时间
+"slave_parameter_workflow" time elapsed: 00:00:03
+----------------------------------------------------------
+
+7/25 Testing: plugin_ui_contract
+7/25 Test: plugin_ui_contract
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/plugin_ui_contract_tests.exe" "-o" "plugin-ui-contract-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"plugin_ui_contract" start time: Oct 24 17:22 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   2.88 sec
+----------------------------------------------------------
+Test Passed.
+"plugin_ui_contract" end time: Oct 24 17:22 中国标准时间
+"plugin_ui_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+8/25 Testing: parameter_qml_trends
+8/25 Test: parameter_qml_trends
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/parameter_trend_tests.exe" "-o" "parameter-trend-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"parameter_qml_trends" start time: Oct 24 17:22 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =  39.14 sec
+----------------------------------------------------------
+Test Passed.
+"parameter_qml_trends" end time: Oct 24 17:23 中国标准时间
+"parameter_qml_trends" time elapsed: 00:00:39
+----------------------------------------------------------
+
+9/25 Testing: parameter_file_edit_save_apply
+9/25 Test: parameter_file_edit_save_apply
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/parameter_file_editor_tests.exe" "-o" "parameter-file-editor-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"parameter_file_edit_save_apply" start time: Oct 24 17:23 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   3.64 sec
+----------------------------------------------------------
+Test Passed.
+"parameter_file_edit_save_apply" end time: Oct 24 17:23 中国标准时间
+"parameter_file_edit_save_apply" time elapsed: 00:00:03
+----------------------------------------------------------
+
+10/25 Testing: parameter_group_polling
+10/25 Test: parameter_group_polling
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/parameter_poll_tests.exe" "-o" "parameter-poll-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"parameter_group_polling" start time: Oct 24 17:23 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   3.71 sec
+----------------------------------------------------------
+Test Passed.
+"parameter_group_polling" end time: Oct 24 17:23 中国标准时间
+"parameter_group_polling" time elapsed: 00:00:03
+----------------------------------------------------------
+
+11/25 Testing: window_trace_workflow
+11/25 Test: window_trace_workflow
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/window_trace_tests.exe" "-o" "window-trace-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"window_trace_workflow" start time: Oct 24 17:23 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   3.15 sec
+----------------------------------------------------------
+Test Passed.
+"window_trace_workflow" end time: Oct 24 17:23 中国标准时间
+"window_trace_workflow" time elapsed: 00:00:03
+----------------------------------------------------------
+
+12/25 Testing: parameter_pending_write
+12/25 Test: parameter_pending_write
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/parameter_write_tests.exe" "-o" "parameter-write-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"parameter_pending_write" start time: Oct 24 17:23 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   3.42 sec
+----------------------------------------------------------
+Test Passed.
+"parameter_pending_write" end time: Oct 24 17:23 中国标准时间
+"parameter_pending_write" time elapsed: 00:00:03
+----------------------------------------------------------
+
+13/25 Testing: parameter_definition_read
+13/25 Test: parameter_definition_read
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/parameter_definition_tests.exe" "-o" "parameter-definition-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"parameter_definition_read" start time: Oct 24 17:23 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   3.71 sec
+----------------------------------------------------------
+Test Passed.
+"parameter_definition_read" end time: Oct 24 17:23 中国标准时间
+"parameter_definition_read" time elapsed: 00:00:03
+----------------------------------------------------------
+
+14/25 Testing: parameter_window_read
+14/25 Test: parameter_window_read
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/parameter_window_tests.exe" "-o" "parameter-window-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"parameter_window_read" start time: Oct 24 17:23 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   2.14 sec
+----------------------------------------------------------
+Test Passed.
+"parameter_window_read" end time: Oct 24 17:23 中国标准时间
+"parameter_window_read" time elapsed: 00:00:02
+----------------------------------------------------------
+
+15/25 Testing: parallel_sessions_recovery
+15/25 Test: parallel_sessions_recovery
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/session_recovery_tests.exe" "-o" "recovery-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"parallel_sessions_recovery" start time: Oct 24 17:23 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   3.08 sec
+----------------------------------------------------------
+Test Passed.
+"parallel_sessions_recovery" end time: Oct 24 17:23 中国标准时间
+"parallel_sessions_recovery" time elapsed: 00:00:03
+----------------------------------------------------------
+
+16/25 Testing: slave_edit_import_save
+16/25 Test: slave_edit_import_save
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/slave_edit_tests.exe" "-o" "edit-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"slave_edit_import_save" start time: Oct 24 17:23 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   3.12 sec
+----------------------------------------------------------
+Test Passed.
+"slave_edit_import_save" end time: Oct 24 17:23 中国标准时间
+"slave_edit_import_save" time elapsed: 00:00:03
+----------------------------------------------------------
+
+17/25 Testing: session_lifecycle
+17/25 Test: session_lifecycle
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/session_tests.exe" "-o" "test-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"session_lifecycle" start time: Oct 24 17:23 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   2.71 sec
+----------------------------------------------------------
+Test Passed.
+"session_lifecycle" end time: Oct 24 17:23 中国标准时间
+"session_lifecycle" time elapsed: 00:00:02
+----------------------------------------------------------
+
+18/25 Testing: rtu_first_read
+18/25 Test: rtu_first_read
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/rtu_read_tests.exe" "-o" "read-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"rtu_first_read" start time: Oct 24 17:23 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   4.21 sec
+----------------------------------------------------------
+Test Passed.
+"rtu_first_read" end time: Oct 24 17:24 中国标准时间
+"rtu_first_read" time elapsed: 00:00:04
+----------------------------------------------------------
+
+19/25 Testing: rtu_polling
+19/25 Test: rtu_polling
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/rtu_poll_tests.exe" "-o" "poll-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"rtu_polling" start time: Oct 24 17:24 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   3.14 sec
+----------------------------------------------------------
+Test Passed.
+"rtu_polling" end time: Oct 24 17:24 中国标准时间
+"rtu_polling" time elapsed: 00:00:03
+----------------------------------------------------------
+
+20/25 Testing: rtu_explicit_write
+20/25 Test: rtu_explicit_write
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/rtu_write_tests.exe" "-o" "write-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"rtu_explicit_write" start time: Oct 24 17:24 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   4.57 sec
+----------------------------------------------------------
+Test Passed.
+"rtu_explicit_write" end time: Oct 24 17:24 中国标准时间
+"rtu_explicit_write" time elapsed: 00:00:04
+----------------------------------------------------------
+
+21/25 Testing: rtu_slave_json_read
+21/25 Test: rtu_slave_json_read
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/rtu_slave_tests.exe" "-o" "slave-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"rtu_slave_json_read" start time: Oct 24 17:24 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   4.18 sec
+----------------------------------------------------------
+Test Passed.
+"rtu_slave_json_read" end time: Oct 24 17:24 中国标准时间
+"rtu_slave_json_read" time elapsed: 00:00:04
+----------------------------------------------------------
+
+22/25 Testing: rtu_slave_write
+22/25 Test: rtu_slave_write
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/rtu_slave_write_tests.exe" "-o" "slave-write-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"rtu_slave_write" start time: Oct 24 17:24 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   3.53 sec
+----------------------------------------------------------
+Test Passed.
+"rtu_slave_write" end time: Oct 24 17:24 中国标准时间
+"rtu_slave_write" time elapsed: 00:00:03
+----------------------------------------------------------
+
+23/25 Testing: trace_query_export
+23/25 Test: trace_query_export
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/trace_tests.exe" "-o" "trace-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"trace_query_export" start time: Oct 24 17:24 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   3.62 sec
+----------------------------------------------------------
+Test Passed.
+"trace_query_export" end time: Oct 24 17:24 中国标准时间
+"trace_query_export" time elapsed: 00:00:03
+----------------------------------------------------------
+
+24/25 Testing: workspace_roundtrip
+24/25 Test: workspace_roundtrip
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/workspace_tests.exe" "-o" "workspace-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"workspace_roundtrip" start time: Oct 24 17:24 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   4.37 sec
+----------------------------------------------------------
+Test Passed.
+"workspace_roundtrip" end time: Oct 24 17:24 中国标准时间
+"workspace_roundtrip" time elapsed: 00:00:04
+----------------------------------------------------------
+
+25/25 Testing: bounded_disk_recording
+25/25 Test: bounded_disk_recording
+Command: "C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/recording_tests.exe" "-o" "recording-results.txt,txt"
+Directory: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+"bounded_disk_recording" start time: Oct 24 17:24 中国标准时间
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   9.19 sec
+----------------------------------------------------------
+Test Passed.
+"bounded_disk_recording" end time: Oct 24 17:24 中国标准时间
+"bounded_disk_recording" time elapsed: 00:00:09
+----------------------------------------------------------
+
+End testing: Oct 24 17:24 中国标准时间

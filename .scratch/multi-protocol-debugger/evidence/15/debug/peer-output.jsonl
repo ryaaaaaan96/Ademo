@@ -1,0 +1,9 @@
+READY virtual-can-test
+{"requestHex":"05500701204889","responseHex":"05500f012032304141ffffffffb77a","sourceKind":"virtual-can-test"}
+{"requestHex":"05500d022100020006000325e2","responseHex":"05500a02210607084090","sourceKind":"virtual-can-test"}
+{"requestHex":"055014032202000200060003000400060004374c","responseHex":"05501b032202000200060003060708000400060004060708095cbe","sourceKind":"virtual-can-test"}
+{"requestHex":"05500a04230100007b1f","responseHex":"055015042300010100000002000600030607081bf9","sourceKind":"virtual-can-test"}
+{"requestHex":"05500e05260004000600010234c5","responseHex":"0550070526ca4b","sourceKind":"virtual-can-test"}
+{"requestHex":"05501b062702000200060003010203000300070004010203045fcb","responseHex":"05500706270b7b","sourceKind":"virtual-can-test"}
+{"requestHex":"0550160728010002000600030100040006000102fd8a","responseHex":"0550110728010002000600030102035d09","sourceKind":"virtual-can-test"}
+{"requestHex":"05500d0821003200060003e599","responseHex":"05500908a100024c12","sourceKind":"virtual-can-test"}

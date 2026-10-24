@@ -1,0 +1,6 @@
+[1/8] Automatic MOC for target debugger_host
+[2/7] Building CXX object CMakeFiles/debugger_host.dir/src/workbench.cpp.obj
+[3/7] Linking CXX static library libdebugger_host.a
+[4/7] Automatic MOC for target upp_exchange_tests
+[5/6] Building CXX object CMakeFiles/upp_exchange_tests.dir/tests/upp_exchange_tests.cpp.obj
+[6/6] Linking CXX executable bin\upp_exchange_tests.exe

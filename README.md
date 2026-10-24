@@ -81,3 +81,5 @@ SDK14 插件位于 `bin/plugins`，匹配 SDK、产品、Qt 完整版本、编�
 ## UPP CAN 接收解析（14B暂定软件版）
 
 新增UPP接收插件，支持全部CAN适用功能的重组、Modbus CRC、字段/异常解析及原始分片回溯；采用用户授权的暂定规则，未验证真实设备。详见[接收说明](docs/upp-receive.md)。用户可手动运行run-upp-sample.cmd向同通道提供独立virtualcan样例；产品不发送UPP，旧15与TCP未启动。后台测试仍使用offscreen预设，不操作桌面。
+
+UPP CAN 暂定软件交互（全部7功能、原始hex写入、独立virtualcan对端及发送阶段语义）见[使用说明](docs/upp-exchange.md)。宿主和全部DLL需按SDK15配套构建；TCP未启动，物理验收后置。

@@ -1,10 +1,10 @@
 # UPP CAN 接收解析（14B暂定软件版）
 
-本页说明用户授权先实施、后续修订的接收观察功能。原始依据见[UPP资料](protocols/upp-can-format.md)，暂定选择见[14B规则](../.scratch/multi-protocol-debugger/14b-provisional-profile.md)。不是已经验证目标设备的正式线格式；不提供产品UPP发送操作，旧15和TCP未启动。
+本页说明用户授权先实施、后续修订的接收观察功能。原始依据见[UPP资料](protocols/upp-can-format.md)，暂定选择见[14B规则](../.scratch/multi-protocol-debugger/14b-provisional-profile.md)。不是已经验证目标设备的正式线格式；observer保留本页接收观察；15新增master发送交互，见[发送说明](upp-exchange.md)。TCP未启动。
 
 ## 使用
 
-启动本机Release程序，新建会话并选择“UPP CAN 接收解析（暂定规则）”、CAN传输和observer。虚拟软件测试使用virtualcan/can0，显式启动会话后由用户另行运行 `run-upp-sample.cmd`。工具不自动生成流量；本轮代理验收只用Qt offscreen，不打开或操纵桌面。
+启动本机Release程序，新建会话并选择“UPP CAN 交互（暂定规则）”、CAN传输和observer。虚拟软件测试使用virtualcan/can0，显式启动会话后由用户另行运行 `run-upp-sample.cmd`。工具不自动生成流量；本轮代理验收只用Qt offscreen，不打开或操纵桌面。
 
 独立样例源通过正式Qt CAN后端发送重复的握手请求与两片握手回复；默认CAN ID为5，命令行可用 `--can-id 321` 改为十六进制321，`--extended`选择扩展帧。报文设备地址仍为5，因此界面设备归属不由CAN ID替代。直接工具参数为 `can_sample_source --profile upp --interface can0 --count 60 --interval 20`；每3帧构成一组完整握手样例。样例只用于软件测试，CRC由独立脚本计算，未冒充设备抓包。
 

@@ -1,0 +1,16 @@
+********* Start testing of UppExchangeTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : UppExchangeTests::initTestCase()
+FAIL!  : UppExchangeTests::partialCompletionDoesNotMarkWholeOperationSent() '!s.operation(op).localSent' returned FALSE. ()
+C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/tests/upp_exchange_tests.cpp(166) : failure location
+FAIL!  : UppExchangeTests::exceptionTargetMustBelongToRequest() '!s.operation(op).finished' returned FALSE. ()
+C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/tests/upp_exchange_tests.cpp(171) : failure location
+FAIL!  : UppExchangeTests::completionUsesSignalTimeRatherThanDispatchTime() '!s.operation(op).finished' returned FALSE. ()
+C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/tests/upp_exchange_tests.cpp(177) : failure location
+FAIL!  : UppExchangeTests::canBackendBoundsAndSettlesAcceptedTokensExactlyOnce() Compared lists have different sizes.
+   Actual   (completed) size: 0
+   Expected (QList<quint64>{1}) size: 1
+C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/tests/upp_exchange_tests.cpp(159) : failure location
+PASS   : UppExchangeTests::cleanupTestCase()
+Totals: 2 passed, 4 failed, 0 skipped, 0 blacklisted, 2608ms
+********* Finished testing of UppExchangeTests *********

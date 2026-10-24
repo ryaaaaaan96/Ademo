@@ -32,7 +32,7 @@ Status: ready-for-agent
 | [旧13](../multi-protocol-debugger/issues/13-rtu-phase-acceptance.md) | 验收 RTU 第一阶段的真实互通与负载 | needs-info | UI13、旧10/12（已完成）；硬件/对端 | 用户要求物理验收后置；未完成，不阻塞后续软件开发 |
 | [旧14A](../multi-protocol-debugger/issues/14-upp-can-receive.md) | 原始经典CAN帧观察、筛选与导出 | ready-for-agent | UI13软件收尾 | 软件完成；虚拟CAN正式接收链与离屏Qt筛选导出已验收，见[14A证据](../multi-protocol-debugger/evidence/14A/acceptance.md)；无UPP解析/发送，物理后置 |
 | [旧14B](../multi-protocol-debugger/issues/14-upp-can-receive.md) | UPP接收重组、校验、解析与来源回溯 | ready-for-agent | 旧14A已完成；用户授权暂定规则 | 暂定软件版完成（双配置各24/24；403通过、4原生跳过），见[14B证据](../multi-protocol-debugger/evidence/14B/acceptance.md)；设备规则待核验，旧14整体与物理验收未全部完成 |
-| [旧15](../multi-protocol-debugger/issues/15-upp-can-exchange.md) | 完成真实 UPP/CAN 发送交互并与 RTU 并行 | needs-info | 旧14B软件部分；交互规则与样例 | 原始帧观察通过不足以解锁；发送元数据契约待演进，物理验收后置 |
+| [旧15](../multi-protocol-debugger/issues/15-upp-can-exchange.md) | 完成真实 UPP/CAN 发送交互并与 RTU 并行 | needs-info | 旧14B软件部分；交互规则与样例 | 暂定软件交付：8cb9d6d、fc61595、92a9c95；[15验收](../multi-protocol-debugger/evidence/15/acceptance.md)；设备规则/物理后置，TCP未启动 |
 | [旧16](../multi-protocol-debugger/issues/16-tcp-first-register-read.md) | 完成一次 Modbus TCP 主站读取 | ready-for-agent | 旧15软件部分 | 未启动 |
 | [旧17](../multi-protocol-debugger/issues/17-tcp-master-operations.md) | TCP 主站多设备读写、轮询与恢复 | ready-for-agent | 旧16 | 未启动 |
 | [旧18](../multi-protocol-debugger/issues/18-tcp-slave-shared-data.md) | TCP 从站多客户端共享模拟设备 | ready-for-agent | 旧16 | 未启动 |
@@ -78,3 +78,7 @@ UI02–UI13 软件切片均已按依赖合入。整体 Standards 初审两项生
 ### 2026-10-24：14B暂定软件版
 
 用户授权按建议先实现后修改，全部CAN适用功能纳入接收重组、CRC、字段/异常解析和来源回溯，沿用工作台与白底插件视图。实现1c3f328、审查修复ea245f2；[证据](../multi-protocol-debugger/evidence/14B/acceptance.md)区分暂定规则、离屏软件回归和未做的物理验收。旧15、TCP未启动。
+
+### 2026-10-24：旧15暂定软件版
+
+沿用已确认工作台，插件增加原始hex请求面板、全部7功能、明确本地完成与设备确认；离屏按钮经独立virtualcan对端闭环，白底消息/字段/来源及JSONL保留。主站工作区/RTU并行隔离、Debug/Release完整回归及两轴审查见[15证据](../multi-protocol-debugger/evidence/15/acceptance.md)。未操作用户桌面，物理验收后置，TCP未启动。

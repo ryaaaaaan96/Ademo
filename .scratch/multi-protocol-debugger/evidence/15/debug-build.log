@@ -1,0 +1,26 @@
+[1/26] C:\WINDOWS\system32\cmd.exe /C "cd /D C:\Users\81966\Documents\Ademo\build\worktrees\upp15-exchange\build\qt-llvm-debug-offscreen && C:\Qt\Tools\CMake_64\bin\cmake.exe -E make_directory C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/can-lifetime-fixtures && C:\Qt\Tools\CMake_64\bin\cmake.exe -E copy_if_different C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/plugins/libcan_plugin.dll C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/can-lifetime-fixtures/ && C:\Qt\Tools\CMake_64\bin\cmake.exe -E copy_if_different C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/plugins/libcan_observer_plugin.dll C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/bin/can-lifetime-fixtures/"
+[2/26] Linking CXX executable bin\multi_protocol_debugger.exe
+[3/26] Linking CXX executable bin\trace_tests.exe
+[4/26] Linking CXX executable bin\upp_receive_tests.exe
+[5/26] Linking CXX executable bin\can_observation_tests.exe
+[6/26] Linking CXX executable bin\ui_acceptance_tests.exe
+[7/26] Linking CXX executable bin\workspace_layout_tests.exe
+[8/26] Linking CXX executable bin\slave_parameter_tests.exe
+[9/26] Linking CXX executable bin\parameter_trend_tests.exe
+[10/26] Linking CXX executable bin\plugin_ui_contract_tests.exe
+[11/26] Linking CXX executable bin\parameter_file_editor_tests.exe
+[12/26] Linking CXX executable bin\parameter_poll_tests.exe
+[13/26] Linking CXX executable bin\window_trace_tests.exe
+[14/26] Linking CXX executable bin\parameter_write_tests.exe
+[15/26] Linking CXX executable bin\parameter_definition_tests.exe
+[16/26] Linking CXX executable bin\parameter_window_tests.exe
+[17/26] Linking CXX executable bin\session_recovery_tests.exe
+[18/26] Linking CXX executable bin\slave_edit_tests.exe
+[19/26] Linking CXX executable bin\rtu_read_tests.exe
+[20/26] Linking CXX executable bin\rtu_poll_tests.exe
+[21/26] Linking CXX executable bin\session_tests.exe
+[22/26] Linking CXX executable bin\rtu_write_tests.exe
+[23/26] Linking CXX executable bin\rtu_slave_tests.exe
+[24/26] Linking CXX executable bin\workspace_tests.exe
+[25/26] Linking CXX executable bin\rtu_slave_write_tests.exe
+[26/26] Linking CXX executable bin\recording_tests.exe
