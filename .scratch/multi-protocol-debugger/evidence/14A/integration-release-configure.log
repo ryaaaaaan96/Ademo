@@ -1,0 +1,16 @@
+Preset CMake variables:
+
+  CMAKE_BUILD_TYPE="Release"
+  CMAKE_CXX_COMPILER="C:/Qt/Tools/llvm-mingw2217_64/bin/clang++.exe"
+  CMAKE_MAKE_PROGRAM="C:/Qt/Tools/Ninja/ninja.exe"
+  CMAKE_PREFIX_PATH="C:/Qt/6.12.0/llvm-mingw_64"
+
+Preset environment variables:
+
+  PATH="C:/Qt/6.12.0/llvm-mingw_64/bin;C:/Qt/Tools/llvm-mingw2217_64/bin;C:/Qt/Tools/Ninja;C:\Users\81966\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell;C:\Users\81966\.codex\tmp\arg0-windows\codex-arg09ZYraC;C:\Users\81966\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\libheif\libheif\bin;C:\Users\81966\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\jxrlib\jxrlib\bin;C:\Users\81966\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\poppler\Library\bin;C:\Users\81966\.cache\codex-runtimes\codex-primary-runtime\dependencies\bin\override;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\WSL\;C:\Program Files\Git\cmd;C:\Users\81966\AppData\Local\Author Software\nvm;C:\Users\81966\AppData\Local\Author Software\nvm\\.nodejs;C:\Users\81966\AppData\Local\Programs\Python\Python315\Scripts\;C:\Users\81966\AppData\Local\Programs\Python\Python315\;C:\Users\81966\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell;C:\Users\81966\AppData\Local\Microsoft\WindowsApps;C:\Users\81966\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\81966\AppData\Local\Programs\Microsoft VS Code\bin\copilot-shim;C:\Users\81966\.cache\codex-runtimes\codex-primary-runtime\dependencies\bin\fallback;C:\Users\81966\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin;C:\Users\81966\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\git\cmd;C:\Users\81966\AppData\Local\OpenAI\Codex\bin\4f9f0b4313a42895;C:\Users\81966\AppData\Local\OpenAI\Codex\bin\8925276705115dea"
+
+-- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+-- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+-- Configuring done (2.3s)
+-- Generating done (1.4s)
+-- Build files have been written to: C:/Users/81966/Documents/Ademo/build/qt-llvm-release
