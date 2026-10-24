@@ -1,0 +1,28 @@
+[1/30] Automatic MOC for target debugger_host
+[2/29] Building CXX object CMakeFiles/debugger_host.dir/src/workbench.cpp.obj
+[3/29] Linking CXX static library libdebugger_host.a
+[4/29] Linking CXX executable bin\multi_protocol_debugger.exe
+[5/29] Linking CXX executable bin\ui_acceptance_tests.exe
+[6/29] Linking CXX executable bin\slave_parameter_tests.exe
+[7/29] Linking CXX executable bin\workspace_layout_tests.exe
+[8/29] Linking CXX executable bin\parameter_poll_tests.exe
+[9/29] Linking CXX executable bin\parameter_file_editor_tests.exe
+[10/29] Linking CXX executable bin\parameter_trend_tests.exe
+[11/29] Linking CXX executable bin\trace_tests.exe
+[12/29] Linking CXX executable bin\parameter_definition_tests.exe
+[13/29] Linking CXX executable bin\parameter_write_tests.exe
+[14/29] Linking CXX executable bin\plugin_ui_contract_tests.exe
+[15/29] Linking CXX executable bin\parameter_window_tests.exe
+[16/29] Linking CXX executable bin\slave_edit_tests.exe
+[17/29] Linking CXX executable bin\rtu_read_tests.exe
+[18/29] Linking CXX executable bin\rtu_poll_tests.exe
+[19/29] Linking CXX executable bin\window_trace_tests.exe
+[20/29] Linking CXX executable bin\rtu_write_tests.exe
+[21/29] Linking CXX executable bin\rtu_slave_tests.exe
+[22/29] Linking CXX executable bin\rtu_slave_write_tests.exe
+[23/29] Linking CXX executable bin\workspace_tests.exe
+[24/29] Linking CXX executable bin\session_tests.exe
+[25/29] Linking CXX executable bin\recording_tests.exe
+[26/29] Automatic MOC for target session_recovery_tests
+[27/28] Building CXX object CMakeFiles/session_recovery_tests.dir/tests/session_recovery_tests.cpp.obj
+[28/28] Linking CXX executable bin\session_recovery_tests.exe

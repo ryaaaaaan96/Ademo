@@ -272,7 +272,7 @@ void WorkspaceController::applyLayout(const QJsonObject &document, bool restoreO
         const auto item = entries[index].toObject().value("layout").toObject();
         auto *dock = window_.docks_[index];
         const auto saved = QByteArray::fromBase64(item.value("windowGeometry").toString().toLatin1());
-        if (dock->detached() && !saved.isEmpty()) dock->window()->restoreGeometry(saved);
+        if (dock->detached()) dock->restoreFloatingGeometry(saved);
         if (restoreOpen) {
             if (auto *view = window_.parameterView(index); view && item.contains("selectedDevice")) {
                 view->selectDevice(item.value("selectedDevice").toString());
