@@ -23,7 +23,15 @@ struct Descriptor {
     QStringList transports;
     QStringList capabilities;
     QList<Field> fields;
+    QStringList requiredTransportCapabilities = {"byte-stream"};
+    bool preferredForNewSession = false;
 };
+inline bool supportsTransport(const Descriptor &protocol, const Descriptor &transport) {
+    if (!protocol.transports.contains(transport.id)) return false;
+    for (const auto &capability : protocol.requiredTransportCapabilities)
+        if (!transport.capabilities.contains(capability)) return false;
+    return true;
+}
 struct SessionConfig {
     QString protocolId;
     QString transportId;
@@ -115,6 +123,8 @@ struct SessionAccess {
     // GUI线程视图：进入模态回调前复制且早于闭包声明；最后释放延迟到返回事件循环。
     // 不是任意线程代码租约；后台作业须走 background 的独立租约。
     std::shared_ptr<void> lifetime;
+    // 有界原始记录快照的归属/容量及磁盘缺失状态；协议视图不推算丢失数。
+    std::function<QJsonObject()> recordStatus;
 };
 struct ParameterDevice { QString id; QString name; };
 class ParameterView : public QWidget {
@@ -183,7 +193,7 @@ public:
     virtual QJsonObject relocateConfiguration(QJsonObject config, const QString &, const QString &) const { return config; }
 };
 }
-#define DebuggerProtocolIid "org.ademo.debugger.Protocol/13.0"
-#define DebuggerTransportIid "org.ademo.debugger.Transport/13.0"
+#define DebuggerProtocolIid "org.ademo.debugger.Protocol/14.0"
+#define DebuggerTransportIid "org.ademo.debugger.Transport/14.0"
 Q_DECLARE_INTERFACE(debugger::ProtocolPlugin, DebuggerProtocolIid)
 Q_DECLARE_INTERFACE(debugger::TransportPlugin, DebuggerTransportIid)

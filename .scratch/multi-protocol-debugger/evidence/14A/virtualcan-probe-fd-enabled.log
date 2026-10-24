@@ -1,0 +1,30 @@
+Server [0x7ffe33a4d1e0] started and listening on port 35468.
+Server [0x7ffe33a4d1e0] is already running.
+Client [0x1b00d6d9c60] socket connected.
+Server [0x7ffe33a4d1e0] client connected.
+Server [0x7ffe33a4d1e0] client connected.
+Client [0x1b00d6d9b70] socket connected.
+{"echo":false,"errors":0,"extended":false,"fd":false,"id":291,"payloadHex":"010203","payloadSize":3,"stage":"sent-attempt","timestampMicros":"0","timestampSeconds":"0","type":1,"valid":true}
+accepted true
+{"echo":false,"errors":0,"extended":true,"fd":false,"id":291,"payloadHex":"abcdef","payloadSize":3,"stage":"sent-attempt","timestampMicros":"0","timestampSeconds":"0","type":1,"valid":true}
+accepted true
+{"echo":false,"errors":0,"extended":false,"fd":false,"id":292,"payloadHex":"","payloadSize":0,"stage":"sent-attempt","timestampMicros":"0","timestampSeconds":"0","type":1,"valid":true}
+accepted true
+{"echo":false,"errors":0,"extended":false,"fd":false,"id":293,"payloadHex":"deadbeef","payloadSize":4,"stage":"sent-attempt","timestampMicros":"0","timestampSeconds":"0","type":3,"valid":true}
+accepted true
+{"echo":false,"errors":0,"extended":false,"fd":false,"id":294,"payloadHex":"","payloadSize":0,"stage":"sent-attempt","timestampMicros":"0","timestampSeconds":"0","type":3,"valid":true}
+accepted true
+{"echo":false,"errors":64,"extended":false,"fd":false,"id":0,"payloadHex":"","payloadSize":0,"stage":"sent-attempt","timestampMicros":"0","timestampSeconds":"0","type":2,"valid":true}
+accepted true
+{"echo":false,"errors":128,"extended":false,"fd":false,"id":0,"payloadHex":"aabb","payloadSize":2,"stage":"sent-attempt","timestampMicros":"0","timestampSeconds":"0","type":2,"valid":true}
+accepted true
+{"echo":false,"errors":0,"extended":false,"fd":true,"id":295,"payloadHex":"787878787878787878787878","payloadSize":12,"stage":"sent-attempt","timestampMicros":"0","timestampSeconds":"0","type":1,"valid":true}
+accepted true
+{"echo":false,"errors":0,"extended":false,"fd":false,"id":291,"payloadHex":"010203","payloadSize":3,"stage":"received","timestampMicros":"124000","timestampSeconds":"1792824946","type":1,"valid":true}
+{"echo":false,"errors":0,"extended":true,"fd":false,"id":291,"payloadHex":"abcdef","payloadSize":3,"stage":"received","timestampMicros":"125000","timestampSeconds":"1792824946","type":1,"valid":true}
+{"echo":false,"errors":0,"extended":false,"fd":false,"id":292,"payloadHex":"","payloadSize":0,"stage":"received","timestampMicros":"125000","timestampSeconds":"1792824946","type":1,"valid":true}
+{"echo":false,"errors":0,"extended":false,"fd":false,"id":293,"payloadHex":"deadbeef","payloadSize":4,"stage":"received","timestampMicros":"125000","timestampSeconds":"1792824946","type":3,"valid":true}
+{"echo":false,"errors":0,"extended":false,"fd":false,"id":294,"payloadHex":"","payloadSize":0,"stage":"received","timestampMicros":"126000","timestampSeconds":"1792824946","type":3,"valid":true}
+{"echo":false,"errors":0,"extended":false,"fd":false,"id":0,"payloadHex":"","payloadSize":0,"stage":"received","timestampMicros":"126000","timestampSeconds":"1792824946","type":1,"valid":true}
+{"echo":false,"errors":0,"extended":false,"fd":false,"id":0,"payloadHex":"aabb","payloadSize":2,"stage":"received","timestampMicros":"126000","timestampSeconds":"1792824946","type":1,"valid":true}
+{"echo":false,"errors":0,"extended":false,"fd":true,"id":295,"payloadHex":"787878787878787878787878","payloadSize":12,"stage":"received","timestampMicros":"126000","timestampSeconds":"1792824946","type":1,"valid":true}

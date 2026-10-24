@@ -1,0 +1,44 @@
+********* Start testing of CanObservationTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : CanObservationTests::initTestCase()
+PASS   : CanObservationTests::observerHasDedicatedFrameTable()
+PASS   : CanObservationTests::classicAndEmptyFramesUseSessionRecords()
+PASS   : CanObservationTests::backendPreservesRemoteErrorAndUnsupportedFrames()
+QWARN  : CanObservationTests::filteringAndExportKeepRawRecordsAndSessionSource() This plugin does not support propagateSizeHints()
+QWARN  : CanObservationTests::filteringAndExportKeepRawRecordsAndSessionSource() This plugin does not support propagateSizeHints()
+QWARN  : CanObservationTests::filteringAndExportKeepRawRecordsAndSessionSource() This plugin does not support propagateSizeHints()
+QWARN  : CanObservationTests::filteringAndExportKeepRawRecordsAndSessionSource() This plugin does not support propagateSizeHints()
+PASS   : CanObservationTests::filteringAndExportKeepRawRecordsAndSessionSource()
+PASS   : CanObservationTests::boundedFramesStopAndOldCallbacksCannotContaminateRestart()
+QINFO  : CanObservationTests::independentVirtualSampleUsesFormalBackend() qt.canbus.plugins.virtualcan: Server [0x7ffe18bbd1e0] started and listening on port 35468.
+QINFO  : CanObservationTests::independentVirtualSampleUsesFormalBackend() qt.canbus.plugins.virtualcan: Server [0x7ffe18bbd1e0] client connected.
+QINFO  : CanObservationTests::independentVirtualSampleUsesFormalBackend() qt.canbus.plugins.virtualcan: Client [0x1d565ba1e60] socket connected.
+QINFO  : CanObservationTests::independentVirtualSampleUsesFormalBackend() qt.canbus.plugins.virtualcan: Server [0x7ffe18bbd1e0] client connected.
+QINFO  : CanObservationTests::independentVirtualSampleUsesFormalBackend() qt.canbus.plugins.virtualcan: Server [0x7ffe18bbd1e0] client disconnected.
+QINFO  : CanObservationTests::independentVirtualSampleUsesFormalBackend() 实际独立样例源输出： {"canId":291,"extended":false,"index":1,"qtFrameType":1,"qtPayloadHex":"0102030405060708","source":"virtual-can-sample-only"}?
+{"canId":28036579,"extended":true,"index":2,"qtFrameType":1,"qtPayloadHex":"deadbeef","source":"virtual-can-sample-only"}?
+{"canId":1110,"extended":false,"index":3,"qtFrameType":1,"qtPayloadHex":"","source":"virtual-can-sample-only"}?
+{"canId":801,"extended":false,"index":4,"qtFrameType":3,"qtPayloadHex":"00000000","source":"virtual-can-sample-only"}?
+
+QWARN  : CanObservationTests::independentVirtualSampleUsesFormalBackend() This plugin does not support propagateSizeHints()
+QWARN  : CanObservationTests::independentVirtualSampleUsesFormalBackend() This plugin does not support propagateSizeHints()
+QWARN  : CanObservationTests::independentVirtualSampleUsesFormalBackend() This plugin does not support propagateSizeHints()
+QWARN  : CanObservationTests::independentVirtualSampleUsesFormalBackend() This plugin does not support propagateSizeHints()
+QINFO  : CanObservationTests::independentVirtualSampleUsesFormalBackend() qt.canbus.plugins.virtualcan: Server [0x7ffe18bbd1e0] is already running.
+QINFO  : CanObservationTests::independentVirtualSampleUsesFormalBackend() qt.canbus.plugins.virtualcan: Server [0x7ffe18bbd1e0] client disconnected.
+QINFO  : CanObservationTests::independentVirtualSampleUsesFormalBackend() qt.canbus.plugins.virtualcan: Server [0x7ffe18bbd1e0] client connected.
+QINFO  : CanObservationTests::independentVirtualSampleUsesFormalBackend() qt.canbus.plugins.virtualcan: Client [0x1d565eff890] socket connected.
+PASS   : CanObservationTests::independentVirtualSampleUsesFormalBackend()
+QWARN  : CanObservationTests::compatibleDefaultsWorkspaceRestoreAndParallelSessions() This plugin does not support propagateSizeHints()
+QWARN  : CanObservationTests::compatibleDefaultsWorkspaceRestoreAndParallelSessions() This plugin does not support raise()
+QINFO  : CanObservationTests::compatibleDefaultsWorkspaceRestoreAndParallelSessions() qt.canbus.plugins.virtualcan: Server [0x7ffe18bbd1e0] client disconnected.
+PASS   : CanObservationTests::compatibleDefaultsWorkspaceRestoreAndParallelSessions()
+QWARN  : CanObservationTests::switchingProtocolEnablesStartAfterCompatibleRoleSelection() This plugin does not support propagateSizeHints()
+QWARN  : CanObservationTests::switchingProtocolEnablesStartAfterCompatibleRoleSelection() This plugin does not support raise()
+QWARN  : CanObservationTests::switchingProtocolEnablesStartAfterCompatibleRoleSelection() This plugin does not support propagateSizeHints()
+QWARN  : CanObservationTests::switchingProtocolEnablesStartAfterCompatibleRoleSelection() This plugin does not support raise()
+PASS   : CanObservationTests::switchingProtocolEnablesStartAfterCompatibleRoleSelection()
+PASS   : CanObservationTests::exportSurvivesViewSessionAndCatalogDestruction()
+PASS   : CanObservationTests::cleanupTestCase()
+Totals: 11 passed, 0 failed, 0 skipped, 0 blacklisted, 5224ms
+********* Finished testing of CanObservationTests *********

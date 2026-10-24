@@ -1,0 +1,44 @@
+[0/1] Re-running CMake...
+-- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+-- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+-- Configuring done (2.6s)
+-- Generating done (1.9s)
+-- Build files have been written to: C:/Users/81966/Documents/Ademo/build/worktrees/can14a-observation/build/qt-llvm-release-offscreen
+[1/110] Automatic MOC for target can_transport
+[2/108] Automatic MOC for target debugger_widgets
+[3/106] Automatic MOC for target debugger_host
+[4/104] Automatic MOC for target serial_plugin
+[5/102] Automatic MOC for target modbus_plugin
+[6/100] Automatic MOC for target trace_fixture_plugin
+[7/98] Automatic MOC for target can_plugin
+[8/96] Automatic MOC for target can_sample_source
+[9/94] Automatic MOC for target can_observer_plugin
+[10/92] Automatic MOC for target ui_contract_plugin
+[11/90] Automatic MOC for target ui_contract_stale_plugin
+[12/88] Automatic MOC for target incompatible_plugin
+[13/86] C:\WINDOWS\system32\cmd.exe /C "cd /D C:\Users\81966\Documents\Ademo\build\worktrees\can14a-observation\build\qt-llvm-release-offscreen && C:\Qt\Tools\CMake_64\bin\cmake.exe -E make_directory C:/Users/81966/Documents/Ademo/build/worktrees/can14a-observation/build/qt-llvm-release-offscreen/bin/can-lifetime-fixtures && C:\Qt\Tools\CMake_64\bin\cmake.exe -E copy_if_different C:/Users/81966/Documents/Ademo/build/worktrees/can14a-observation/build/qt-llvm-release-offscreen/bin/plugins/libcan_plugin.dll C:/Users/81966/Documents/Ademo/build/worktrees/can14a-observation/build/qt-llvm-release-offscreen/bin/can-lifetime-fixtures/ && C:\Qt\Tools\CMake_64\bin\cmake.exe -E copy_if_different C:/Users/81966/Documents/Ademo/build/worktrees/can14a-observation/build/qt-llvm-release-offscreen/bin/plugins/libcan_observer_plugin.dll C:/Users/81966/Documents/Ademo/build/worktrees/can14a-observation/build/qt-llvm-release-offscreen/bin/can-lifetime-fixtures/"
+[14/86] Automatic MOC for target trace_tests
+[15/84] Automatic MOC for target multi_protocol_debugger
+[16/82] Automatic MOC for target ui_acceptance_tests
+[17/80] Automatic MOC for target workspace_layout_tests
+[18/78] Automatic MOC for target slave_parameter_tests
+[19/76] Automatic MOC for target plugin_ui_contract_tests
+[20/74] Automatic MOC for target parameter_trend_tests
+[21/72] Automatic MOC for target parameter_file_editor_tests
+[22/70] Automatic MOC for target parameter_poll_tests
+[23/68] Automatic MOC for target window_trace_tests
+[24/66] Automatic MOC for target parameter_write_tests
+[25/64] Automatic MOC for target parameter_definition_tests
+[26/62] Automatic MOC for target can_observation_tests
+[27/61] Automatic MOC for target parameter_window_tests
+[28/59] Automatic MOC for target session_recovery_tests
+[29/57] Automatic MOC for target slave_edit_tests
+[30/55] Automatic MOC for target session_tests
+[31/53] Automatic MOC for target rtu_read_tests
+[32/51] Automatic MOC for target rtu_poll_tests
+[33/49] Automatic MOC for target rtu_write_tests
+[34/47] Automatic MOC for target rtu_slave_tests
+[35/45] Automatic MOC for target rtu_slave_write_tests
+[36/43] Linking CXX executable bin\can_observation_tests.exe
+[37/43] Automatic MOC for target workspace_tests
+[38/41] Automatic MOC for target recording_tests

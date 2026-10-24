@@ -1,0 +1,62 @@
+********* Start testing of RecoveryTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : RecoveryTests::initTestCase()
+PASS   : RecoveryTests::parallelMasterSlaveAndConflictingEndpoint()
+PASS   : RecoveryTests::automaticReconnectResumesPollingAndRejectsOldCallbacks()
+PASS   : RecoveryTests::sentWriteIsUncertainAndNeverReplayed()
+PASS   : RecoveryTests::manualReconnectCanLeavePollingPaused()
+PASS   : RecoveryTests::slaveReconnectPreservesEditedDataDespiteDeletedStartupFile()
+PASS   : RecoveryTests::repeatedLifecycleReleasesEndpointAndBoundsAutomaticAttempts()
+PASS   : RecoveryTests::backgroundSaveCompletesAcrossConnectionEpoch()
+PASS   : RecoveryTests::invalidRecoveryPolicyDoesNotOpenEndpoint()
+PASS   : RecoveryTests::qtTimerRetriesInitialOpenFailureWithoutManualPoll()
+PASS   : RecoveryTests::newConfigurationCancelsOldRecovery()
+QWARN  : RecoveryTests::closingWindowRetainsSessionConfigurationAndOtherConnection() This plugin does not support raise()
+PASS   : RecoveryTests::closingWindowRetainsSessionConfigurationAndOtherConnection()
+QWARN  : RecoveryTests::windowArrangementIsAvailableWithoutStoppingSessions() This plugin does not support propagateSizeHints()
+QWARN  : RecoveryTests::windowArrangementIsAvailableWithoutStoppingSessions() This plugin does not support raise()
+QWARN  : RecoveryTests::windowArrangementIsAvailableWithoutStoppingSessions() This plugin does not support raise()
+QWARN  : RecoveryTests::windowArrangementIsAvailableWithoutStoppingSessions() This plugin does not support propagateSizeHints()
+QWARN  : RecoveryTests::windowArrangementIsAvailableWithoutStoppingSessions() This plugin does not support propagateSizeHints()
+QWARN  : RecoveryTests::windowArrangementIsAvailableWithoutStoppingSessions() This plugin does not support propagateSizeHints()
+QWARN  : RecoveryTests::windowArrangementIsAvailableWithoutStoppingSessions() This plugin does not support raise()
+QWARN  : RecoveryTests::windowArrangementIsAvailableWithoutStoppingSessions() This plugin does not support propagateSizeHints()
+QWARN  : RecoveryTests::windowArrangementIsAvailableWithoutStoppingSessions() This plugin does not support raise()
+QWARN  : RecoveryTests::windowArrangementIsAvailableWithoutStoppingSessions() This plugin does not support propagateSizeHints()
+QWARN  : RecoveryTests::windowArrangementIsAvailableWithoutStoppingSessions() This plugin does not support propagateSizeHints()
+QWARN  : RecoveryTests::windowArrangementIsAvailableWithoutStoppingSessions() This plugin does not support raise()
+QWARN  : RecoveryTests::windowArrangementIsAvailableWithoutStoppingSessions() This plugin does not support raise()
+QWARN  : RecoveryTests::windowArrangementIsAvailableWithoutStoppingSessions() This plugin does not support propagateSizeHints()
+PASS   : RecoveryTests::windowArrangementIsAvailableWithoutStoppingSessions()
+SKIP   : RecoveryTests::titleMenuDocksWithoutExtraRowOrRestartingSession() 需要 windows QPA 的原生菜单/拖动；offscreen 不执行桌面操作
+C:/Users/81966/Documents/Ademo/build/worktrees/can14a-observation/tests/session_recovery_tests.cpp(283) : failure location
+SKIP   : RecoveryTests::nativeWindowMoveDropsIntoEmptyWorkbench() 需要 windows QPA 的原生菜单/拖动；offscreen 不执行桌面操作
+C:/Users/81966/Documents/Ademo/build/worktrees/can14a-observation/tests/session_recovery_tests.cpp(325) : failure location
+SKIP   : RecoveryTests::nativeMoveCancellationAndOcclusionKeepFloating() 需要 windows QPA 的原生菜单/拖动；offscreen 不执行桌面操作
+C:/Users/81966/Documents/Ademo/build/worktrees/can14a-observation/tests/session_recovery_tests.cpp(343) : failure location
+SKIP   : RecoveryTests::nativeMoveCanTileOnEverySideOfAnotherSession() 需要 windows QPA 的原生菜单/拖动；offscreen 不执行桌面操作
+C:/Users/81966/Documents/Ademo/build/worktrees/can14a-observation/tests/session_recovery_tests.cpp(367) : failure location
+QWARN  : RecoveryTests::navigationAndRecordsStayWithTheirSession() This plugin does not support propagateSizeHints()
+QWARN  : RecoveryTests::navigationAndRecordsStayWithTheirSession() This plugin does not support raise()
+QWARN  : RecoveryTests::navigationAndRecordsStayWithTheirSession() This plugin does not support raise()
+QWARN  : RecoveryTests::navigationAndRecordsStayWithTheirSession() This plugin does not support raise()
+QWARN  : RecoveryTests::navigationAndRecordsStayWithTheirSession() This plugin does not support raise()
+QWARN  : RecoveryTests::navigationAndRecordsStayWithTheirSession() This plugin does not support propagateSizeHints()
+QWARN  : RecoveryTests::navigationAndRecordsStayWithTheirSession() This plugin does not support propagateSizeHints()
+QWARN  : RecoveryTests::navigationAndRecordsStayWithTheirSession() This plugin does not support propagateSizeHints()
+QWARN  : RecoveryTests::navigationAndRecordsStayWithTheirSession() This plugin does not support raise()
+QWARN  : RecoveryTests::navigationAndRecordsStayWithTheirSession() This plugin does not support propagateSizeHints()
+PASS   : RecoveryTests::navigationAndRecordsStayWithTheirSession()
+QWARN  : RecoveryTests::workbenchCreatesParallelWindowsAndProtectsDirtyClose() This plugin does not support propagateSizeHints()
+QWARN  : RecoveryTests::workbenchCreatesParallelWindowsAndProtectsDirtyClose() This plugin does not support raise()
+QWARN  : RecoveryTests::workbenchCreatesParallelWindowsAndProtectsDirtyClose() This plugin does not support raise()
+QWARN  : RecoveryTests::workbenchCreatesParallelWindowsAndProtectsDirtyClose() This plugin does not support raise()
+PASS   : RecoveryTests::workbenchCreatesParallelWindowsAndProtectsDirtyClose()
+QWARN  : RecoveryTests::windowCloseRechecksEarlierSessionAfterLaterGuard() This plugin does not support propagateSizeHints()
+QWARN  : RecoveryTests::windowCloseRechecksEarlierSessionAfterLaterGuard() This plugin does not support raise()
+QWARN  : RecoveryTests::windowCloseRechecksEarlierSessionAfterLaterGuard() This plugin does not support raise()
+QWARN  : RecoveryTests::windowCloseRechecksEarlierSessionAfterLaterGuard() This plugin does not support raise()
+PASS   : RecoveryTests::windowCloseRechecksEarlierSessionAfterLaterGuard()
+PASS   : RecoveryTests::cleanupTestCase()
+Totals: 17 passed, 0 failed, 4 skipped, 0 blacklisted, 884ms
+********* Finished testing of RecoveryTests *********

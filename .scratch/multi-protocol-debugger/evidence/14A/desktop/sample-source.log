@@ -1,0 +1,12 @@
+{"canId":291,"extended":false,"index":1,"qtFrameType":1,"qtPayloadHex":"0102030405060708","source":"virtual-can-sample-only"}
+{"canId":28036579,"extended":true,"index":2,"qtFrameType":1,"qtPayloadHex":"deadbeef","source":"virtual-can-sample-only"}
+{"canId":1110,"extended":false,"index":3,"qtFrameType":1,"qtPayloadHex":"","source":"virtual-can-sample-only"}
+{"canId":801,"extended":false,"index":4,"qtFrameType":3,"qtPayloadHex":"00000000","source":"virtual-can-sample-only"}
+{"canId":291,"extended":false,"index":5,"qtFrameType":1,"qtPayloadHex":"0102030405060708","source":"virtual-can-sample-only"}
+{"canId":28036579,"extended":true,"index":6,"qtFrameType":1,"qtPayloadHex":"deadbeef","source":"virtual-can-sample-only"}
+{"canId":1110,"extended":false,"index":7,"qtFrameType":1,"qtPayloadHex":"","source":"virtual-can-sample-only"}
+{"canId":801,"extended":false,"index":8,"qtFrameType":3,"qtPayloadHex":"00000000","source":"virtual-can-sample-only"}
+{"canId":291,"extended":false,"index":9,"qtFrameType":1,"qtPayloadHex":"0102030405060708","source":"virtual-can-sample-only"}
+{"canId":28036579,"extended":true,"index":10,"qtFrameType":1,"qtPayloadHex":"deadbeef","source":"virtual-can-sample-only"}
+{"canId":1110,"extended":false,"index":11,"qtFrameType":1,"qtPayloadHex":"","source":"virtual-can-sample-only"}
+{"canId":801,"extended":false,"index":12,"qtFrameType":3,"qtPayloadHex":"00000000","source":"virtual-can-sample-only"}

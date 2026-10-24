@@ -23,7 +23,7 @@ Status: ready-for-agent
 | [11](issues/11-trace-query-export.md) | 按操作与消息回溯并导出记录 | RTU | ready-for-agent | 02 |
 | [12](issues/12-bounded-disk-recording.md) | 开启磁盘回溯并在过载时保持通信 | RTU | ready-for-agent | 05、11 |
 | [13](issues/13-rtu-phase-acceptance.md) | 验收 RTU 第一阶段的真实互通与负载 | RTU 阶段验收 | needs-info | UI13、10、12；另需外部条件 |
-| [14A](issues/14-upp-can-receive.md) | 原始经典CAN帧观察、筛选与导出 | UPP/CAN | ready-for-agent | UI13软件收尾；虚拟CAN验收，不依赖UPP歧义 |
+| [14A](issues/14-upp-can-receive.md) | 原始经典CAN帧观察、筛选与导出 | UPP/CAN | ready-for-agent | 软件完成，见[14A验收证据](evidence/14A/acceptance.md)；用户禁止桌面操作后采用离屏Qt验收，物理后置 |
 | [14B](issues/14-upp-can-receive.md) | UPP接收重组与解析 | UPP/CAN | needs-info | 14A；相关协议缺口确认；物理验收后置 |
 | [15](issues/15-upp-can-exchange.md) | 完成真实 UPP/CAN 发送交互并与 RTU 并行 | UPP/CAN | needs-info | 14B软件部分；交互规则与样例；物理验收后置 |
 | [16](issues/16-tcp-first-register-read.md) | 完成一次 Modbus TCP 主站读取 | TCP | ready-for-agent | 15软件部分 |

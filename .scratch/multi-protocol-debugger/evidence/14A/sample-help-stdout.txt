@@ -1,0 +1,9 @@
+Usage: C:\Users\81966\Documents\Ademo\build\worktrees\can14a-observation\build\qt-llvm-release-offscreen\bin\can_sample_source.exe [options]
+独立虚拟 CAN 样例源，仅软件测试，不连接物理设备
+
+Options:
+  -?, -h, --help         Displays help on commandline options.
+  --help-all             Displays help, including generic Qt options.
+  --interface <channel>  虚拟测试通道 can0..can9
+  --count <count>        发送帧数，1..100000
+  --interval <ms>        样例发送间隔毫秒，10..60000

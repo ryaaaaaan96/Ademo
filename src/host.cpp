@@ -190,8 +190,7 @@ bool DebugSession::start(const SessionConfig &config)
     if (!p || !t) { fail(QStringLiteral("所需协议或传输插件不可用")); return false; }
     const auto pd = p->describe();
     const auto td = t->describe();
-    if (!pd.roles.contains(config.role) || !pd.transports.contains(td.id)
-        || !td.capabilities.contains("byte-stream")) {
+    if (!pd.roles.contains(config.role) || !supportsTransport(pd, td)) {
         fail(QStringLiteral("不支持的协议、角色、传输或必要能力组合")); return false;
     }
     const auto error = t->validate(config.endpoint);
@@ -356,6 +355,13 @@ quint64 DebugSession::appendTrace(const QString &kind, const QByteArray &bytes, 
 void DebugSession::received(quint64 run, ReceiveChunk input, qint64 observedUs)
 {
     if (run != generation_ || !protocol_ || (state_ != SessionState::Running && state_ != SessionState::Starting)) return;
+    const auto *transport = catalog_->transport(config_.transportId);
+    if (transport && transport->describe().capabilities.contains("frame")) {
+        const auto id = appendTrace("rx", input.bytes, 0, {}, observedUs, input.metadata, input.idleBeforeUs);
+        const auto record = trace(id);
+        if (record) protocol_->onInput(*record);
+        return;
+    }
     for (qsizetype offset = 0; offset < input.bytes.size(); offset += 4096) {
         const auto chunk = input.bytes.mid(offset, 4096);
         const auto id = appendTrace("rx", chunk, 0, {}, observedUs, input.metadata, offset == 0 ? input.idleBeforeUs : std::nullopt);
@@ -531,7 +537,14 @@ SessionAccess DebugSession::access()
                 if (!registered) QObject::connect(owner, &QObject::destroyed, self, [self, owner] {
                     if (self) self->viewStates_.remove(owner);
                 });
-            }, std::move(lifetime)};
+            }, std::move(lifetime), [self] {
+                if (!self) return QJsonObject{};
+                const auto stats = self->recordingStats();
+                return QJsonObject{{"sessionId", self->sessionId()}, {"recordCapacity", self->traceLimits().records},
+                    {"expiredRecords", QString::number(self->expiredTraceCount())},
+                    {"diskDroppedEvents", QString::number(stats.droppedEvents)},
+                    {"diskRotatedEvents", QString::number(stats.rotatedEvents)}, {"diskState", stats.state}, {"diskError", stats.error}};
+            }};
 }
 bool DebugSession::configure(QJsonObject protocol)
 {

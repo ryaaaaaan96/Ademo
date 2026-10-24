@@ -18,28 +18,78 @@
     {
       "name": "qt-llvm-debug",
       "inherits": "qt-llvm-base",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
     },
     {
       "name": "qt-llvm-release",
       "inherits": "qt-llvm-base",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "qt-llvm-debug-offscreen",
+      "inherits": "qt-llvm-debug",
+      "cacheVariables": {
+        "DEBUGGER_TEST_QPA": "offscreen"
+      }
+    },
+    {
+      "name": "qt-llvm-release-offscreen",
+      "inherits": "qt-llvm-release",
+      "cacheVariables": {
+        "DEBUGGER_TEST_QPA": "offscreen"
+      }
     }
   ],
   "buildPresets": [
-    { "name": "qt-llvm-debug", "configurePreset": "qt-llvm-debug" },
-    { "name": "qt-llvm-release", "configurePreset": "qt-llvm-release" }
+    {
+      "name": "qt-llvm-debug",
+      "configurePreset": "qt-llvm-debug"
+    },
+    {
+      "name": "qt-llvm-release",
+      "configurePreset": "qt-llvm-release"
+    },
+    {
+      "name": "qt-llvm-debug-offscreen",
+      "configurePreset": "qt-llvm-debug-offscreen"
+    },
+    {
+      "name": "qt-llvm-release-offscreen",
+      "configurePreset": "qt-llvm-release-offscreen"
+    }
   ],
   "testPresets": [
     {
       "name": "qt-llvm-debug",
       "configurePreset": "qt-llvm-debug",
-      "output": { "outputOnFailure": true }
+      "output": {
+        "outputOnFailure": true
+      }
     },
     {
       "name": "qt-llvm-release",
       "configurePreset": "qt-llvm-release",
-      "output": { "outputOnFailure": true }
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "qt-llvm-debug-offscreen",
+      "configurePreset": "qt-llvm-debug-offscreen",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "qt-llvm-release-offscreen",
+      "configurePreset": "qt-llvm-release-offscreen",
+      "output": {
+        "outputOnFailure": true
+      }
     }
   ]
 }

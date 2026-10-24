@@ -30,7 +30,7 @@ Status: ready-for-agent
 | [UI12](issues/12-plugin-ui-contract-validation.md) | 通过独立示例插件验证表格与编辑页扩展 | ready-for-agent | UI03、UI07 | 已完成：e394d58；合入 66ffa7e；[验收与集成复测](evidence/UI12/integration.md) |
 | [UI13](issues/13-rtu-ui-acceptance-migration.md) | 验收 RTU 新界面完整流程并完成旧入口迁移 | ready-for-agent | UI09、UI10、UI11、UI12 | 用户已确认正式界面；配置／侧栏／标题菜单增量已归档于 87126a3，屏幕外窗口恢复已修复并完成双配置软件回归，见[收尾证据](../window-screen-recovery/evidence/acceptance.md)。最终整体两轴审查随14A集成收尾记录 |
 | [旧13](../multi-protocol-debugger/issues/13-rtu-phase-acceptance.md) | 验收 RTU 第一阶段的真实互通与负载 | needs-info | UI13、旧10/12（已完成）；硬件/对端 | 用户要求物理验收后置；未完成，不阻塞后续软件开发 |
-| [旧14A](../multi-protocol-debugger/issues/14-upp-can-receive.md) | 原始经典CAN帧观察、筛选与导出 | ready-for-agent | UI13软件收尾 | Q1–Q3已确认；虚拟CAN样例源走正式接收链，无UPP解析/发送；尚未实施 |
+| [旧14A](../multi-protocol-debugger/issues/14-upp-can-receive.md) | 原始经典CAN帧观察、筛选与导出 | ready-for-agent | UI13软件收尾 | 软件完成；虚拟CAN正式接收链与离屏Qt筛选导出已验收，见[14A证据](../multi-protocol-debugger/evidence/14A/acceptance.md)；无UPP解析/发送，物理后置 |
 | [旧14B](../multi-protocol-debugger/issues/14-upp-can-receive.md) | UPP接收重组、校验、解析与来源回溯 | needs-info | 旧14A；相关协议缺口确认 | 文档已收到，缺口见整理文档第8节；旧14整体尚未完成，物理验收后置 |
 | [旧15](../multi-protocol-debugger/issues/15-upp-can-exchange.md) | 完成真实 UPP/CAN 发送交互并与 RTU 并行 | needs-info | 旧14B软件部分；交互规则与样例 | 原始帧观察通过不足以解锁；发送元数据契约待演进，物理验收后置 |
 | [旧16](../multi-protocol-debugger/issues/16-tcp-first-register-read.md) | 完成一次 Modbus TCP 主站读取 | ready-for-agent | 旧15软件部分 | 未启动 |

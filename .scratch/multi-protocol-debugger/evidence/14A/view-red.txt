@@ -1,0 +1,9 @@
+********* Start testing of CanObservationTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : CanObservationTests::initTestCase()
+FAIL!  : CanObservationTests::observerHasDedicatedFrameTable() 'view' returned FALSE. ()
+C:/Users/81966/Documents/Ademo/build/worktrees/can14a-observation/tests/can_observation_tests.cpp(13) : failure location
+PASS   : CanObservationTests::classicAndEmptyFramesUseSessionRecords()
+PASS   : CanObservationTests::cleanupTestCase()
+Totals: 3 passed, 1 failed, 0 skipped, 0 blacklisted, 824ms
+********* Finished testing of CanObservationTests *********

@@ -43,8 +43,8 @@ private slots:
         catalog = std::make_shared<PluginCatalog>();
         catalog->discover(QCoreApplication::applicationDirPath() + "/plugins");
         QCOMPARE(catalog->diagnostics(), QStringList{});
-        QCOMPARE(catalog->protocols().size(), 1);
-        QCOMPARE(catalog->transports().size(), 1);
+        QVERIFY(catalog->protocol("modbus.rtu"));
+        QVERIFY(catalog->transport("serial"));
     }
     void startStopAndRelease() {
         ControlledWire wire;
