@@ -182,4 +182,4 @@ public:
     }
 };
 }
-std::unique_ptr<ProtocolSession> createUppSession(ProtocolServices s) { return std::make_unique<UppSession>(std::move(s)); }
+std::unique_ptr<ProtocolSession> createUppObserver(ProtocolServices s) { return std::make_unique<UppSession>(std::move(s)); }

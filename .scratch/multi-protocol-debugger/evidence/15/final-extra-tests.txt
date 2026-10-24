@@ -1,0 +1,14 @@
+********* Start testing of UppExchangeTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : UppExchangeTests::initTestCase()
+QWARN  : UppExchangeTests::masterWorkspaceAndRtuRemainIndependent() QFontDatabase: Cannot find font directory C:/Qt/6.12.0/llvm-mingw_64/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+FAIL!  : UppExchangeTests::masterWorkspaceAndRtuRemainIndependent() Compared values are not the same
+   Actual   (window.workspaceOperation(save).state): "file-error"
+   Expected (QString("success"))                   : "success"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/tests/upp_exchange_tests.cpp(208) : failure location
+QWARN  : UppExchangeTests::masterWorkspaceAndRtuRemainIndependent() QTemporaryDir: Unable to remove "C:\\Users\\81966\\AppData\\Local\\Packages\\sandbox.{1e3bc77b-d737-48d0-a866-f6d15cfc6cf6}\\AC\\Temp\\upp_exchange_tests-kBZFPz" most likely due to the presence of read-only files.
+PASS   : UppExchangeTests::sequenceWrapIsBoundedAndPerDevice()
+PASS   : UppExchangeTests::cleanupTestCase()
+Totals: 3 passed, 1 failed, 0 skipped, 0 blacklisted, 18352ms
+********* Finished testing of UppExchangeTests *********

@@ -202,6 +202,11 @@ bool DebugSession::start(const SessionConfig &config)
     services.send = [self, run](quint64 id, QByteArray bytes) {
         return self && self->ownsProtocol(run) && self->send(self->generation_, id, bytes);
     };
+    services.sendUnit = [self, run](quint64 id, QByteArray bytes, QJsonObject metadata) {
+        SendReceipt receipt;
+        if (self && self->ownsProtocol(run)) receipt.accepted = self->send(self->generation_, id, bytes, std::move(metadata), &receipt.recordId);
+        return receipt;
+    };
     services.publish = [self, run](OperationUpdate update) {
         if (self && self->ownsProtocol(run)) self->publish(std::move(update));
     };
@@ -368,7 +373,7 @@ void DebugSession::received(quint64 run, ReceiveChunk input, qint64 observedUs)
         protocol_->onInput(*trace(id)); // 原始记录分配稳定身份后，才进入协议。
     }
 }
-bool DebugSession::send(quint64 run, quint64 id, const QByteArray &bytes)
+bool DebugSession::send(quint64 run, quint64 id, const QByteArray &bytes, QJsonObject metadata, quint64 *recordId)
 {
     if (run != generation_ || state_ != SessionState::Running || !endpoint_ || bytes.size() > 256) return false;
     auto &attempt = sendAttempts_[id];
@@ -376,11 +381,14 @@ bool DebugSession::send(quint64 run, quint64 id, const QByteArray &bytes)
     attempt.token = attempt.attempt == 1 ? id : allocateSendToken();
     attempt.completed = false;
     const auto token = attempt.token;
-    const QJsonObject metadata{{"attempt", attempt.attempt}, {"sendId", QString::number(token)}};
-    appendTrace("send-request", bytes, id, QStringLiteral("请求本地发送，尚未证明发送完成或设备应答"), -1, metadata);
-    const bool accepted = endpoint_->send(token, bytes);
+    metadata["attempt"] = metadata.value("protocolAttempt").toInt(attempt.attempt); metadata["sendId"] = QString::number(token);
+    attempt.metadata = metadata;
+    const auto source = appendTrace("send-request", bytes, id, QStringLiteral("请求本地发送，尚未证明发送完成或设备应答"), -1, metadata);
+    if (recordId) *recordId = source;
+    auto transportMetadata = metadata; transportMetadata.remove("attempt"); transportMetadata.remove("sendId");
+    const bool accepted = transportMetadata.isEmpty() ? endpoint_->send(token, bytes) : endpoint_->sendUnit(token, bytes, transportMetadata);
     for (auto &operation : operations_) if (operation.request.id == id) {
-        operation.sendAccepted = accepted;
+        operation.sendAccepted = operation.sendAccepted || accepted;
         operation.localSent = false;
     }
     appendTrace(accepted ? "send-accepted" : "send-rejected", {}, id, {}, -1, metadata);
@@ -419,9 +427,8 @@ void DebugSession::sent(quint64 run, quint64 id, bool ok, const QString &reason,
     const auto operation = this->operation(operationId);
     if (!operation.sendAccepted || current->completed || operation.finished) return;
     current->completed = true;
-    appendTrace(ok ? "local-sent" : "local-send-failed", {}, operationId, reason, observedUs,
-                {{"attempt", current->attempt}, {"sendId", QString::number(id)}});
-    for (auto &entry : operations_) if (entry.request.id == operationId) entry.localSent = ok;
+    appendTrace(ok ? "local-sent" : "local-send-failed", {}, operationId, reason, observedUs, current->metadata);
+    for (auto &entry : operations_) if (entry.request.id == operationId) entry.localSent = ok && current->metadata.value("finalUnit").toBool(true);
     protocol_->onSent(operationId, ok, reason, observedUs);
 }
 void DebugSession::publish(OperationUpdate update)

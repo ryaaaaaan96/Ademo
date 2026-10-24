@@ -25,7 +25,7 @@ Status: ready-for-agent
 | [13](issues/13-rtu-phase-acceptance.md) | 验收 RTU 第一阶段的真实互通与负载 | RTU 阶段验收 | needs-info | UI13、10、12；另需外部条件 |
 | [14A](issues/14-upp-can-receive.md) | 原始经典CAN帧观察、筛选与导出 | UPP/CAN | ready-for-agent | 软件完成，见[14A验收证据](evidence/14A/acceptance.md)；用户禁止桌面操作后采用离屏Qt验收，物理后置 |
 | [14B](issues/14-upp-can-receive.md) | UPP接收重组与解析 | UPP/CAN | ready-for-agent | 14A已完成；用户授权暂定规则软件实施；设备规则/物理核验后置 |
-| [15](issues/15-upp-can-exchange.md) | 完成真实 UPP/CAN 发送交互并与 RTU 并行 | UPP/CAN | needs-info | 14B软件部分；交互规则与样例；物理验收后置 |
+| [15](issues/15-upp-can-exchange.md) | 完成真实 UPP/CAN 发送交互并与 RTU 并行 | UPP/CAN | needs-info | 暂定软件版完成：8cb9d6d、fc61595、92a9c95；[15证据](evidence/15/acceptance.md)；设备规则/物理待核验，TCP未启动 |
 | [16](issues/16-tcp-first-register-read.md) | 完成一次 Modbus TCP 主站读取 | TCP | ready-for-agent | 15软件部分 |
 | [17](issues/17-tcp-master-operations.md) | TCP 主站多设备读写、轮询与恢复 | TCP | ready-for-agent | 16 |
 | [18](issues/18-tcp-slave-shared-data.md) | TCP 从站多客户端共享模拟设备 | TCP | ready-for-agent | 16 |
@@ -99,3 +99,7 @@ Qt/LLVM-MinGW、Debug/Release 与 LLDB 验证已完成，见 [环境证据](tool
 ### 2026-10-24：14B暂定接收软件实施
 
 用户授权先按建议实现、后续修改。14B以70e9301规则基线、1c3f328实现、ea245f2审查修复交付全部CAN适用功能接收解析；证据见[14B软件验收](evidence/14B/acceptance.md)。本轮只有离屏软件验证，设备规则仍待核验，旧14整体保留needs-info。旧15和TCP仍未启动，不因本软件版本通过自动调度。
+
+### 2026-10-24：15暂定发送软件交付
+
+用户授权范围内全部7功能与独立virtualcan闭环、SDK15通用发送、离屏插件操作、RTU并行和工作区恢复完成；两轴审查修复及双配置完整回归见[15验收](evidence/15/acceptance.md)。旧15整体保留needs-info用于实机规则/物理验收。TCP不自动调度，本轮未启动16–19。

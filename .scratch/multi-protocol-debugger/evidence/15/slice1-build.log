@@ -1,0 +1,74 @@
+[0/1] Re-running CMake...
+-- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+-- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+-- Configuring done (4.6s)
+-- Generating done (1.5s)
+-- Build files have been written to: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+[1/69] Automatic MOC for target can_transport
+[2/69] Building CXX object CMakeFiles/can_transport.dir/can_transport_autogen/mocs_compilation.cpp.obj
+[3/69] Automatic MOC for target debugger_host
+[4/69] Automatic MOC for target debugger_widgets
+[5/69] Building CXX object CMakeFiles/can_transport.dir/plugins/can_endpoint.cpp.obj
+[6/69] Building CXX object CMakeFiles/debugger_widgets.dir/debugger_widgets_autogen/mocs_compilation.cpp.obj
+[7/69] Automatic MOC for target serial_plugin
+[8/69] Building CXX object CMakeFiles/debugger_widgets.dir/src/parameter_table.cpp.obj
+[9/69] Building CXX object CMakeFiles/debugger_widgets.dir/src/confirmation.cpp.obj
+[10/69] Building CXX object CMakeFiles/debugger_widgets.dir/debugger_widgets_autogen/UVLADIE3JM/qrc_trends.cpp.obj
+[11/69] Linking CXX static library libcan_transport.a
+[12/69] Building CXX object CMakeFiles/debugger_widgets.dir/src/file_editor.cpp.obj
+[13/69] Building CXX object CMakeFiles/debugger_widgets.dir/src/trend_window.cpp.obj
+[14/69] Linking CXX static library libdebugger_widgets.a
+[15/69] Automatic MOC for target can_plugin
+[16/69] Automatic MOC for target upp_plugin
+[17/69] Building CXX object CMakeFiles/debugger_host.dir/debugger_host_autogen/mocs_compilation.cpp.obj
+[18/69] Building CXX object CMakeFiles/debugger_host.dir/src/application_style.cpp.obj
+[19/69] Automatic MOC for target modbus_plugin
+[20/69] Building CXX object CMakeFiles/debugger_host.dir/src/session_recovery.cpp.obj
+[21/69] Building CXX object CMakeFiles/debugger_host.dir/src/workspace.cpp.obj
+[22/69] Building CXX object CMakeFiles/debugger_host.dir/src/host.cpp.obj
+[23/69] Building CXX object CMakeFiles/debugger_host.dir/src/session_window.cpp.obj
+[24/69] Building CXX object CMakeFiles/debugger_host.dir/src/workbench.cpp.obj
+[25/69] Building CXX object CMakeFiles/debugger_host.dir/src/trace_query.cpp.obj
+[26/69] Building CXX object CMakeFiles/debugger_host.dir/src/trace_codec.cpp.obj
+[27/69] Building CXX object CMakeFiles/debugger_host.dir/src/trace_panel.cpp.obj
+[28/69] Building CXX object CMakeFiles/debugger_host.dir/src/session_records.cpp.obj
+[29/69] Building CXX object CMakeFiles/debugger_host.dir/src/archive_format.cpp.obj
+[30/69] Building CXX object CMakeFiles/debugger_host.dir/src/recording.cpp.obj
+[31/69] Building CXX object CMakeFiles/modbus_plugin.dir/modbus_plugin_autogen/mocs_compilation.cpp.obj
+[32/69] Building CXX object CMakeFiles/debugger_host.dir/src/archive_query.cpp.obj
+[33/69] Building CXX object CMakeFiles/debugger_host.dir/src/recording_panel.cpp.obj
+[34/69] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/modbus.cpp.obj
+[35/69] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/master_controls.cpp.obj
+[36/69] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/master_parameters.cpp.obj
+[37/69] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/master_trends.cpp.obj
+[38/69] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/parameter_definition.cpp.obj
+[39/69] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/parameter_file_editor.cpp.obj
+[40/69] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/parameter_read_scope.cpp.obj
+[41/69] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_file_editor.cpp.obj
+[42/69] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_parameters.cpp.obj
+[43/69] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/rtu_session.cpp.obj
+[44/69] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/write_pdu.cpp.obj
+[45/69] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/rtu_slave.cpp.obj
+[46/69] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_view.cpp.obj
+[47/69] Building CXX object CMakeFiles/serial_plugin.dir/serial_plugin_autogen/mocs_compilation.cpp.obj
+[48/69] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_edit.cpp.obj
+[49/69] Building CXX object CMakeFiles/can_plugin.dir/can_plugin_autogen/mocs_compilation.cpp.obj
+[50/69] Building CXX object CMakeFiles/serial_plugin.dir/plugins/serial.cpp.obj
+[51/69] Building CXX object CMakeFiles/upp_plugin.dir/upp_plugin_autogen/mocs_compilation.cpp.obj
+[52/69] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_edit_view.cpp.obj
+[53/69] Building CXX object CMakeFiles/can_plugin.dir/plugins/can.cpp.obj
+[54/69] Building CXX object CMakeFiles/upp_plugin.dir/plugins/upp.cpp.obj
+[55/69] Building CXX object CMakeFiles/upp_plugin.dir/plugins/upp_session.cpp.obj
+[56/69] Building CXX object CMakeFiles/upp_plugin.dir/plugins/upp_pdu.cpp.obj
+[57/69] Building CXX object CMakeFiles/upp_plugin.dir/plugins/upp_request.cpp.obj
+[58/69] Linking CXX static library libdebugger_host.a
+[59/69] Linking CXX shared module bin\plugins\libmodbus_plugin.dll
+[60/69] Building CXX object CMakeFiles/upp_plugin.dir/plugins/upp_exchange.cpp.obj
+[61/69] Building CXX object CMakeFiles/upp_plugin.dir/plugins/upp_view.cpp.obj
+[62/69] Linking CXX shared module bin\plugins\libserial_plugin.dll
+[63/69] Linking CXX shared module bin\plugins\libcan_plugin.dll
+[64/69] Linking CXX shared module bin\plugins\libupp_plugin.dll
+[65/69] Automatic MOC for target upp_exchange_tests
+[66/69] Building CXX object CMakeFiles/upp_exchange_tests.dir/upp_exchange_tests_autogen/mocs_compilation.cpp.obj
+[67/69] Building CXX object CMakeFiles/upp_exchange_tests.dir/tests/upp_exchange_tests.cpp.obj
+[68/69] Linking CXX executable bin\upp_exchange_tests.exe

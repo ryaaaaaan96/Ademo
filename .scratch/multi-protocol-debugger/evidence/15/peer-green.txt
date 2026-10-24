@@ -1,0 +1,28 @@
+********* Start testing of UppExchangeTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : UppExchangeTests::initTestCase()
+PASS   : UppExchangeTests::activeHandshakeIsSubmitted()
+PASS   : UppExchangeTests::canBackendWaitsForActualLocalCompletion()
+PASS   : UppExchangeTests::allFunctionsSendExactFramesAndConfirm(ok-0)
+PASS   : UppExchangeTests::allFunctionsSendExactFramesAndConfirm(exception-0)
+PASS   : UppExchangeTests::allFunctionsSendExactFramesAndConfirm(ok-1)
+PASS   : UppExchangeTests::allFunctionsSendExactFramesAndConfirm(exception-1)
+PASS   : UppExchangeTests::allFunctionsSendExactFramesAndConfirm(ok-2)
+PASS   : UppExchangeTests::allFunctionsSendExactFramesAndConfirm(exception-2)
+PASS   : UppExchangeTests::allFunctionsSendExactFramesAndConfirm(ok-3)
+PASS   : UppExchangeTests::allFunctionsSendExactFramesAndConfirm(exception-3)
+PASS   : UppExchangeTests::allFunctionsSendExactFramesAndConfirm(ok-4)
+PASS   : UppExchangeTests::allFunctionsSendExactFramesAndConfirm(exception-4)
+PASS   : UppExchangeTests::allFunctionsSendExactFramesAndConfirm(ok-5)
+PASS   : UppExchangeTests::allFunctionsSendExactFramesAndConfirm(exception-5)
+PASS   : UppExchangeTests::allFunctionsSendExactFramesAndConfirm(ok-6)
+PASS   : UppExchangeTests::allFunctionsSendExactFramesAndConfirm(exception-6)
+PASS   : UppExchangeTests::earlyReplyWaitsForLocalCompletionAndRejectsUnrelatedTraffic()
+PASS   : UppExchangeTests::partialWriteFailureIsUncertainAndNeverRetried()
+PASS   : UppExchangeTests::timeoutStopAndInvalidInputsNeverCreateRetries()
+PASS   : UppExchangeTests::operationPanelSubmitsAndShowsProtocolResult()
+FAIL!  : UppExchangeTests::independentPeerConfirmsRealCanOperationsAndExports() 'peer.waitForStarted(2000)' returned FALSE. (Process failed to start: 系统找不到指定的文件。)
+C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/tests/upp_exchange_tests.cpp(127) : failure location
+PASS   : UppExchangeTests::cleanupTestCase()
+Totals: 22 passed, 1 failed, 0 skipped, 0 blacklisted, 450ms
+********* Finished testing of UppExchangeTests *********

@@ -34,6 +34,21 @@ ReceiveChunk observedFrame(const QCanBusFrame &frame, const QJsonObject &config)
     return input;
 }
 class CanEndpoint final : public QObject, public Endpoint {
+    struct PendingSend { quint64 id=0; bool accepted=false, finalized=false, delivered=false, ok=false; QString reason; };
+    QList<std::shared_ptr<PendingSend>> sends_;
+    void deliver(const std::shared_ptr<PendingSend> &send) {
+        if(send->delivered || !send->accepted || !send->finalized) return;
+        send->delivered=true; sends_.removeAll(send);
+        events_.sent(send->id,send->ok,send->reason);
+    }
+    void settle(const std::shared_ptr<PendingSend> &send,bool ok,const QString &reason) {
+        if(send->finalized) return;
+        send->finalized=true;send->ok=ok;send->reason=reason;
+        deliver(send);
+    }
+    void failSends(const QString &reason) {
+        const auto pending=sends_; for(const auto &send:pending) {settle(send,false,reason);deliver(send);}
+    }
 public:
     CanEndpoint(QJsonObject config, EndpointEvents events, CanDeviceFactory factory) : config_(std::move(config)), events_(std::move(events)), factory_(std::move(factory)) {}
     ~CanEndpoint() override { close(); }
@@ -45,19 +60,37 @@ public:
         connect(device_, &QCanBusDevice::stateChanged, this, [this](QCanBusDevice::CanBusDeviceState state) {
             if (closing_) return;
             if (state == QCanBusDevice::ConnectedState) { opened_ = true; events_.opened(true, {}); }
-            else if (state == QCanBusDevice::UnconnectedState && opened_) events_.failed(QStringLiteral("CAN 后端已断开"));
+            else if (state == QCanBusDevice::UnconnectedState && opened_) { failSends(QStringLiteral("CAN 后端已断开")); events_.failed(QStringLiteral("CAN 后端已断开")); }
         });
         connect(device_, &QCanBusDevice::errorOccurred, this, [this](QCanBusDevice::CanBusError error) {
             if (closing_ || error == QCanBusDevice::NoError) return;
+            failSends(device_->errorString());
             if (opened_) events_.failed(device_->errorString());
             else events_.opened(false, device_->errorString());
         });
         connect(device_, &QCanBusDevice::framesReceived, this, [this] { drain(); });
+        connect(device_, &QCanBusDevice::framesWritten, this, [this](qint64 count) {
+            const auto pending=sends_;
+            for(const auto &send:pending) if(count>0 && !send->finalized) {settle(send,true,QStringLiteral("Qt CAN后端本地发送完成；非设备确认"));--count;}
+        });
         // 只观察不承诺硬件静默模式；不设置后端未声明支持的监听配置。
         if (!device_->connectDevice()) events_.opened(false, device_->errorString());
     }
-    void close() override { if (closing_) return; closing_ = true; if (device_ && device_->state() != QCanBusDevice::UnconnectedState) device_->disconnectDevice(); }
+    void close() override { if (closing_) return; closing_ = true; failSends(QStringLiteral("CAN端点关闭，发送结果未确认")); if (device_ && device_->state() != QCanBusDevice::UnconnectedState) device_->disconnectDevice(); }
     bool send(quint64, const QByteArray &) override { return false; }
+    bool sendUnit(quint64 id,const QByteArray &bytes,const QJsonObject &metadata) override {
+        if(closing_ || !opened_ || !device_ || device_->state()!=QCanBusDevice::ConnectedState || sends_.size()>=32 || bytes.size()>8) return false;
+        if(metadata.value("unitKind")!="can-frame" || metadata.value("frameType")!="data" || !metadata.value("canId").isDouble() || !metadata.value("extended").isBool()) return false;
+        const auto value=metadata.value("canId").toDouble();const bool extended=metadata.value("extended").toBool();
+        if(value<0 || value>(extended?0x1fffffff:0x7ff) || value!=qint64(value) || metadata.value("fd").toBool()) return false;
+        QCanBusFrame frame(quint32(value),bytes); frame.setExtendedFrameFormat(extended);
+        auto pending=std::make_shared<PendingSend>();pending->id=id;sends_.append(pending);
+        pending->accepted=device_->writeFrame(frame);
+        if(!pending->accepted) {sends_.removeAll(pending);pending->delivered=true;return false;}
+        if(closing_) settle(pending,false,QStringLiteral("CAN发送期间端点关闭"));
+        deliver(pending);
+        return true;
+    }
 private:
     void drain() {
         if (closing_ || !device_) return;

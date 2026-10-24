@@ -1,0 +1,85 @@
+[0/1] Re-running CMake...
+-- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+-- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+-- Configuring done (2.1s)
+-- Generating done (1.2s)
+-- Build files have been written to: C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+[1/30] Automatic MOC for target can_transport
+[2/28] Automatic MOC for target debugger_widgets
+[3/26] Automatic MOC for target debugger_host
+[4/24] Automatic MOC for target serial_plugin
+[5/22] Automatic MOC for target modbus_plugin
+[6/20] Automatic MOC for target can_plugin
+[7/18] Automatic MOC for target upp_plugin
+[8/17] Automatic MOC for target upp_virtual_peer
+[9/17] Building CXX object CMakeFiles/upp_virtual_peer.dir/upp_virtual_peer_autogen/mocs_compilation.cpp.obj
+[10/17] Building CXX object CMakeFiles/upp_virtual_peer.dir/tools/upp_virtual_peer.cpp.obj
+FAILED: CMakeFiles/upp_virtual_peer.dir/tools/upp_virtual_peer.cpp.obj 
+C:\Qt\Tools\llvm-mingw2217_64\bin\clang++.exe -DQT_CORE_LIB -DQT_NETWORK_LIB -DQT_SERIALBUS_LIB -DQT_SERIALPORT_LIB -DUNICODE -DWIN32 -DWIN64 -DWINVER=0x0A00 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN32_WINNT=0x0A00 -D_WIN64 -isystem C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen/upp_virtual_peer_autogen/include -isystem C:/Qt/6.12.0/llvm-mingw_64/include/QtCore -isystem C:/Qt/6.12.0/llvm-mingw_64/include -isystem C:/Qt/6.12.0/llvm-mingw_64/mkspecs/win32-clang-g++ -isystem C:/Qt/6.12.0/llvm-mingw_64/include/QtSerialBus -isystem C:/Qt/6.12.0/llvm-mingw_64/include/QtNetwork -isystem C:/Qt/6.12.0/llvm-mingw_64/include/QtSerialPort -g -std=gnu++17 -pthread -MD -MT CMakeFiles/upp_virtual_peer.dir/tools/upp_virtual_peer.cpp.obj -MF CMakeFiles\upp_virtual_peer.dir\tools\upp_virtual_peer.cpp.obj.d -o CMakeFiles/upp_virtual_peer.dir/tools/upp_virtual_peer.cpp.obj -c C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/tools/upp_virtual_peer.cpp
+C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/tools/upp_virtual_peer.cpp:60:48: error: call to constructor of 'const QCommandLineOption' is ambiguous
+   60 |     parser.addHelpOption(); parser.addOptions({{{"interface"},"virtualcan channel","channel","can0"},{{"device"},"UPP device 1..255","number","5"},
+      |                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:/Qt/6.12.0/llvm-mingw_64/include/QtCore/qcommandlineoption.h:30:18: note: candidate constructor
+   30 |     /*implicit*/ QCommandLineOption(const QString &name, const QString &description,
+      |                  ^
+C:/Qt/6.12.0/llvm-mingw_64/include/QtCore/qcommandlineoption.h:33:18: note: candidate constructor
+   33 |     /*implicit*/ QCommandLineOption(const QStringList &names, const QString &description,
+      |                  ^
+C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/tools/upp_virtual_peer.cpp:60:102: error: call to constructor of 'const QCommandLineOption' is ambiguous
+   60 |     parser.addHelpOption(); parser.addOptions({{{"interface"},"virtualcan channel","channel","can0"},{{"device"},"UPP device 1..255","number","5"},
+      |                                                                                                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:/Qt/6.12.0/llvm-mingw_64/include/QtCore/qcommandlineoption.h:30:18: note: candidate constructor
+   30 |     /*implicit*/ QCommandLineOption(const QString &name, const QString &description,
+      |                  ^
+C:/Qt/6.12.0/llvm-mingw_64/include/QtCore/qcommandlineoption.h:33:18: note: candidate constructor
+   33 |     /*implicit*/ QCommandLineOption(const QStringList &names, const QString &description,
+      |                  ^
+C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/tools/upp_virtual_peer.cpp:61:9: error: call to constructor of 'const QCommandLineOption' is ambiguous
+   61 |         {{"rx-id"},"Request CAN ID hexadecimal","hex","5"},{{"tx-id"},"Response CAN ID hexadecimal","hex","5"},{{"extended"},"Use extended frames"},
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:/Qt/6.12.0/llvm-mingw_64/include/QtCore/qcommandlineoption.h:30:18: note: candidate constructor
+   30 |     /*implicit*/ QCommandLineOption(const QString &name, const QString &description,
+      |                  ^
+C:/Qt/6.12.0/llvm-mingw_64/include/QtCore/qcommandlineoption.h:33:18: note: candidate constructor
+   33 |     /*implicit*/ QCommandLineOption(const QStringList &names, const QString &description,
+      |                  ^
+C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/tools/upp_virtual_peer.cpp:61:60: error: call to constructor of 'const QCommandLineOption' is ambiguous
+   61 |         {{"rx-id"},"Request CAN ID hexadecimal","hex","5"},{{"tx-id"},"Response CAN ID hexadecimal","hex","5"},{{"extended"},"Use extended frames"},
+      |                                                            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:/Qt/6.12.0/llvm-mingw_64/include/QtCore/qcommandlineoption.h:30:18: note: candidate constructor
+   30 |     /*implicit*/ QCommandLineOption(const QString &name, const QString &description,
+      |                  ^
+C:/Qt/6.12.0/llvm-mingw_64/include/QtCore/qcommandlineoption.h:33:18: note: candidate constructor
+   33 |     /*implicit*/ QCommandLineOption(const QStringList &names, const QString &description,
+      |                  ^
+C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/tools/upp_virtual_peer.cpp:61:112: error: call to constructor of 'const QCommandLineOption' is ambiguous
+   61 |         {{"rx-id"},"Request CAN ID hexadecimal","hex","5"},{{"tx-id"},"Response CAN ID hexadecimal","hex","5"},{{"extended"},"Use extended frames"},
+      |                                                                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:/Qt/6.12.0/llvm-mingw_64/include/QtCore/qcommandlineoption.h:30:18: note: candidate constructor
+   30 |     /*implicit*/ QCommandLineOption(const QString &name, const QString &description,
+      |                  ^
+C:/Qt/6.12.0/llvm-mingw_64/include/QtCore/qcommandlineoption.h:33:18: note: candidate constructor
+   33 |     /*implicit*/ QCommandLineOption(const QStringList &names, const QString &description,
+      |                  ^
+C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/tools/upp_virtual_peer.cpp:62:9: error: call to constructor of 'const QCommandLineOption' is ambiguous
+   62 |         {{"duration"},"Exit after milliseconds","ms","30000"}});
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:/Qt/6.12.0/llvm-mingw_64/include/QtCore/qcommandlineoption.h:30:18: note: candidate constructor
+   30 |     /*implicit*/ QCommandLineOption(const QString &name, const QString &description,
+      |                  ^
+C:/Qt/6.12.0/llvm-mingw_64/include/QtCore/qcommandlineoption.h:33:18: note: candidate constructor
+
+   33 |     /*implicit*/ QCommandLineOption(const QStringList &names, const QString &description,
+
+      |                  ^
+
+C:/Qt/6.12.0/llvm-mingw_64/include/QtCore/qlist.h:320:43: note: passing argument to parameter 'args' here
+
+  320 |     inline QList(std::initializer_list<T> args)
+
+      |                                           ^
+
+6 errors generated.
+
+[11/17] Building CXX object CMakeFiles/upp_plugin.dir/plugins/upp_view.cpp.obj
+ninja: build stopped: subcommand failed.

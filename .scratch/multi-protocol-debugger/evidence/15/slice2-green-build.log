@@ -1,0 +1,5 @@
+[1/6] Automatic MOC for target can_transport
+[2/5] Building CXX object CMakeFiles/can_transport.dir/plugins/can_endpoint.cpp.obj
+[3/5] Linking CXX static library libcan_transport.a
+[4/5] Linking CXX shared module bin\plugins\libcan_plugin.dll
+[5/5] Linking CXX executable bin\upp_exchange_tests.exe

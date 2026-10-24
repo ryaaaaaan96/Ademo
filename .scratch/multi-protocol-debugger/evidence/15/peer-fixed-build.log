@@ -1,0 +1,5 @@
+[1/8] Linking CXX shared module bin\plugins\libupp_plugin.dll
+[2/8] Automatic MOC for target upp_virtual_peer
+[3/7] Building CXX object CMakeFiles/upp_virtual_peer.dir/tools/upp_virtual_peer.cpp.obj
+[4/7] Linking CXX executable bin\upp_virtual_peer.exe
+[5/7] Automatic MOC for target upp_exchange_tests

@@ -1,0 +1,12 @@
+Test project C:/Users/81966/Documents/Ademo/build/worktrees/upp15-exchange/build/qt-llvm-debug-offscreen
+    Start 1: upp_can_exchange
+1/1 Test #1: upp_can_exchange .................***Failed    2.32 sec
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   2.33 sec
+
+The following tests FAILED:
+	  1 - upp_can_exchange (Failed)
+Errors while running CTest

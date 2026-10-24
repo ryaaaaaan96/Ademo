@@ -1,0 +1,7 @@
+[1/16] Automatic MOC for target serial_plugin
+[2/14] Automatic MOC for target can_plugin
+[3/12] Automatic MOC for target modbus_plugin
+[4/10] Automatic MOC for target upp_plugin
+[5/8] Automatic MOC for target upp_exchange_tests
+[6/7] Building CXX object CMakeFiles/upp_exchange_tests.dir/tests/upp_exchange_tests.cpp.obj
+[7/7] Linking CXX executable bin\upp_exchange_tests.exe

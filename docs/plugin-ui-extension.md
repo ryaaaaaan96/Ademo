@@ -1,6 +1,10 @@
 # 配套插件的参数界面与文件编辑扩展
 
-当前配套契约为 SDK14、产品0.2；宿主、协议／传输 DLL、Qt、编译器、架构和 Debug/Release 必须一起配套构建。`DebuggerProtocolIid` / `DebuggerTransportIid` 与 `buildKey()` 都参与兼容检查。插件只在启动时发现，替换 DLL 后重启；未知或不兼容插件保留错误提示和工作区身份，不建立热加载承诺。
+当前配套契约为 SDK15、产品0.2；宿主、协议／传输 DLL、Qt、编译器、架构和 Debug/Release 必须一起配套构建。`DebuggerProtocolIid` / `DebuggerTransportIid` 与 `buildKey()` 都参与兼容检查。插件只在启动时发现，替换 DLL 后重启；未知或不兼容插件保留错误提示和工作区身份，不建立热加载承诺。
+
+## SDK15 通用发送单元
+
+新增 ProtocolServices.sendUnit/SendReceipt 和 Endpoint.sendUnit，元数据携带传输帧身份以及通用 finalUnit 完成语义；主体不识别 UPP/CAN 名称。IID 与 buildKey 同时更新为15，全部DLL同步重编；旧版本fixture仍覆盖拒绝加载，always-run部署同步fixture。详细契约与Qt本地完成语义见[接口契约](../.scratch/multi-protocol-debugger/interface-contracts.md#issue-15sdk-15-通用发送单元)。
 
 ## SDK14 帧观察扩展
 
