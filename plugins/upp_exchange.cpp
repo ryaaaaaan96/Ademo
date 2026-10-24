@@ -58,7 +58,7 @@ class Exchange final : public ProtocolSession {
         auto &t=transaction_; if(!t.id || t.waitingLocal || t.allLocal || now()<t.due) return;
         const auto bytes=t.adu.mid(t.offset,8);
         QJsonObject metadata{{"unitKind","can-frame"},{"frameType","data"},{"canId",int(t.route.tx)},{"extended",t.route.extended},
-            {"fragmentIndex",t.offset/8},{"fragmentCount",(t.adu.size()+7)/8},{"protocolAttempt",1}};
+            {"fragmentIndex",t.offset/8},{"fragmentCount",(t.adu.size()+7)/8},{"protocolAttempt",1},{"finalUnit",t.offset+bytes.size()==t.adu.size()}};
         t.waitingLocal=true; t.localDeadline=now()+replyUs_; t.offset+=bytes.size();
         const auto receipt=services_.sendUnit ? services_.sendUnit(t.id,bytes,metadata) : SendReceipt{};
         const bool accepted=receipt.accepted;

@@ -58,7 +58,20 @@ QByteArray encodeAdu(int device,int sequence,int function,const QByteArray &pdu)
     b.append(char(crc)); b.append(char(crc>>8)); return b;
 }
 bool responseMatches(const Request &r,const QJsonObject &p,bool exception) {
-    if(exception) return true; // Exception PDU structure is already checked by the observer.
+    if(exception) {
+        if(!p.contains("model")) return true;
+        // Handshake and incremental query carry no concrete target range.
+        if(r.function==0x20 || r.function==0x23) return true;
+        QJsonArray units;
+        if(r.function==0x21 || r.function==0x26) units.append(r.fields);
+        else if(r.function==0x28) {units=r.fields.value("readUnits").toArray();for(const auto &u:r.fields.value("writeUnits").toArray()) units.append(u);}
+        else units=r.fields.value("units").toArray();
+        for(const auto &value:units) {
+            const auto u=value.toObject();const int offset=p.value("offset").toInt(),start=u.value("offset").toInt();
+            if(p.value("model")==u.value("model") && offset>=start && offset<start+u.value("length").toInt()) return true;
+        }
+        return false;
+    }
     switch(r.function) {
     case 0x21: return p.value("dataHex").toString().size()==r.fields.value("length").toInt()*2;
     case 0x22: return sameUnits(r.fields.value("units").toArray(),p.value("units").toArray());

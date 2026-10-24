@@ -428,7 +428,7 @@ void DebugSession::sent(quint64 run, quint64 id, bool ok, const QString &reason,
     if (!operation.sendAccepted || current->completed || operation.finished) return;
     current->completed = true;
     appendTrace(ok ? "local-sent" : "local-send-failed", {}, operationId, reason, observedUs, current->metadata);
-    for (auto &entry : operations_) if (entry.request.id == operationId) entry.localSent = ok;
+    for (auto &entry : operations_) if (entry.request.id == operationId) entry.localSent = ok && current->metadata.value("finalUnit").toBool(true);
     protocol_->onSent(operationId, ok, reason, observedUs);
 }
 void DebugSession::publish(OperationUpdate update)

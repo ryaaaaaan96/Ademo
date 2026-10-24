@@ -42,9 +42,9 @@ class CanEndpoint final : public QObject, public Endpoint {
         events_.sent(send->id,send->ok,send->reason);
     }
     void settle(const std::shared_ptr<PendingSend> &send,bool ok,const QString &reason) {
-        if(send->delivered) return;
+        if(send->finalized) return;
         send->finalized=true;send->ok=ok;send->reason=reason;
-        QTimer::singleShot(0,this,[this,send]{deliver(send);});
+        deliver(send);
     }
     void failSends(const QString &reason) {
         const auto pending=sends_; for(const auto &send:pending) {settle(send,false,reason);deliver(send);}
@@ -88,6 +88,7 @@ public:
         pending->accepted=device_->writeFrame(frame);
         if(!pending->accepted) {sends_.removeAll(pending);pending->delivered=true;return false;}
         if(closing_) settle(pending,false,QStringLiteral("CAN发送期间端点关闭"));
+        deliver(pending);
         return true;
     }
 private:

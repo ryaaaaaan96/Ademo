@@ -10,13 +10,14 @@
 #include <QFile>
 #include <QDir>
 #include <QTableWidget>
+#include <QTemporaryDir>
 #include "upp_vectors.h"
 using namespace debugger;
 namespace {
 class Device : public QCanBusDevice {
 public:
-    QList<QCanBusFrame> writes; bool accept=true, automatic=false;
-    bool writeFrame(const QCanBusFrame &f) override { if(!accept)return false; writes<<f; if(automatic) QTimer::singleShot(0,this,[this]{emit framesWritten(1);}); return true; }
+    QList<QCanBusFrame> writes; bool accept=true, automatic=false, synchronous=false;
+    bool writeFrame(const QCanBusFrame &f) override { if(!accept)return false; writes<<f; if(synchronous)emit framesWritten(1);else if(automatic) QTimer::singleShot(0,this,[this]{emit framesWritten(1);}); return true; }
     void complete(int n=1) { emit framesWritten(n); }
     void inject(QByteArray bytes,int id=5,bool extended=false,bool echo=false) { QCanBusFrame frame(id,bytes);frame.setExtendedFrameFormat(extended);frame.setLocalEcho(echo);enqueueReceivedFrames({frame}); }
     QString interpretErrorFrame(const QCanBusFrame &) override {return {};}
@@ -39,6 +40,9 @@ QJsonObject parameters(int function) {
     if(function==0x27)p["units"]=QJsonArray{write1,write2};
     if(function==0x28) {p["readUnits"]=QJsonArray{read};p["writeUnits"]=QJsonArray{write};}
     return p;
+}
+QByteArray reply(int function, QByteArray pdu) {
+    QByteArray b=QByteArray::fromHex("05500001");b[2]=char(pdu.size()+7);b.append(char(function));b+=pdu;quint16 crc=0xffff;for(auto c:b){crc^=quint8(c);for(int i=0;i<8;++i)crc=(crc>>1)^((crc&1)?0xa001:0);}b.append(char(crc));b.append(char(crc>>8));return b;
 }
 void events() { QCoreApplication::processEvents();QCoreApplication::processEvents(); }
 void completeRequest(DebugSession &s,Input &input,qint64 &clock,int size) {
@@ -82,7 +86,7 @@ private slots:
         auto expected=QByteArray::fromHex(vectors[index*2].hex); auto op=s.submit("upp.request",parameters(vectors[index*2].function));
         completeRequest(s,input,clock,expected.size());QByteArray actual;for(const auto &frame:input.device->writes) {actual+=frame.payload();QCOMPARE(frame.frameId(),quint32(5));QVERIFY(!frame.hasExtendedFrameFormat());}
         QCOMPARE(actual,expected);QVERIFY(!s.operation(op).finished);QVERIFY(s.operation(op).localSent);
-        input.adu(QByteArray::fromHex(vectors[exception?14+index:index*2+1].hex));
+        input.adu(exception?reply(vectors[index*2].function|0x80,QByteArray::fromHex("0002")):QByteArray::fromHex(vectors[index*2+1].hex));
         QTRY_COMPARE(s.operation(op).update.state,QString(exception?"protocol-exception":"succeeded"));
         QCOMPARE(input.device->writes.size(),(expected.size()+7)/8);
         auto trace=s.queryTrace({});QVERIFY(!trace.messages.isEmpty());
@@ -146,6 +150,62 @@ private slots:
         }
         s.stop();QVERIFY(peer.waitForFinished(6000));QCOMPARE(peer.exitCode(),0);peerLog+=peer.readAllStandardOutput();
         if(!directory.isEmpty()) {QFile log(directory+"/peer-output.jsonl");QVERIFY(log.open(QIODevice::WriteOnly));log.write(peerLog);}
+    }
+    void canBackendBoundsAndSettlesAcceptedTokensExactlyOnce() {
+        Device *device=nullptr;QList<quint64> completed;QList<bool> success;
+        EndpointEvents e;e.opened=[](bool,QString){};e.failed=[](QString){};e.received=[](ReceiveChunk){};e.sent=[&](quint64 id,bool ok,QString){completed<<id;success<<ok;};
+        auto endpoint=createCanEndpoint(config().endpoint,e,[&](const QJsonObject &,QString *){device=new Device;return device;});endpoint->open();
+        QJsonObject metadata{{"unitKind","can-frame"},{"frameType","data"},{"canId",5},{"extended",false}};
+        device->synchronous=true;QVERIFY(endpoint->sendUnit(1,"a",metadata));QCOMPARE(completed,QList<quint64>{1});events();QCOMPARE(completed,QList<quint64>{1});QVERIFY(success[0]);
+        device->synchronous=false;for(int i=0;i<32;++i)QVERIFY(endpoint->sendUnit(10+i,"b",metadata));QVERIFY(!endpoint->sendUnit(99,"c",metadata));
+        device->complete(5);QCOMPARE(completed.size(),6);events();QCOMPARE(completed.size(),6);endpoint->close();QCOMPARE(completed.size(),33);events();QCOMPARE(completed.size(),33);
+        for(int i=6;i<success.size();++i)QVERIFY(!success[i]);
+    }
+    void partialCompletionDoesNotMarkWholeOperationSent() {
+        auto catalog=std::make_shared<PluginCatalog>();catalog->discover(QCoreApplication::applicationDirPath()+"/plugins");Input input;DebugSession s(catalog,nullptr,input.factory());
+        QVERIFY(s.start(config()));QTRY_COMPARE(s.state(),SessionState::Running);auto op=s.submit("upp.request",parameters(0x27));input.device->complete();events();QVERIFY(!s.operation(op).localSent);s.stop();QVERIFY(!s.operation(op).localSent);QVERIFY(s.operation(op).update.result.value("uncertain").toBool());
+    }
+    void exceptionTargetMustBelongToRequest() {
+        auto catalog=std::make_shared<PluginCatalog>();catalog->discover(QCoreApplication::applicationDirPath()+"/plugins");qint64 clock=0;Input input;DebugSession s(catalog,nullptr,input.factory(),[&]{return clock;});
+        QVERIFY(s.start(config()));QTRY_COMPARE(s.state(),SessionState::Running);auto op=s.submit("upp.request",parameters(0x21));completeRequest(s,input,clock,13);
+        input.adu(reply(0xa1,QByteArray::fromHex("000200040006")));events();QVERIFY(!s.operation(op).finished);
+        input.adu(reply(0xa1,QByteArray::fromHex("000200020009")));events();QVERIFY(!s.operation(op).finished);
+        input.adu(reply(0xa1,QByteArray::fromHex("000200020008")));QTRY_COMPARE(s.operation(op).update.state,QString("protocol-exception"));
+    }
+    void completionUsesSignalTimeRatherThanDispatchTime() {
+        auto catalog=std::make_shared<PluginCatalog>();catalog->discover(QCoreApplication::applicationDirPath()+"/plugins");qint64 clock=0;Input input;DebugSession s(catalog,nullptr,input.factory(),[&]{return clock;});
+        QVERIFY(s.start(config()));QTRY_COMPARE(s.state(),SessionState::Running);auto op=s.submit("upp.request",parameters(0x20));clock=999000;input.device->complete();clock=1001000;events();QVERIFY(!s.operation(op).finished);QVERIFY(s.operation(op).localSent);
+    }
+    void spacingTimeoutAndWrongPduCannotConfirm() {
+        auto catalog=std::make_shared<PluginCatalog>();catalog->discover(QCoreApplication::applicationDirPath()+"/plugins");qint64 clock=0;Input input;DebugSession s(catalog,nullptr,input.factory(),[&]{return clock;});
+        QVERIFY(s.start(config()));QTRY_COMPARE(s.state(),SessionState::Running);auto p=parameters(0x22);p["units"]=QJsonArray{QJsonObject{{"model",2},{"offset",6},{"length",3}}};auto op=s.submit("upp.request",p);
+        input.device->complete();events();clock=19999;s.poll();QCOMPARE(input.device->writes.size(),1);clock=20000;s.poll();QCOMPARE(input.device->writes.size(),2);input.device->complete();events();
+        input.adu(QByteArray::fromHex(vectors[5].hex));events();QVERIFY(!s.operation(op).finished);
+        clock+=1000000;s.poll();QCOMPARE(s.operation(op).update.state,QString("timeout"));QCOMPARE(input.device->writes.size(),2);
+        auto waiting=s.submit("upp.request",parameters(0x20));clock+=1000000;s.poll();QCOMPARE(s.operation(waiting).update.state,QString("send-failed"));
+    }
+    void invalidConfigurationAndOversizeRequestsFailBeforeSending() {
+        auto catalog=std::make_shared<PluginCatalog>();catalog->discover(QCoreApplication::applicationDirPath()+"/plugins");Input input;DebugSession s(catalog,nullptr,input.factory());
+        auto invalid=config();invalid.protocol["deviceRoutes"]="not json";QVERIFY(!s.start(invalid));
+        invalid=config();invalid.protocol["deviceRoutes"]=QJsonObject{{"5",QJsonObject{{"txId",0x800}}}};QVERIFY(!s.start(invalid));
+        QVERIFY(s.start(config()));QTRY_COMPARE(s.state(),SessionState::Running);
+        for(auto p:QList<QJsonObject>{{{"deviceId",0},{"function",32}},{{"deviceId",5},{"function",33},{"model",2},{"offset",6},{"length",250}},{{"deviceId",5},{"function",38},{"model",2},{"offset",6},{"dataHex",QString(500,'a')}}}) {
+            auto op=s.submit("upp.request",p);QCOMPARE(s.operation(op).update.state,QString("rejected"));
+        }
+        QVERIFY(input.device->writes.isEmpty());
+    }
+    void reconnectPreservesSequenceAndRejectsOldCallbacks() {
+        auto catalog=std::make_shared<PluginCatalog>();catalog->discover(QCoreApplication::applicationDirPath()+"/plugins");Input input;DebugSession s(catalog,nullptr,input.factory());
+        QVERIFY(s.start(config()));QTRY_COMPARE(s.state(),SessionState::Running);auto op=s.submit("upp.request",parameters(0x26));auto old=input.callbacks;old.failed("offline");QTRY_COMPARE(s.state(),SessionState::Error);QVERIFY(s.operation(op).update.result.value("uncertain").toBool());
+        QVERIFY(s.reconnect());QTRY_COMPARE(s.state(),SessionState::Running);QVERIFY(input.device->writes.isEmpty());
+        auto next=s.submit("upp.request",parameters(0x20));QCOMPARE(quint8(input.device->writes[0].payload()[3]),quint8(2));old.sent(next,true,{});events();QVERIFY(!s.operation(next).localSent);
+        s.stop();QVERIFY(s.start(config()));QTRY_COMPARE(s.state(),SessionState::Running);s.submit("upp.request",parameters(0x20));QCOMPARE(quint8(input.device->writes[0].payload()[3]),quint8(1));
+    }
+    void sequenceWrapIsBoundedAndPerDevice() {
+        auto catalog=std::make_shared<PluginCatalog>();catalog->discover(QCoreApplication::applicationDirPath()+"/plugins");qint64 clock=0;Input input;DebugSession s(catalog,nullptr,input.factory(),[&]{return clock;});
+        QVERIFY(s.start(config()));QTRY_COMPARE(s.state(),SessionState::Running);
+        for(int i=1;i<=256;++i) {auto op=s.submit("upp.request",parameters(0x20));QCOMPARE(quint8(input.device->writes.last().payload()[3]),quint8(i==256?1:i));clock+=1000001;s.poll();QVERIFY(s.operation(op).finished);}
+        auto p=parameters(0x20);p["deviceId"]=6;s.submit("upp.request",p);QCOMPARE(quint8(input.device->writes.last().payload()[3]),quint8(1));
     }
 };
 QTEST_MAIN(UppExchangeTests)
