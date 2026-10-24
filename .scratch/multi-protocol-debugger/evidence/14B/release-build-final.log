@@ -1,0 +1,22 @@
+[0/1] Re-running CMake...
+-- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+-- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+-- Configuring done (2.3s)
+-- Generating done (1.4s)
+-- Build files have been written to: C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-release-offscreen
+[1/58] Automatic MOC for target can_transport
+[2/55] Automatic MOC for target debugger_widgets
+[3/52] Automatic MOC for target debugger_host
+[4/26] Automatic MOC for target serial_plugin
+[5/24] Automatic MOC for target modbus_plugin
+[6/22] Automatic MOC for target trace_fixture_plugin
+[7/20] C:\WINDOWS\system32\cmd.exe /C "cd /D C:\Users\81966\Documents\Ademo\build\worktrees\upp14b-receive\build\qt-llvm-release-offscreen && C:\Qt\Tools\CMake_64\bin\cmake.exe -E make_directory C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-release-offscreen/bin/can-lifetime-fixtures && C:\Qt\Tools\CMake_64\bin\cmake.exe -E copy_if_different C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-release-offscreen/bin/plugins/libcan_plugin.dll C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-release-offscreen/bin/can-lifetime-fixtures/ && C:\Qt\Tools\CMake_64\bin\cmake.exe -E copy_if_different C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-release-offscreen/bin/plugins/libcan_observer_plugin.dll C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-release-offscreen/bin/can-lifetime-fixtures/"
+[8/20] Automatic MOC for target upp_plugin
+[9/19] Automatic MOC for target can_sample_source
+[10/18] Building CXX object CMakeFiles/can_sample_source.dir/tools/can_sample_source.cpp.obj
+[11/18] Linking CXX executable bin\can_sample_source.exe
+[12/18] Building CXX object CMakeFiles/upp_plugin.dir/plugins/upp_session.cpp.obj
+[13/18] Linking CXX shared module bin\plugins\libupp_plugin.dll
+[14/18] Automatic MOC for target upp_receive_tests
+[15/17] Building CXX object CMakeFiles/upp_receive_tests.dir/tests/upp_receive_tests.cpp.obj
+[16/17] Linking CXX executable bin\upp_receive_tests.exe

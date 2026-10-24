@@ -1,0 +1,18 @@
+[0/1] Re-running CMake...
+-- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+-- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+-- Configuring done (3.2s)
+-- Generating done (2.0s)
+-- Build files have been written to: C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-debug-offscreen
+[1/32] Automatic MOC for target can_transport
+[2/30] Automatic MOC for target debugger_widgets
+[3/28] Automatic MOC for target debugger_host
+[4/26] Automatic MOC for target serial_plugin
+[5/24] Automatic MOC for target modbus_plugin
+[6/22] Automatic MOC for target can_plugin
+[7/20] Automatic MOC for target can_observer_plugin
+[8/18] Automatic MOC for target can_sample_source
+[9/16] Automatic MOC for target upp_plugin
+[10/14] Automatic MOC for target upp_receive_tests
+[11/13] Building CXX object CMakeFiles/upp_receive_tests.dir/tests/upp_receive_tests.cpp.obj
+[12/13] Linking CXX executable bin\upp_receive_tests.exe

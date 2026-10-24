@@ -24,7 +24,7 @@ Status: ready-for-agent
 | [12](issues/12-bounded-disk-recording.md) | 开启磁盘回溯并在过载时保持通信 | RTU | ready-for-agent | 05、11 |
 | [13](issues/13-rtu-phase-acceptance.md) | 验收 RTU 第一阶段的真实互通与负载 | RTU 阶段验收 | needs-info | UI13、10、12；另需外部条件 |
 | [14A](issues/14-upp-can-receive.md) | 原始经典CAN帧观察、筛选与导出 | UPP/CAN | ready-for-agent | 软件完成，见[14A验收证据](evidence/14A/acceptance.md)；用户禁止桌面操作后采用离屏Qt验收，物理后置 |
-| [14B](issues/14-upp-can-receive.md) | UPP接收重组与解析 | UPP/CAN | needs-info | 14A；相关协议缺口确认；物理验收后置 |
+| [14B](issues/14-upp-can-receive.md) | UPP接收重组与解析 | UPP/CAN | ready-for-agent | 14A已完成；用户授权暂定规则软件实施；设备规则/物理核验后置 |
 | [15](issues/15-upp-can-exchange.md) | 完成真实 UPP/CAN 发送交互并与 RTU 并行 | UPP/CAN | needs-info | 14B软件部分；交互规则与样例；物理验收后置 |
 | [16](issues/16-tcp-first-register-read.md) | 完成一次 Modbus TCP 主站读取 | TCP | ready-for-agent | 15软件部分 |
 | [17](issues/17-tcp-master-operations.md) | TCP 主站多设备读写、轮询与恢复 | TCP | ready-for-agent | 16 |
@@ -95,3 +95,7 @@ Qt/LLVM-MinGW、Debug/Release 与 LLDB 验证已完成，见 [环境证据](tool
 用户依次确认：Q1先做原始CAN帧观察、筛选及导出；Q2采用虚拟CAN样例源经正式接收后端进入现有会话界面，无硬件验收，不增加文件导入/定时回放；Q3采用经典CAN标准/扩展格式，远程帧与错误帧按后端实际信息保留，CAN FD后置。沿用已确认界面和物理验收后置安排。
 
 据此将旧14内部明确为14A（原始帧观察，范围ready-for-agent，仍依赖UI13软件收尾）与14B（UPP接收重组解析，needs-info）；旧15仅在14B及交互资料到位后推进。旧14完整目标与后续编号不变。已收到UPP原文并整理，不再把缺口表述为整份协议未提供。更新规格、索引与验收边界；本次没有实施产品代码或执行CAN测试。
+
+### 2026-10-24：14B暂定接收软件实施
+
+用户授权先按建议实现、后续修改。14B以70e9301规则基线、1c3f328实现、ea245f2审查修复交付全部CAN适用功能接收解析；证据见[14B软件验收](evidence/14B/acceptance.md)。本轮只有离屏软件验证，设备规则仍待核验，旧14整体保留needs-info。旧15和TCP仍未启动，不因本软件版本通过自动调度。

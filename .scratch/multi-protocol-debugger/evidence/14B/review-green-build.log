@@ -1,0 +1,9 @@
+[1/12] Automatic MOC for target can_sample_source
+[2/11] Automatic MOC for target upp_plugin
+[3/10] Building CXX object CMakeFiles/can_sample_source.dir/tools/can_sample_source.cpp.obj
+[4/10] Linking CXX executable bin\can_sample_source.exe
+[5/10] Building CXX object CMakeFiles/upp_plugin.dir/plugins/upp_session.cpp.obj
+[6/10] Linking CXX shared module bin\plugins\libupp_plugin.dll
+[7/10] Automatic MOC for target upp_receive_tests
+[8/9] Building CXX object CMakeFiles/upp_receive_tests.dir/tests/upp_receive_tests.cpp.obj
+[9/9] Linking CXX executable bin\upp_receive_tests.exe

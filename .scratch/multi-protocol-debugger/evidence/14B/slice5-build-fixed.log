@@ -1,0 +1,3 @@
+[1/4] Automatic MOC for target upp_receive_tests
+[2/3] Building CXX object CMakeFiles/upp_receive_tests.dir/tests/upp_receive_tests.cpp.obj
+[3/3] Linking CXX executable bin\upp_receive_tests.exe

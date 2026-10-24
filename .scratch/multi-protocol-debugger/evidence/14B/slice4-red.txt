@@ -1,0 +1,87 @@
+********* Start testing of UppReceiveTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : UppReceiveTests::initTestCase()
+PASS   : UppReceiveTests::handshakeIsDecodedThroughSession()
+PASS   : UppReceiveTests::completeHandshakeAndCorruptedCrcHaveExactSources()
+PASS   : UppReceiveTests::fragmentsAndReplyAreDecodedWithAllSources()
+PASS   : UppReceiveTests::everyCanFunction(20-request)
+PASS   : UppReceiveTests::everyCanFunction(20-response)
+FAIL!  : UppReceiveTests::everyCanFunction(21-request) Compared values are not the same
+   Actual   (m.status)                                                            : "unsupported-function"
+   Expected (function & 0x80 ? QString("protocol-exception") : QString("decoded")): "decoded"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(66) : failure location
+FAIL!  : UppReceiveTests::everyCanFunction(21-response) Compared values are not the same
+   Actual   (m.status)                                                            : "unsupported-function"
+   Expected (function & 0x80 ? QString("protocol-exception") : QString("decoded")): "decoded"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(66) : failure location
+FAIL!  : UppReceiveTests::everyCanFunction(22-request) Compared values are not the same
+   Actual   (m.status)                                                            : "unsupported-function"
+   Expected (function & 0x80 ? QString("protocol-exception") : QString("decoded")): "decoded"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(66) : failure location
+FAIL!  : UppReceiveTests::everyCanFunction(22-response) Compared values are not the same
+   Actual   (m.status)                                                            : "unsupported-function"
+   Expected (function & 0x80 ? QString("protocol-exception") : QString("decoded")): "decoded"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(66) : failure location
+FAIL!  : UppReceiveTests::everyCanFunction(23-request) Compared values are not the same
+   Actual   (m.status)                                                            : "unsupported-function"
+   Expected (function & 0x80 ? QString("protocol-exception") : QString("decoded")): "decoded"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(66) : failure location
+FAIL!  : UppReceiveTests::everyCanFunction(23-response) Compared values are not the same
+   Actual   (m.status)                                                            : "unsupported-function"
+   Expected (function & 0x80 ? QString("protocol-exception") : QString("decoded")): "decoded"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(66) : failure location
+FAIL!  : UppReceiveTests::everyCanFunction(26-request) Compared values are not the same
+   Actual   (m.status)                                                            : "unsupported-function"
+   Expected (function & 0x80 ? QString("protocol-exception") : QString("decoded")): "decoded"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(66) : failure location
+FAIL!  : UppReceiveTests::everyCanFunction(26-response) Compared values are not the same
+   Actual   (m.status)                                                            : "unsupported-function"
+   Expected (function & 0x80 ? QString("protocol-exception") : QString("decoded")): "decoded"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(66) : failure location
+FAIL!  : UppReceiveTests::everyCanFunction(27-request) Compared values are not the same
+   Actual   (m.status)                                                            : "unsupported-function"
+   Expected (function & 0x80 ? QString("protocol-exception") : QString("decoded")): "decoded"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(66) : failure location
+FAIL!  : UppReceiveTests::everyCanFunction(27-response) Compared values are not the same
+   Actual   (m.status)                                                            : "unsupported-function"
+   Expected (function & 0x80 ? QString("protocol-exception") : QString("decoded")): "decoded"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(66) : failure location
+FAIL!  : UppReceiveTests::everyCanFunction(28-request) Compared values are not the same
+   Actual   (m.status)                                                            : "unsupported-function"
+   Expected (function & 0x80 ? QString("protocol-exception") : QString("decoded")): "decoded"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(66) : failure location
+FAIL!  : UppReceiveTests::everyCanFunction(28-response) Compared values are not the same
+   Actual   (m.status)                                                            : "unsupported-function"
+   Expected (function & 0x80 ? QString("protocol-exception") : QString("decoded")): "decoded"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(66) : failure location
+FAIL!  : UppReceiveTests::everyCanFunction(a0-response) Compared values are not the same
+   Actual   (m.status)                                                            : "pdu-error"
+   Expected (function & 0x80 ? QString("protocol-exception") : QString("decoded")): "protocol-exception"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(66) : failure location
+FAIL!  : UppReceiveTests::everyCanFunction(a1-response) Compared values are not the same
+   Actual   (m.status)                                                            : "unsupported-function"
+   Expected (function & 0x80 ? QString("protocol-exception") : QString("decoded")): "protocol-exception"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(66) : failure location
+FAIL!  : UppReceiveTests::everyCanFunction(a2-response) Compared values are not the same
+   Actual   (m.status)                                                            : "unsupported-function"
+   Expected (function & 0x80 ? QString("protocol-exception") : QString("decoded")): "protocol-exception"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(66) : failure location
+FAIL!  : UppReceiveTests::everyCanFunction(a3-response) Compared values are not the same
+   Actual   (m.status)                                                            : "unsupported-function"
+   Expected (function & 0x80 ? QString("protocol-exception") : QString("decoded")): "protocol-exception"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(66) : failure location
+FAIL!  : UppReceiveTests::everyCanFunction(a6-response) Compared values are not the same
+   Actual   (m.status)                                                            : "unsupported-function"
+   Expected (function & 0x80 ? QString("protocol-exception") : QString("decoded")): "protocol-exception"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(66) : failure location
+FAIL!  : UppReceiveTests::everyCanFunction(a7-response) Compared values are not the same
+   Actual   (m.status)                                                            : "unsupported-function"
+   Expected (function & 0x80 ? QString("protocol-exception") : QString("decoded")): "protocol-exception"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(66) : failure location
+FAIL!  : UppReceiveTests::everyCanFunction(a8-response) Compared values are not the same
+   Actual   (m.status)                                                            : "unsupported-function"
+   Expected (function & 0x80 ? QString("protocol-exception") : QString("decoded")): "protocol-exception"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(66) : failure location
+PASS   : UppReceiveTests::cleanupTestCase()
+Totals: 7 passed, 19 failed, 0 skipped, 0 blacklisted, 18ms
+********* Finished testing of UppReceiveTests *********

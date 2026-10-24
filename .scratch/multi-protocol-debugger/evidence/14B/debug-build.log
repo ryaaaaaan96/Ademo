@@ -1,0 +1,152 @@
+[1/153] Automatic MOC for target trace_fixture_plugin
+[2/153] Building CXX object CMakeFiles/trace_fixture_plugin.dir/trace_fixture_plugin_autogen/mocs_compilation.cpp.obj
+[3/153] Automatic MOC for target serial_plugin
+[4/153] Building CXX object CMakeFiles/serial_plugin.dir/serial_plugin_autogen/mocs_compilation.cpp.obj
+[5/153] Automatic MOC for target debugger_widgets
+[6/153] Automatic RCC for src/trends.qrc
+[7/153] Building CXX object CMakeFiles/trace_fixture_plugin.dir/tests/trace_fixture_plugin.cpp.obj
+[8/153] Building CXX object CMakeFiles/serial_plugin.dir/plugins/serial.cpp.obj
+[9/153] Building CXX object CMakeFiles/debugger_widgets.dir/debugger_widgets_autogen/mocs_compilation.cpp.obj
+[10/153] Building CXX object CMakeFiles/debugger_widgets.dir/src/confirmation.cpp.obj
+[11/153] Building CXX object CMakeFiles/debugger_widgets.dir/src/parameter_table.cpp.obj
+[12/153] Building CXX object CMakeFiles/debugger_widgets.dir/debugger_widgets_autogen/UVLADIE3JM/qrc_trends.cpp.obj
+[13/153] Building CXX object CMakeFiles/debugger_widgets.dir/src/file_editor.cpp.obj
+[14/153] Linking CXX shared module bin\plugins\libserial_plugin.dll
+[15/153] Linking CXX shared module bin\trace-fixtures\libtrace_fixture_plugin.dll
+[16/153] Automatic MOC for target upp_plugin
+[17/152] Automatic MOC for target can_observer_plugin
+[18/152] Building CXX object CMakeFiles/debugger_widgets.dir/src/trend_window.cpp.obj
+[19/152] Automatic MOC for target ui_contract_stale_plugin
+[20/152] Linking CXX static library libdebugger_widgets.a
+[21/152] Building CXX object CMakeFiles/can_observer_plugin.dir/can_observer_plugin_autogen/mocs_compilation.cpp.obj
+[22/152] Automatic MOC for target incompatible_plugin
+[23/152] Building CXX object CMakeFiles/can_observer_plugin.dir/plugins/can_observer.cpp.obj
+[24/152] Automatic MOC for target modbus_plugin
+[25/152] Building CXX object CMakeFiles/modbus_plugin.dir/modbus_plugin_autogen/mocs_compilation.cpp.obj
+[26/152] Building CXX object CMakeFiles/can_observer_plugin.dir/plugins/can_observer_view.cpp.obj
+[27/152] Automatic MOC for target ui_contract_plugin
+[28/152] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/modbus.cpp.obj
+[29/152] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/master_controls.cpp.obj
+[30/152] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/master_trends.cpp.obj
+[31/152] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/master_parameters.cpp.obj
+[32/152] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/parameter_definition.cpp.obj
+[33/152] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/parameter_read_scope.cpp.obj
+[34/152] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/parameter_file_editor.cpp.obj
+[35/152] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_parameters.cpp.obj
+[36/152] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_file_editor.cpp.obj
+[37/152] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/rtu_session.cpp.obj
+[38/152] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/write_pdu.cpp.obj
+[39/152] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/rtu_slave.cpp.obj
+[40/152] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_view.cpp.obj
+[41/152] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_edit.cpp.obj
+[42/152] Linking CXX shared module bin\plugins\libcan_observer_plugin.dll
+[43/152] Building CXX object CMakeFiles/ui_contract_plugin.dir/ui_contract_plugin_autogen/mocs_compilation.cpp.obj
+[44/152] Building CXX object CMakeFiles/modbus_plugin.dir/plugins/slave_edit_view.cpp.obj
+[45/152] Linking CXX shared module bin\plugins\libmodbus_plugin.dll
+[46/152] Building CXX object CMakeFiles/upp_plugin.dir/plugins/upp_view.cpp.obj
+[47/152] Building CXX object CMakeFiles/ui_contract_stale_plugin.dir/ui_contract_stale_plugin_autogen/mocs_compilation.cpp.obj
+[48/152] Building CXX object CMakeFiles/ui_contract_plugin.dir/tests/ui_contract_plugin.cpp.obj
+[49/152] Building CXX object CMakeFiles/incompatible_plugin.dir/incompatible_plugin_autogen/mocs_compilation.cpp.obj
+[50/152] Building CXX object CMakeFiles/ui_contract_stale_plugin.dir/tests/ui_contract_stale_plugin.cpp.obj
+[51/152] Linking CXX shared module bin\plugins\libupp_plugin.dll
+[52/152] Automatic MOC for target trace_tests
+[53/152] Building CXX object CMakeFiles/trace_tests.dir/trace_tests_autogen/mocs_compilation.cpp.obj
+[54/152] Linking CXX shared module bin\ui-contract-fixtures\libui_contract_plugin.dll
+[55/152] Linking CXX shared module bin\ui-contract-fixtures\libui_contract_stale_plugin.dll
+[56/152] Building CXX object CMakeFiles/incompatible_plugin.dir/tests/incompatible_plugin.cpp.obj
+[57/152] C:\WINDOWS\system32\cmd.exe /C "cd /D C:\Users\81966\Documents\Ademo\build\worktrees\upp14b-receive\build\qt-llvm-debug-offscreen && C:\Qt\Tools\CMake_64\bin\cmake.exe -E make_directory C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-debug-offscreen/bin/can-lifetime-fixtures && C:\Qt\Tools\CMake_64\bin\cmake.exe -E copy_if_different C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-debug-offscreen/bin/plugins/libcan_plugin.dll C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-debug-offscreen/bin/can-lifetime-fixtures/ && C:\Qt\Tools\CMake_64\bin\cmake.exe -E copy_if_different C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-debug-offscreen/bin/plugins/libcan_observer_plugin.dll C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-debug-offscreen/bin/can-lifetime-fixtures/"
+[58/152] Linking CXX shared module bin\fixtures\libincompatible_plugin.dll
+[59/152] Automatic MOC for target multi_protocol_debugger
+[60/152] Building CXX object CMakeFiles/trace_tests.dir/tests/trace_tests.cpp.obj
+[61/152] Automatic MOC for target can_observation_tests
+[62/152] Linking CXX executable bin\trace_tests.exe
+[63/152] Automatic MOC for target ui_acceptance_tests
+[64/152] Automatic MOC for target workspace_layout_tests
+[65/152] Automatic MOC for target slave_parameter_tests
+[66/152] Automatic MOC for target plugin_ui_contract_tests
+[67/152] Automatic MOC for target parameter_file_editor_tests
+[68/152] Automatic MOC for target parameter_poll_tests
+[69/152] Automatic MOC for target parameter_trend_tests
+[70/152] Automatic MOC for target window_trace_tests
+[71/152] Automatic MOC for target parameter_write_tests
+[72/152] Automatic MOC for target parameter_definition_tests
+[73/152] Automatic MOC for target parameter_window_tests
+[74/152] Automatic MOC for target slave_edit_tests
+[75/152] Automatic MOC for target session_recovery_tests
+[76/152] Automatic MOC for target session_tests
+[77/152] Automatic MOC for target rtu_read_tests
+[78/152] Automatic MOC for target rtu_poll_tests
+[79/152] Automatic MOC for target rtu_write_tests
+[80/152] Automatic MOC for target rtu_slave_write_tests
+[81/152] Automatic MOC for target rtu_slave_tests
+[82/152] Building CXX object CMakeFiles/multi_protocol_debugger.dir/multi_protocol_debugger_autogen/mocs_compilation.cpp.obj
+[83/152] Automatic MOC for target workspace_tests
+[84/152] Building CXX object CMakeFiles/can_observation_tests.dir/can_observation_tests_autogen/mocs_compilation.cpp.obj
+[85/152] Automatic MOC for target recording_tests
+[86/152] Building CXX object CMakeFiles/multi_protocol_debugger.dir/src/main.cpp.obj
+[87/152] Building CXX object CMakeFiles/ui_acceptance_tests.dir/ui_acceptance_tests_autogen/mocs_compilation.cpp.obj
+[88/152] Building CXX object CMakeFiles/workspace_layout_tests.dir/workspace_layout_tests_autogen/mocs_compilation.cpp.obj
+[89/152] Building CXX object CMakeFiles/can_observation_tests.dir/tests/can_observation_tests.cpp.obj
+[90/152] Building CXX object CMakeFiles/slave_parameter_tests.dir/slave_parameter_tests_autogen/mocs_compilation.cpp.obj
+[91/152] Building CXX object CMakeFiles/workspace_layout_tests.dir/tests/workspace_layout_tests.cpp.obj
+[92/152] Building CXX object CMakeFiles/plugin_ui_contract_tests.dir/plugin_ui_contract_tests_autogen/mocs_compilation.cpp.obj
+[93/152] Building CXX object CMakeFiles/ui_acceptance_tests.dir/tests/ui_acceptance_tests.cpp.obj
+[94/152] Building CXX object CMakeFiles/parameter_trend_tests.dir/parameter_trend_tests_autogen/mocs_compilation.cpp.obj
+[95/152] Building CXX object CMakeFiles/slave_parameter_tests.dir/tests/slave_parameter_tests.cpp.obj
+[96/152] Building CXX object CMakeFiles/parameter_file_editor_tests.dir/parameter_file_editor_tests_autogen/mocs_compilation.cpp.obj
+[97/152] Building CXX object CMakeFiles/plugin_ui_contract_tests.dir/tests/plugin_ui_contract_tests.cpp.obj
+[98/152] Building CXX object CMakeFiles/parameter_poll_tests.dir/parameter_poll_tests_autogen/mocs_compilation.cpp.obj
+[99/152] Building CXX object CMakeFiles/parameter_trend_tests.dir/tests/parameter_trend_tests.cpp.obj
+[100/152] Building CXX object CMakeFiles/window_trace_tests.dir/window_trace_tests_autogen/mocs_compilation.cpp.obj
+[101/152] Building CXX object CMakeFiles/parameter_file_editor_tests.dir/tests/parameter_file_editor_tests.cpp.obj
+[102/152] Building CXX object CMakeFiles/parameter_write_tests.dir/parameter_write_tests_autogen/mocs_compilation.cpp.obj
+[103/152] Building CXX object CMakeFiles/parameter_poll_tests.dir/tests/parameter_poll_tests.cpp.obj
+[104/152] Building CXX object CMakeFiles/parameter_definition_tests.dir/parameter_definition_tests_autogen/mocs_compilation.cpp.obj
+[105/152] Building CXX object CMakeFiles/window_trace_tests.dir/tests/window_trace_tests.cpp.obj
+[106/152] Building CXX object CMakeFiles/parameter_window_tests.dir/parameter_window_tests_autogen/mocs_compilation.cpp.obj
+[107/152] Building CXX object CMakeFiles/parameter_write_tests.dir/tests/parameter_write_tests.cpp.obj
+[108/152] Building CXX object CMakeFiles/session_recovery_tests.dir/session_recovery_tests_autogen/mocs_compilation.cpp.obj
+[109/152] Building CXX object CMakeFiles/parameter_definition_tests.dir/tests/parameter_definition_tests.cpp.obj
+[110/152] Building CXX object CMakeFiles/slave_edit_tests.dir/slave_edit_tests_autogen/mocs_compilation.cpp.obj
+[111/152] Building CXX object CMakeFiles/parameter_window_tests.dir/tests/parameter_window_tests.cpp.obj
+[112/152] Building CXX object CMakeFiles/session_tests.dir/session_tests_autogen/mocs_compilation.cpp.obj
+[113/152] Building CXX object CMakeFiles/slave_edit_tests.dir/tests/slave_edit_tests.cpp.obj
+[114/152] Building CXX object CMakeFiles/rtu_read_tests.dir/rtu_read_tests_autogen/mocs_compilation.cpp.obj
+[115/152] Building CXX object CMakeFiles/session_tests.dir/tests/session_tests.cpp.obj
+[116/152] Building CXX object CMakeFiles/rtu_poll_tests.dir/rtu_poll_tests_autogen/mocs_compilation.cpp.obj
+[117/152] Building CXX object CMakeFiles/session_recovery_tests.dir/tests/session_recovery_tests.cpp.obj
+[118/152] Building CXX object CMakeFiles/rtu_write_tests.dir/rtu_write_tests_autogen/mocs_compilation.cpp.obj
+[119/152] Building CXX object CMakeFiles/rtu_poll_tests.dir/tests/rtu_poll_tests.cpp.obj
+[120/152] Building CXX object CMakeFiles/rtu_read_tests.dir/tests/rtu_read_tests.cpp.obj
+[121/152] Building CXX object CMakeFiles/rtu_slave_tests.dir/rtu_slave_tests_autogen/mocs_compilation.cpp.obj
+[122/152] Building CXX object CMakeFiles/rtu_slave_write_tests.dir/rtu_slave_write_tests_autogen/mocs_compilation.cpp.obj
+[123/152] Building CXX object CMakeFiles/rtu_write_tests.dir/tests/rtu_write_tests.cpp.obj
+[124/152] Building CXX object CMakeFiles/workspace_tests.dir/workspace_tests_autogen/mocs_compilation.cpp.obj
+[125/152] Building CXX object CMakeFiles/rtu_slave_write_tests.dir/tests/rtu_slave_write_tests.cpp.obj
+[126/152] Building CXX object CMakeFiles/recording_tests.dir/recording_tests_autogen/mocs_compilation.cpp.obj
+[127/152] Building CXX object CMakeFiles/workspace_tests.dir/tests/workspace_tests.cpp.obj
+[128/152] Linking CXX executable bin\multi_protocol_debugger.exe
+[129/152] Building CXX object CMakeFiles/rtu_slave_tests.dir/tests/rtu_slave_tests.cpp.obj
+[130/152] Linking CXX executable bin\can_observation_tests.exe
+[131/152] Linking CXX executable bin\ui_acceptance_tests.exe
+[132/152] Linking CXX executable bin\workspace_layout_tests.exe
+[133/152] Linking CXX executable bin\slave_parameter_tests.exe
+[134/152] Linking CXX executable bin\parameter_trend_tests.exe
+[135/152] Linking CXX executable bin\plugin_ui_contract_tests.exe
+[136/152] Linking CXX executable bin\parameter_file_editor_tests.exe
+[137/152] Linking CXX executable bin\parameter_poll_tests.exe
+[138/152] Linking CXX executable bin\window_trace_tests.exe
+[139/152] Linking CXX executable bin\parameter_write_tests.exe
+[140/152] Linking CXX executable bin\parameter_definition_tests.exe
+[141/152] Linking CXX executable bin\parameter_window_tests.exe
+[142/152] Linking CXX executable bin\session_recovery_tests.exe
+[143/152] Linking CXX executable bin\slave_edit_tests.exe
+[144/152] Linking CXX executable bin\rtu_read_tests.exe
+[145/152] Linking CXX executable bin\session_tests.exe
+[146/152] Linking CXX executable bin\rtu_poll_tests.exe
+[147/152] Linking CXX executable bin\rtu_write_tests.exe
+[148/152] Linking CXX executable bin\rtu_slave_tests.exe
+[149/152] Linking CXX executable bin\rtu_slave_write_tests.exe
+[150/152] Linking CXX executable bin\workspace_tests.exe
+[151/152] Building CXX object CMakeFiles/recording_tests.dir/tests/recording_tests.cpp.obj
+[152/152] Linking CXX executable bin\recording_tests.exe
