@@ -25,7 +25,7 @@ ReceiveChunk observedFrame(const QCanBusFrame &frame, const QJsonObject &config)
         {"fd", frame.hasFlexibleDataRateFormat()}, {"bitrateSwitch", frame.hasBitrateSwitch()},
         {"errorStateIndicator", frame.hasErrorStateIndicator()}, {"localEcho", frame.hasLocalEcho()},
         {"valid", frame.isValid()}, {"classicSupported", supported},
-        {"diagnostic", supported ? QString() : QStringLiteral("不支持的 CAN FD 或无效帧；原始后端信息保留，未截断")},
+        {"diagnostic", supported ? QString() : QStringLiteral("不支持的 CAN FD、未知或无效帧；原始后端信息保留，未截断")},
         {"backend", config.value("backend")}, {"interface", config.value("interface")},
         {"sourceKind", config.value("backend") == "virtualcan" ? "virtual-can-test" : "can-backend"},
         {"backendTimestampSeconds", QString::number(frame.timeStamp().seconds())},

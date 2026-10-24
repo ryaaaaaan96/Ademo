@@ -12,7 +12,10 @@ int main(int argc, char **argv) {
     QCommandLineParser parser; parser.setApplicationDescription(QStringLiteral("独立虚拟 CAN 样例源，仅软件测试，不连接物理设备")); parser.addHelpOption();
     parser.addOption({"interface", QStringLiteral("虚拟测试通道 can0..can9"), "channel", "can0"});
     parser.addOption({"count", QStringLiteral("发送帧数，1..100000"), "count", "20"});
-    parser.addOption({"interval", QStringLiteral("样例发送间隔毫秒，10..60000"), "ms", "500"}); parser.process(app);
+    parser.addOption({"interval", QStringLiteral("样例发送间隔毫秒，10..60000"), "ms", "500"});
+    // QCommandLineParser::process/showHelp 在无控制台的 Windows 上会弹窗；工具始终只写标准流。
+    if (!parser.parse(app.arguments())) { fprintf(stderr, "%s\n", qPrintable(parser.errorText())); return 2; }
+    if (parser.isSet("help") || app.arguments().contains("--help-all")) { const auto help = parser.helpText().toUtf8(); fwrite(help.constData(), 1, help.size(), stdout); return 0; }
     bool countOk, intervalOk; const int count = parser.value("count").toInt(&countOk), interval = parser.value("interval").toInt(&intervalOk);
     if (!countOk || !intervalOk || count < 1 || count > 100000 || interval < 10 || interval > 60000 || !QRegularExpression("^can[0-9]$").match(parser.value("interface")).hasMatch()) return 2;
     QString error; std::unique_ptr<QCanBusDevice> device(QCanBus::instance()->createDevice("virtualcan", parser.value("interface"), &error));

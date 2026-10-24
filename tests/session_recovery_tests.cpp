@@ -280,6 +280,7 @@ private slots:
     }
 #ifdef Q_OS_WIN
     void titleMenuDocksWithoutExtraRowOrRestartingSession() {
+        if (QGuiApplication::platformName() != "windows") QSKIP("需要 windows QPA 的原生菜单/拖动；offscreen 不执行桌面操作");
         Hub hub; Workbench window(catalog, nullptr, hub.factory()); window.show();
         auto *session = window.session(0); auto *view = window.sessionView(0);
         QVERIFY(session->start(master("COM118")));
@@ -321,6 +322,7 @@ private slots:
         QCOMPARE(window.sessionView(0), view);
     }
     void nativeWindowMoveDropsIntoEmptyWorkbench() {
+        if (QGuiApplication::platformName() != "windows") QSKIP("需要 windows QPA 的原生菜单/拖动；offscreen 不执行桌面操作");
         Hub hub; Workbench window(catalog, nullptr, hub.factory()); window.show();
         QVERIFY(SetWindowPos(reinterpret_cast<HWND>(window.winId()), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE));
         auto *floating = window.sessionWindow(0); QVERIFY(floating);
@@ -338,6 +340,7 @@ private slots:
         QCOMPARE(window.session(0)->state(), SessionState::Stopped);
     }
     void nativeMoveCancellationAndOcclusionKeepFloating() {
+        if (QGuiApplication::platformName() != "windows") QSKIP("需要 windows QPA 的原生菜单/拖动；offscreen 不执行桌面操作");
         Hub hub; Workbench window(catalog, nullptr, hub.factory()); window.show();
         QVERIFY(SetWindowPos(reinterpret_cast<HWND>(window.winId()), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE));
         auto *floating = window.sessionWindow(0);
@@ -361,6 +364,7 @@ private slots:
         QVERIFY(cancelled); QVERIFY(occluded);
     }
     void nativeMoveCanTileOnEverySideOfAnotherSession() {
+        if (QGuiApplication::platformName() != "windows") QSKIP("需要 windows QPA 的原生菜单/拖动；offscreen 不执行桌面操作");
         Hub hub; Workbench window(catalog, nullptr, hub.factory());
         window.addSession(master("COM112")); window.show();
         QVERIFY(SetWindowPos(reinterpret_cast<HWND>(window.winId()), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE));
