@@ -36,6 +36,7 @@ public:
     void detach();
     void attach();
     void centerFloating(int offset = 0);
+    void restoreFloatingGeometry(const QByteArray &);
     std::function<bool()> requestClose;
     std::function<void()> presentationChanged;
 protected:
@@ -50,5 +51,7 @@ private:
     bool detached_ = false;
     bool changing_ = false;
     bool open_ = true;
+    bool restoredGeometryNeedsClamp_ = false;
+    void constrainRestoredFrame();
 };
 }

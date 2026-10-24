@@ -232,11 +232,26 @@ private slots:
         source.sessionWindow(0)->resize(640, 550); source.sessionWindow(0)->move(-20000, -20000);
         const auto path = directory.filePath("off-desktop.json"); auto id = source.saveWorkspace(path);
         QTRY_COMPARE(source.workspaceOperation(id).state, QString("success"));
+        Workbench alreadyVisible(catalog); alreadyVisible.show();
+        id = alreadyVisible.openWorkspace(path);
+        QTRY_COMPARE(alreadyVisible.workspaceOperation(id).state, QString("success"));
+        auto *visibleWindow = alreadyVisible.sessionWindow(0);
+        QVERIFY(visibleWindow->screen()->availableGeometry().contains(visibleWindow->frameGeometry().topLeft()));
         Workbench restored(catalog); id = restored.openWorkspace(path);
         QTRY_COMPARE(restored.workspaceOperation(id).state, QString("success")); restored.show();
         auto *window = restored.sessionWindow(0);
         QTRY_VERIFY(window->screen()->availableGeometry().intersects(window->frameGeometry()));
         QVERIFY(window->screen()->availableGeometry().contains(window->frameGeometry().topLeft()));
+        QVERIFY(source.closeSession(0));
+        const auto closedPath = directory.filePath("closed-off-desktop.json");
+        id = source.saveWorkspace(closedPath);
+        QTRY_COMPARE(source.workspaceOperation(id).state, QString("success"));
+        Workbench closed(catalog); id = closed.openWorkspace(closedPath);
+        QTRY_COMPARE(closed.workspaceOperation(id).state, QString("success")); closed.show();
+        QVERIFY(!closed.isSessionOpen(0));
+        closed.selectSession(0);
+        QTRY_VERIFY(closed.isSessionOpen(0));
+        QVERIFY(closed.sessionWindow(0)->screen()->availableGeometry().contains(closed.sessionWindow(0)->frameGeometry().topLeft()));
     }
 };
 QTEST_MAIN(WorkspaceLayoutTests)

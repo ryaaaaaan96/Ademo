@@ -1,0 +1,34 @@
+********* Start testing of RecoveryTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : RecoveryTests::initTestCase()
+PASS   : RecoveryTests::parallelMasterSlaveAndConflictingEndpoint()
+PASS   : RecoveryTests::automaticReconnectResumesPollingAndRejectsOldCallbacks()
+PASS   : RecoveryTests::sentWriteIsUncertainAndNeverReplayed()
+PASS   : RecoveryTests::manualReconnectCanLeavePollingPaused()
+PASS   : RecoveryTests::slaveReconnectPreservesEditedDataDespiteDeletedStartupFile()
+PASS   : RecoveryTests::repeatedLifecycleReleasesEndpointAndBoundsAutomaticAttempts()
+PASS   : RecoveryTests::backgroundSaveCompletesAcrossConnectionEpoch()
+PASS   : RecoveryTests::invalidRecoveryPolicyDoesNotOpenEndpoint()
+PASS   : RecoveryTests::qtTimerRetriesInitialOpenFailureWithoutManualPoll()
+PASS   : RecoveryTests::newConfigurationCancelsOldRecovery()
+PASS   : RecoveryTests::closingWindowRetainsSessionConfigurationAndOtherConnection()
+PASS   : RecoveryTests::windowArrangementIsAvailableWithoutStoppingSessions()
+PASS   : RecoveryTests::titleMenuDocksWithoutExtraRowOrRestartingSession()
+QWARN  : RecoveryTests::nativeWindowMoveDropsIntoEmptyWorkbench() drag hit 0x60650 "main.c - zephyrproject [WSL: Ubuntu] - Visual Studio Code" host 0x47058c point 1655 696
+QWARN  : RecoveryTests::nativeWindowMoveDropsIntoEmptyWorkbench() drag hit 0x60650 "main.c - zephyrproject [WSL: Ubuntu] - Visual Studio Code" host 0x47058c point 1655 696
+FAIL!  : RecoveryTests::nativeWindowMoveDropsIntoEmptyWorkbench() '!window.isSessionFloating(0)' returned FALSE. (原生窗口移动完成后应按预览停靠到空工作台)
+C:/Users/81966/Documents/Ademo/build/worktrees/ui13-window-recovery/tests/session_recovery_tests.cpp(336) : failure location
+QWARN  : RecoveryTests::nativeMoveCancellationAndOcclusionKeepFloating() drag hit 0x60650 "main.c - zephyrproject [WSL: Ubuntu] - Visual Studio Code" host 0x26060c point 1655 696
+QWARN  : RecoveryTests::nativeMoveCancellationAndOcclusionKeepFloating() drag hit 0x60650 "main.c - zephyrproject [WSL: Ubuntu] - Visual Studio Code" host 0x26060c point 1655 696
+QWARN  : RecoveryTests::nativeMoveCancellationAndOcclusionKeepFloating() drag hit 0x60650 "main.c - zephyrproject [WSL: Ubuntu] - Visual Studio Code" host 0x26060c point 1655 696
+PASS   : RecoveryTests::nativeMoveCancellationAndOcclusionKeepFloating()
+QWARN  : RecoveryTests::nativeMoveCanTileOnEverySideOfAnotherSession() drag hit 0x60650 "main.c - zephyrproject [WSL: Ubuntu] - Visual Studio Code" host 0x33066a point 1294 753
+QWARN  : RecoveryTests::nativeMoveCanTileOnEverySideOfAnotherSession() drag hit 0x60650 "main.c - zephyrproject [WSL: Ubuntu] - Visual Studio Code" host 0x33066a point 1294 753
+FAIL!  : RecoveryTests::nativeMoveCanTileOnEverySideOfAnotherSession() '!window.isSessionFloating(1)' returned FALSE. ()
+C:/Users/81966/Documents/Ademo/build/worktrees/ui13-window-recovery/tests/session_recovery_tests.cpp(373) : failure location
+PASS   : RecoveryTests::navigationAndRecordsStayWithTheirSession()
+PASS   : RecoveryTests::workbenchCreatesParallelWindowsAndProtectsDirtyClose()
+PASS   : RecoveryTests::windowCloseRechecksEarlierSessionAfterLaterGuard()
+PASS   : RecoveryTests::cleanupTestCase()
+Totals: 19 passed, 2 failed, 0 skipped, 0 blacklisted, 2369ms
+********* Finished testing of RecoveryTests *********

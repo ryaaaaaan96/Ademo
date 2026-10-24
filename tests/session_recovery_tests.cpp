@@ -322,6 +322,7 @@ private slots:
     }
     void nativeWindowMoveDropsIntoEmptyWorkbench() {
         Hub hub; Workbench window(catalog, nullptr, hub.factory()); window.show();
+        QVERIFY(SetWindowPos(reinterpret_cast<HWND>(window.winId()), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE));
         auto *floating = window.sessionWindow(0); QVERIFY(floating);
         QVERIFY(window.isSessionFloating(0));
         window.raise(); window.activateWindow(); QTest::qWait(100);
@@ -338,6 +339,7 @@ private slots:
     }
     void nativeMoveCancellationAndOcclusionKeepFloating() {
         Hub hub; Workbench window(catalog, nullptr, hub.factory()); window.show();
+        QVERIFY(SetWindowPos(reinterpret_cast<HWND>(window.winId()), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE));
         auto *floating = window.sessionWindow(0);
         const auto handle = reinterpret_cast<HWND>(floating->winId());
         const auto previous = QCursor::pos();
@@ -349,6 +351,9 @@ private slots:
         const bool cancelled = window.isSessionFloating(0);
         QWidget other; other.setWindowTitle(QStringLiteral("遮挡工作台的窗口")); other.resize(240, 180);
         other.move(point - QPoint(120, 90)); other.show(); other.raise(); other.activateWindow(); QTest::qWait(80);
+        QVERIFY(SetWindowPos(reinterpret_cast<HWND>(other.winId()), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE));
+        POINT cursor{}; QVERIFY(GetCursorPos(&cursor));
+        QCOMPARE(GetAncestor(WindowFromPoint(cursor), GA_ROOT), reinterpret_cast<HWND>(other.winId()));
         SendMessage(handle, WM_ENTERSIZEMOVE, 0, 0); floating->move(floating->pos() + QPoint(10, 10));
         SendMessage(handle, WM_MOVING, 0, 0); SendMessage(handle, WM_EXITSIZEMOVE, 0, 0); QTest::qWait(80);
         const bool occluded = window.isSessionFloating(0);
@@ -358,9 +363,11 @@ private slots:
     void nativeMoveCanTileOnEverySideOfAnotherSession() {
         Hub hub; Workbench window(catalog, nullptr, hub.factory());
         window.addSession(master("COM112")); window.show();
+        QVERIFY(SetWindowPos(reinterpret_cast<HWND>(window.winId()), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE));
         const auto previous = QCursor::pos();
         for (int side = 0; side < 4; ++side) {
             window.dockSession(0); window.floatSession(1);
+            QVERIFY(SetWindowPos(reinterpret_cast<HWND>(window.winId()), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE));
             window.raise(); window.activateWindow(); QTest::qWait(80);
             auto *anchor = window.sessionWindow(0), *moving = window.sessionWindow(1);
             const QList<QPoint> points{{12, anchor->height() / 2}, {anchor->width() - 12, anchor->height() / 2},
@@ -370,7 +377,7 @@ private slots:
             SendMessage(handle, WM_ENTERSIZEMOVE, 0, 0); moving->move(moving->pos() + QPoint(10, 10));
             SendMessage(handle, WM_MOVING, 0, 0); SendMessage(handle, WM_EXITSIZEMOVE, 0, 0);
             QTest::qWait(100); QCursor::setPos(previous);
-            QVERIFY(!window.isSessionFloating(1));
+            QVERIFY2(!window.isSessionFloating(1), qPrintable(QStringLiteral("平铺方向 %1").arg(side)));
             const auto a = anchor->mapToGlobal(anchor->rect().center());
             const auto b = moving->mapToGlobal(moving->rect().center());
             if (side == 0) QVERIFY(b.x() < a.x());

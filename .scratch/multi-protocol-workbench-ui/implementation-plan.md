@@ -28,7 +28,7 @@ Status: ready-for-agent
 | [UI10](issues/10-qml-parameter-trends.md) | 用 QWidget 内嵌 QML 展示设备参数趋势 | ready-for-agent | UI06 | 已完成：c008399；合入 640ce33；[验收与集成复测](evidence/UI10/integration.md) |
 | [UI11](issues/11-window-workspace-recovery.md) | 保存并恢复多窗口工作区和插件配置 | ready-for-agent | UI03、UI06、UI08 | 已完成：90a475d；合入 1003854；[验收与集成复测](evidence/UI11/integration.md) |
 | [UI12](issues/12-plugin-ui-contract-validation.md) | 通过独立示例插件验证表格与编辑页扩展 | ready-for-agent | UI03、UI07 | 已完成：e394d58；合入 66ffa7e；[验收与集成复测](evidence/UI12/integration.md) |
-| [UI13](issues/13-rtu-ui-acceptance-migration.md) | 验收 RTU 新界面完整流程并完成旧入口迁移 | ready-for-agent | UI09、UI10、UI11、UI12 | 2026-10-24 用户已确认当前正式界面达到设计预期；本轮配置／侧栏／标题菜单增量构建与定向测试通过，待最终审查、提交归档和已知窗口恢复问题收尾。此前基线 4ae8f32；[此前审查](evidence/UI13/final-review.md)、[最新定向验收](evidence/UI13/window-menu-sidebar-polish/acceptance.md) |
+| [UI13](issues/13-rtu-ui-acceptance-migration.md) | 验收 RTU 新界面完整流程并完成旧入口迁移 | ready-for-agent | UI09、UI10、UI11、UI12 | 用户已确认正式界面；配置／侧栏／标题菜单增量已归档于 87126a3，屏幕外窗口恢复已修复并完成双配置软件回归，见[收尾证据](../window-screen-recovery/evidence/acceptance.md)。最终整体两轴审查随14A集成收尾记录 |
 | [旧13](../multi-protocol-debugger/issues/13-rtu-phase-acceptance.md) | 验收 RTU 第一阶段的真实互通与负载 | needs-info | UI13、旧10/12（已完成）；硬件/对端 | 用户要求物理验收后置；未完成，不阻塞后续软件开发 |
 | [旧14A](../multi-protocol-debugger/issues/14-upp-can-receive.md) | 原始经典CAN帧观察、筛选与导出 | ready-for-agent | UI13软件收尾 | Q1–Q3已确认；虚拟CAN样例源走正式接收链，无UPP解析/发送；尚未实施 |
 | [旧14B](../multi-protocol-debugger/issues/14-upp-can-receive.md) | UPP接收重组、校验、解析与来源回溯 | needs-info | 旧14A；相关协议缺口确认 | 文档已收到，缺口见整理文档第8节；旧14整体尚未完成，物理验收后置 |

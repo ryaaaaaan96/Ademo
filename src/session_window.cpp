@@ -91,6 +91,7 @@ void SessionDock::present()
     open_ = true;
     if (detached_) {
         if (window_->isMinimized()) window_->showNormal(); else window_->show();
+        constrainRestoredFrame();
         window_->raise(); window_->activateWindow();
     } else { window_->show(); show(); raise(); }
     if (presentationChanged) presentationChanged();
@@ -111,6 +112,28 @@ void SessionDock::centerFloating(int offset)
     position.setX(qBound(available.left(), position.x(), qMax(available.left(), available.right() - frame.width() + 1)));
     position.setY(qBound(available.top(), position.y(), qMax(available.top(), available.bottom() - frame.height() + 1)));
     window_->move(position);
+}
+void SessionDock::restoreFloatingGeometry(const QByteArray &saved)
+{
+    if (!detached_ || saved.isEmpty()) return;
+    if (window_->restoreGeometry(saved)) {
+        restoredGeometryNeedsClamp_ = true;
+        constrainRestoredFrame();
+    }
+}
+void SessionDock::constrainRestoredFrame()
+{
+    if (!restoredGeometryNeedsClamp_ || !detached_ || !window_->isVisible()) return;
+    restoredGeometryNeedsClamp_ = false;
+    if (window_->isMaximized() || window_->isFullScreen()) return;
+    const auto frame = window_->frameGeometry();
+    auto *screen = window_->screen();
+    if (!screen || !screen->availableGeometry().intersects(frame)) screen = owner_->screen();
+    if (!screen) return;
+    const auto available = screen->availableGeometry();
+    const QPoint clamped(qBound(available.left(), frame.left(), qMax(available.left(), available.right() - frame.width() + 1)),
+                         qBound(available.top(), frame.top(), qMax(available.top(), available.bottom() - frame.height() + 1)));
+    if (clamped != frame.topLeft()) window_->move(window_->pos() + clamped - frame.topLeft());
 }
 void SessionDock::detach()
 {
