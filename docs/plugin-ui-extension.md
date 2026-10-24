@@ -1,6 +1,12 @@
 # 配套插件的参数界面与文件编辑扩展
 
-当前配套契约为 SDK13、产品0.2；宿主、协议／传输 DLL、Qt、编译器、架构和 Debug/Release 必须一起配套构建。`DebuggerProtocolIid` / `DebuggerTransportIid` 与 `buildKey()` 都参与兼容检查。插件只在启动时发现，替换 DLL 后重启；未知或不兼容插件保留错误提示和工作区身份，不建立热加载承诺。
+当前配套契约为 SDK14、产品0.2；宿主、协议／传输 DLL、Qt、编译器、架构和 Debug/Release 必须一起配套构建。`DebuggerProtocolIid` / `DebuggerTransportIid` 与 `buildKey()` 都参与兼容检查。插件只在启动时发现，替换 DLL 后重启；未知或不兼容插件保留错误提示和工作区身份，不建立热加载承诺。
+
+## SDK14 帧观察扩展
+
+Descriptor.requiredTransportCapabilities 声明协议所需传输能力，默认byte-stream；supportsTransport统一检查传输ID及能力。frame传输保留每个输入的边界和零长度；宿主不识别CAN业务字段。Descriptor.preferredForNewSession声明新会话首选协议，现有Modbus保持首选，避免DLL文件名排序改变用户默认入口。切换协议时选择兼容传输，恢复工作区保留显式配置。
+
+SessionAccess.recordStatus提供会话归属、原始容量、正常过期及磁盘丢失/轮换状态，插件导出值快照时调用一次。CAN专用表和导出列归观察插件，设备列表为空，原始记录不伪造Message或Operation。SDK数据布局变化已升级IID及buildKey为14，SDK13需配套重编。
 
 ## 可复用边界
 

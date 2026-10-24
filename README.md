@@ -1,6 +1,6 @@
 # 多协议调试工具
 
-Windows Qt 工作台，当前正式流程覆盖 Modbus RTU 主站和从站。每个会话独立持有串口、配置、参数、通信记录和窗口；协议专属参数和操作留在插件。技术版本为产品 0.2 / SDK13。
+Windows Qt 工作台，当前正式流程覆盖 Modbus RTU 主站、从站及原始经典 CAN 帧观察。每个会话独立持有端点、配置、参数、通信记录和窗口；协议专属参数和操作留在插件。技术版本为产品 0.2 / SDK14。
 
 ## 本机启动与构建
 
@@ -32,6 +32,10 @@ $env:PATH = 'C:/Qt/6.12.0/llvm-mingw_64/bin;C:/Qt/Tools/llvm-mingw2217_64/bin;' 
 会话内容区不再单独占一行显示“浮动／停靠到工作台”。停靠状态右键会话标题选择“浮动”；Windows 浮窗右键系统标题栏（或 Alt+Space）选择“停靠到工作台”。原生三按钮和拖拽停靠继续可用。
 
 一个工作区最多保留 16 个会话配置（含关闭窗口），同一规范化串口互斥。窗口关闭只停止自己的会话并保留配置，从导航重开时保持停止。连接失败或断线不会停止其他会话；“连接配置…”中可选择自动重连及恢复轮询，重连不补发设备写入。实际总线只能有一个主站，软件隔离不代替物理拓扑检查。
+
+## CAN 原始帧观察
+
+“连接配置…”中选择“CAN 原始帧观察”，使用virtualcan和can0显式启动，再单独运行can_sample_source。标准/扩展、零长度和远程帧进入正式后端与会话；左侧支持ID/格式/类型筛选及CSV/JSONL快照导出。完整操作与字段边界见 [CAN观察说明](docs/can-observation.md)。错误帧以受控后端补测，物理CAN未验收；本片不解析UPP。
 
 ## 主站参数读写和轮询
 
@@ -67,6 +71,6 @@ $env:PATH = 'C:/Qt/6.12.0/llvm-mingw_64/bin;C:/Qt/Tools/llvm-mingw2217_64/bin;' 
 
 UPP/CAN 的协议资料见 [UPP 报文格式与 CAN 调试说明](docs/protocols/upp-can-format.md)，包含完整帧、CAN 拆帧、功能码、原文示例和待确认项；资料整理不代表插件已经实现或通过物理验收。
 
-SDK13 插件位于 `bin/plugins`，匹配 SDK、产品、Qt 完整版本、编译器、架构和构建配置。会话、界面、模态回调与后台作业持有 DLL 生命周期租约；更新后需重启，不支持热替换或崩溃隔离。宿主优先使用可选 `createParameterView`，未提供时仍回退 `createView`；Modbus 新流程不再展示临时兼容页。契约、降级与扩展测试见 [插件 UI 契约](docs/plugin-ui-extension.md)。
+SDK14 插件位于 `bin/plugins`，匹配 SDK、产品、Qt 完整版本、编译器、架构和构建配置。会话、界面、模态回调与后台作业持有 DLL 生命周期租约；更新后需重启，不支持热替换或崩溃隔离。宿主优先使用可选 `createParameterView`，未提供时仍回退 `createView`；Modbus 新流程不再展示临时兼容页。契约、降级与扩展测试见 [插件 UI 契约](docs/plugin-ui-extension.md)。
 
-[综合实施索引](.scratch/multi-protocol-workbench-ui/implementation-plan.md)与各任务证据记录软件进度。用户已确认当前正式界面设计；UI13 增量仍在完成窗口恢复与最终回归。旧13 真实硬件联调后置；当前软件阶段仅推进旧14内的 14A 原始经典 CAN 帧观察，14B、旧15及 TCP 尚未实施。
+[综合实施索引](.scratch/multi-protocol-workbench-ui/implementation-plan.md)与各任务证据记录软件进度。用户已确认当前正式界面设计；UI13 窗口恢复与双配置回归已完成。旧13 真实硬件联调后置；当前软件阶段仅推进旧14内的 14A 原始经典 CAN 帧观察，14B、旧15及 TCP 尚未实施。

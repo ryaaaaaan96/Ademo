@@ -76,7 +76,19 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     role->setObjectName("role");
     role->setAccessibleName(QStringLiteral("会话角色"));
     for (auto *p : catalog_->protocols()) protocol->addItem(p->describe().name, p->describe().id);
+    for (auto *p : catalog_->protocols()) if (p->describe().preferredForNewSession) {
+        protocol->setCurrentIndex(protocol->findData(p->describe().id)); break;
+    }
     for (auto *t : catalog_->transports()) transport->addItem(t->describe().name, t->describe().id);
+    auto chooseCompatibleTransport = [this, protocol, transport] {
+        const auto *p = catalog_->protocol(protocol->currentData().toString());
+        const auto *current = catalog_->transport(transport->currentData().toString());
+        if (!p || (current && supportsTransport(p->describe(), current->describe()))) return;
+        for (auto *candidate : catalog_->transports()) if (supportsTransport(p->describe(), candidate->describe())) {
+            transport->setCurrentIndex(transport->findData(candidate->describe().id)); break;
+        }
+    };
+    chooseCompatibleTransport();
     form->addRow(QStringLiteral("协议"), protocol);
     form->addRow(QStringLiteral("传输"), transport);
     form->addRow(QStringLiteral("角色"), role);
@@ -141,7 +153,7 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     };
     rebuildView_ = buildView;
     auto selectedProtocol = std::make_shared<int>(protocol->currentIndex());
-    auto updateProtocol = [this, protocol, role, selectedProtocol, buildView] {
+    auto updateProtocol = [this, protocol, role, selectedProtocol, buildView, chooseCompatibleTransport](bool selectTransport) {
         QPointer<SessionPane> alive(this);
         const bool resolved = !view_ || session_.resolveUnsaved();
         if (!alive) return;
@@ -149,9 +161,11 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
             const QSignalBlocker blocker(protocol); protocol->setCurrentIndex(*selectedProtocol); return;
         }
         *selectedProtocol = protocol->currentIndex();
+        if (selectTransport) chooseCompatibleTransport();
         const QSignalBlocker blocker(role); role->clear();
-        if (auto *p = catalog_->protocol(protocol->currentData().toString()))
+        if (auto *p = catalog_->protocol(protocol->currentData().toString())) {
             for (const auto &r : p->describe().roles) role->addItem(r, r);
+        }
         buildView();
     };
     connect(role, &QComboBox::currentIndexChanged, this, [this, role, selectedRole, roleRevision, buildView] {
@@ -168,12 +182,12 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
             buildView(); refresh_();
         });
     });
-    rebuildProtocol_ = updateProtocol;
+    rebuildProtocol_ = [updateProtocol] { updateProtocol(false); };
     connect(transport, &QComboBox::currentIndexChanged, this, updateTransport);
     connect(protocol, &QComboBox::currentIndexChanged, this, [this, updateProtocol] {
         // 修改保护可能销毁整个窗口；先让 QComboBox 完成自己的信号发送再进入模态守卫。
-        if (session_.hasUnsavedOrBusy()) QTimer::singleShot(0, this, updateProtocol);
-        else updateProtocol();
+        if (session_.hasUnsavedOrBusy()) QTimer::singleShot(0, this, [updateProtocol] { updateProtocol(true); });
+        else updateProtocol(true);
     });
     updateTransport();
     auto *start = new QPushButton(QStringLiteral("启动会话"), this);
@@ -215,7 +229,7 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     sessionControlsLayout->addWidget(status);
     sessionControlsLayout->addWidget(diagnostics);
     outer->addWidget(scroll, 1);
-    updateProtocol();
+    updateProtocol(false);
     outer->addWidget(new SessionRecords(session_, this));
     auto refresh = [this, formWidget, endpointWidget, protocol, transport, role, start, stop, reconnect, status] {
 
@@ -225,7 +239,7 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
         auto *p = catalog_->protocol(protocol->currentData().toString());
         auto *t = catalog_->transport(transport->currentData().toString());
         const bool available = p && t && p->describe().roles.contains(role->currentData().toString())
-            && p->describe().transports.contains(t->describe().id);
+            && supportsTransport(p->describe(), t->describe());
         start->setEnabled(!active && available);
         stop->setEnabled(active || session_.canReconnect());
         reconnect->setEnabled(session_.canReconnect());
