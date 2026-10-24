@@ -23,9 +23,10 @@ Status: ready-for-agent
 | [11](issues/11-trace-query-export.md) | 按操作与消息回溯并导出记录 | RTU | ready-for-agent | 02 |
 | [12](issues/12-bounded-disk-recording.md) | 开启磁盘回溯并在过载时保持通信 | RTU | ready-for-agent | 05、11 |
 | [13](issues/13-rtu-phase-acceptance.md) | 验收 RTU 第一阶段的真实互通与负载 | RTU 阶段验收 | needs-info | UI13、10、12；另需外部条件 |
-| [14](issues/14-upp-can-receive.md) | 通过插件接收并解析真实 UPP/CAN 消息 | UPP/CAN | needs-info | 13；另需外部条件 |
-| [15](issues/15-upp-can-exchange.md) | 完成真实 UPP/CAN 发送交互并与 RTU 并行 | UPP/CAN | needs-info | 14；另需外部条件 |
-| [16](issues/16-tcp-first-register-read.md) | 完成一次 Modbus TCP 主站读取 | TCP | ready-for-agent | 15 |
+| [14A](issues/14-upp-can-receive.md) | 原始经典CAN帧观察、筛选与导出 | UPP/CAN | ready-for-agent | UI13软件收尾；虚拟CAN验收，不依赖UPP歧义 |
+| [14B](issues/14-upp-can-receive.md) | UPP接收重组与解析 | UPP/CAN | needs-info | 14A；相关协议缺口确认；物理验收后置 |
+| [15](issues/15-upp-can-exchange.md) | 完成真实 UPP/CAN 发送交互并与 RTU 并行 | UPP/CAN | needs-info | 14B软件部分；交互规则与样例；物理验收后置 |
+| [16](issues/16-tcp-first-register-read.md) | 完成一次 Modbus TCP 主站读取 | TCP | ready-for-agent | 15软件部分 |
 | [17](issues/17-tcp-master-operations.md) | TCP 主站多设备读写、轮询与恢复 | TCP | ready-for-agent | 16 |
 | [18](issues/18-tcp-slave-shared-data.md) | TCP 从站多客户端共享模拟设备 | TCP | ready-for-agent | 16 |
 | [19](issues/19-windows-delivery.md) | 交付可运行的 Windows 工具与扩展说明 | 最终交付 | needs-info | 17、18；另需外部条件 |
@@ -55,11 +56,11 @@ Qt/LLVM-MinGW、Debug/Release 与 LLDB 验证已完成，见 [环境证据](tool
 
 ## 依赖与状态规则
 
-- Status 沿用默认五种分诊标签。ready-for-agent 表示任务描述完备；只有其所有 Blocked by 任务有验收完成证据、外部条件满足时才可开始。
-- 13 等待独立对端、实际串口与拓扑等联调信息；14/15 等待 UPP 规范、样例及 CAN 硬件/交互条件；19 等待清洁 Windows 交付验证环境。当前这四项为 needs-info，信息确认后可更新状态，但仍需遵守任务依赖。
+- Status 沿用默认五种分诊标签。ready-for-agent 表示任务描述完备；按 Blocked by 指定的软件阶段或完整任务检查证据，不能把软件阶段通过写成整项物理验收完成。
+- 2026-10-24 用户明确要求硬件条件先跳过、实际物理验收后做。13暂缓，不阻塞14；14/15继续等待 UPP 规范、样例及交互规则，软件部分不等待实际硬件；19的清洁 Windows 交付条件保留。needs-info 的具体缺口按各任务当前正文记录。
 - 以各任务验收勾选与 Comments 中的代码、测试和实际环境证据认定完成，不把 ready-for-agent 当作完成状态，不使用 open/claimed/resolved 等 Wayfinder 状态代替普通实施标签。
 - 02 后可分别推进 03、04、11；03 后可分别推进 05、06；06 后可推进 08，07 还需 04；16 后可分别推进 17、18。
-- 13 的前置 10、12 的祖先覆盖全部 RTU 开发项。13→14 和 15→16 包含用户确定的阶段约束，保持 RTU → UPP/CAN → TCP，不因资料缺失越过阶段。
+- 13 的前置 10、12 的祖先覆盖全部 RTU 开发项。软件调度为 UI13→14A原始经典CAN观察→14B UPP接收解析→15软件→16。14A/B为旧14内部切片，完整任务保留needs-info；14A范围已确认，不等待UPP缺口，14B/15仍按相关资料解锁。物理验收后置，保持RTU→UPP/CAN→TCP。
 - UPP 资料整理可以提前开展；未知线格式不编造，真实硬件验收不得用模拟替代。缺资料不阻塞独立的前期 RTU 工作。
 
 ## 版本与历史
@@ -84,3 +85,13 @@ Qt/LLVM-MinGW、Debug/Release 与 LLDB 验证已完成，见 [环境证据](tool
 ### 2026-10-23：接入已批准的综合计划
 
 已发布 [UI01–UI13 与旧13–19综合索引](../multi-protocol-workbench-ui/implementation-plan.md)。旧01–12的完成记录保留，旧13增加UI13前置，旧13–19按新界面补充验收；本轮仅继续UI01原型，不开始后续产品实施。
+
+### 2026-10-24：用户要求物理验收后置
+
+用户明确表示“我希望硬件条件先跳过，实际物理验收后面再做”。据此撤销实际硬件验收对后续软件开发的阻塞，依赖改按对应软件阶段通过检查；既定 UPP 规范、字段预期和交互资料仍是实现前提。保留物理验收项且不标为完成，历史评论中的硬件阶段门槛由本次决定更新。软件实现继续按 RTU → UPP/CAN → TCP 推进。本次只更新计划和验收边界，未执行物理测试或启动 UPP 产品实现。
+
+### 2026-10-24：Q1–Q3确认首个经典CAN软件切片
+
+用户依次确认：Q1先做原始CAN帧观察、筛选及导出；Q2采用虚拟CAN样例源经正式接收后端进入现有会话界面，无硬件验收，不增加文件导入/定时回放；Q3采用经典CAN标准/扩展格式，远程帧与错误帧按后端实际信息保留，CAN FD后置。沿用已确认界面和物理验收后置安排。
+
+据此将旧14内部明确为14A（原始帧观察，范围ready-for-agent，仍依赖UI13软件收尾）与14B（UPP接收重组解析，needs-info）；旧15仅在14B及交互资料到位后推进。旧14完整目标与后续编号不变。已收到UPP原文并整理，不再把缺口表述为整份协议未提供。更新规格、索引与验收边界；本次没有实施产品代码或执行CAN测试。

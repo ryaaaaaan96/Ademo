@@ -4,6 +4,7 @@
 #include <functional>
 
 class QVBoxLayout;
+class QAction;
 namespace debugger {
 enum class DockDragPhase { Preview, Drop, Cancel };
 // 停靠壳与独立窗口共享同一内容；呈现变化不创建或停止调试会话。
@@ -11,6 +12,7 @@ class SessionWindow final : public QMainWindow {
 public:
     explicit SessionWindow(QWidget *content, QWidget *parent);
     std::function<bool()> requestClose;
+    std::function<void()> requestDock;
     std::function<void(QPoint, DockDragPhase)> dockDrag;
 protected:
     void closeEvent(QCloseEvent *) override;
@@ -44,6 +46,7 @@ private:
     QWidget *container_;
     QVBoxLayout *layout_;
     QMainWindow *owner_;
+    QAction *dockAction_;
     bool detached_ = false;
     bool changing_ = false;
     bool open_ = true;

@@ -39,6 +39,8 @@ public:
 private:
     std::shared_ptr<PluginCatalog> catalog_;
     QWidget *view_ = nullptr;
+    QWidget *sessionControls_ = nullptr;
+    QBoxLayout *controlButtons_ = nullptr;
     SessionConfig original_;
     std::function<void()> rebuildProtocol_, rebuildView_, refresh_;
 };
@@ -49,6 +51,10 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     setWindowTitle(QStringLiteral("多协议调试工具 · RTU 会话"));
     resize(680, 540);
     auto *outer = new QVBoxLayout(this);
+    sessionControls_ = new QWidget(this);
+    auto *sessionControlsLayout = new QVBoxLayout(sessionControls_);
+    sessionControlsLayout->setContentsMargins(0, 0, 0, 0);
+    outer->addWidget(sessionControls_);
     auto *connection = new QDialog(this);
     connection->setWindowTitle(QStringLiteral("连接配置"));
     auto *connectionLayout = new QVBoxLayout(connection);
@@ -101,8 +107,12 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     };
     auto selectedRole = std::make_shared<QString>();
     auto roleRevision = std::make_shared<quint64>(0);
-    auto buildView = [this, protocol, role, layout, selectedRole, roleRevision] {
+    auto buildView = [this, protocol, role, layout, outer, selectedRole, roleRevision] {
         ++*roleRevision; *selectedRole = role->currentData().toString();
+        sessionControls_->setParent(this);
+        outer->insertWidget(0, sessionControls_);
+        sessionControls_->show();
+        if (controlButtons_) controlButtons_->setDirection(QBoxLayout::LeftToRight);
         delete view_;
         view_ = nullptr;
         parameterView_ = nullptr;
@@ -116,6 +126,12 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
         access.config = [self] { return self ? self->configuration() : SessionConfig{}; };
         parameterView_ = catalog_->createParameterView(p->describe().id, stack, access);
         if (parameterView_) stack->addWidget(parameterView_);
+        if (auto *host = parameterView_ ? parameterView_->sessionControlsHost() : nullptr;
+            host && parameterView_->isAncestorOf(host) && host->layout()) {
+            host->layout()->addWidget(sessionControls_);
+            if (controlButtons_) controlButtons_->setDirection(QBoxLayout::TopToBottom);
+        }
+        sessionControls_->show();
         if (!parameterView_) {
             if (auto *fallback = catalog_->createView(p->describe().id, stack, access)) stack->addWidget(fallback);
         }
@@ -171,9 +187,9 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     status->setWordWrap(true);
     auto *diagnostics = new QLabel(catalog_->diagnostics().join('\n'), this);
     diagnostics->setWordWrap(true); diagnostics->setVisible(!diagnostics->text().isEmpty());
-    auto *controls = new QHBoxLayout;
+    auto *controls = new QBoxLayout(QBoxLayout::LeftToRight); controlButtons_ = controls;
     controls->addWidget(start); controls->addWidget(stop); controls->addWidget(configure);
-    outer->addLayout(controls);
+    sessionControlsLayout->addLayout(controls);
     connectionLayout->addWidget(reconnect);
     auto *recovery = new QHBoxLayout;
     auto *automatic = new QCheckBox(QStringLiteral("断线自动重连"), this);
@@ -196,8 +212,8 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
     connect(automatic, &QCheckBox::toggled, this, updateRecovery);
     connect(restore, &QCheckBox::toggled, this, updateRecovery);
     connect(interval, &QSpinBox::valueChanged, this, updateRecovery);
-    outer->addWidget(status);
-    outer->addWidget(diagnostics);
+    sessionControlsLayout->addWidget(status);
+    sessionControlsLayout->addWidget(diagnostics);
     outer->addWidget(scroll, 1);
     updateProtocol();
     outer->addWidget(new SessionRecords(session_, this));
@@ -213,8 +229,10 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
         start->setEnabled(!active && available);
         stop->setEnabled(active || session_.canReconnect());
         reconnect->setEnabled(session_.canReconnect());
-        status->setText(stateText(session_.state()) + "\n" + (available ? session_.diagnostic()
-            : QStringLiteral("所需插件/角色/支持组合不可用，仅禁用此会话；原配置完整保留。\n") + catalog_->diagnostics().join('\n')));
+        const auto detail = available ? session_.diagnostic()
+            : QStringLiteral("所需插件/角色/支持组合不可用，仅禁用此会话；原配置完整保留。\n") + catalog_->diagnostics().join('\n');
+        status->setText(stateText(session_.state()) + (detail.isEmpty() ? QString() : "\n" + detail));
+        status->setToolTip(status->text());
     };
     refresh_ = refresh;
     connect(&session_, &DebugSession::changed, this, refresh);
@@ -240,6 +258,7 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
 SessionPane::~SessionPane()
 {
     // 在会话与 DLL 租约释放前销毁插件视图。
+    sessionControls_->setParent(this); // stop() 仍会刷新宿主控制，不能随插件页先销毁。
     delete view_;
     session_.stop();
 }
@@ -596,6 +615,18 @@ void Workbench::closeEvent(QCloseEvent *event)
     for (int i = 0; i < sessionCount(); ++i) if (session(i)->hasUnsavedOrBusy()) {
         findChild<QLabel *>("workspaceStatus")->setText(QStringLiteral("关闭已取消：确认期间出现新的未保存修改或后台任务，数据已保留。"));
         selectSession(i); event->ignore(); return;
+    }
+    // 仅关闭本工作台拥有的派生窗口；先完成所有修改确认，避免取消时丢失弹窗。
+    QList<QPointer<QWidget>> popups;
+    for (auto *child : findChildren<QWidget *>()) {
+        if (!child->isWindow() || qobject_cast<QDockWidget *>(child)) continue;
+        bool sessionWindow = false;
+        for (auto *dock : docks_) if (dock->window() == child) { sessionWindow = true; break; }
+        if (!sessionWindow) popups.prepend(child);
+    }
+    for (const auto &popup : popups) {
+        if (popup && !popup->close()) { event->ignore(); return; }
+        if (!alive) return;
     }
     for (int i = 0; i < sessionCount(); ++i) { session(i)->stop(); docks_[i]->hideSession(); }
     event->accept();

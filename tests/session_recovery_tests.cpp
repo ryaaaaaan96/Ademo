@@ -11,6 +11,7 @@
 #include <QCursor>
 #include <QScreen>
 #include <QPlainTextEdit>
+#include <QMenuBar>
 #include <QTreeWidget>
 #ifdef Q_OS_WIN
 #include <qt_windows.h>
@@ -278,6 +279,47 @@ private slots:
         QCOMPARE(first->state(), SessionState::Stopped);
     }
 #ifdef Q_OS_WIN
+    void titleMenuDocksWithoutExtraRowOrRestartingSession() {
+        Hub hub; Workbench window(catalog, nullptr, hub.factory()); window.show();
+        auto *session = window.session(0); auto *view = window.sessionView(0);
+        QVERIFY(session->start(master("COM118")));
+        QTRY_COMPARE(session->state(), SessionState::Running);
+        auto *floating = window.sessionWindow(0);
+        QVERIFY(window.isSessionFloating(0));
+        QVERIFY(floating->findChildren<QMenuBar *>(QString(), Qt::FindDirectChildrenOnly).isEmpty());
+        for (int cycle = 0; cycle < 2; ++cycle) {
+            const auto handle = reinterpret_cast<HWND>(floating->winId());
+            const auto menu = GetSystemMenu(handle, FALSE); QVERIFY(menu);
+            SendMessage(handle, WM_INITMENU, reinterpret_cast<WPARAM>(menu), 0);
+            const int count = GetMenuItemCount(menu);
+            SendMessage(handle, WM_INITMENU, reinterpret_cast<WPARAM>(menu), 0);
+            QCOMPARE(GetMenuItemCount(menu), count);
+            QVERIFY(GetMenuState(menu, SC_CLOSE, MF_BYCOMMAND) != UINT(-1));
+            QVERIFY(GetMenuState(menu, SC_MINIMIZE, MF_BYCOMMAND) != UINT(-1));
+            QVERIFY(GetMenuState(menu, SC_MAXIMIZE, MF_BYCOMMAND) != UINT(-1));
+            UINT command = 0;
+            for (int i = 0; i < count; ++i) {
+                wchar_t label[128]{};
+                GetMenuStringW(menu, i, label, 128, MF_BYPOSITION);
+                if (QString::fromWCharArray(label) == QStringLiteral("停靠到工作台"))
+                    command = GetMenuItemID(menu, i);
+            }
+            QVERIFY(command != 0);
+            SendMessage(handle, WM_SYSCOMMAND, command, 0);
+            QTRY_VERIFY(!window.isSessionFloating(0));
+            QCOMPARE(window.sessionView(0), view);
+            QCOMPARE(session->state(), SessionState::Running);
+            QAction *floatAction = nullptr;
+            for (auto *action : window.findChildren<QAction *>("floatSessionAction"))
+                if (action->parent()->isWidgetType() && static_cast<QWidget *>(action->parent())->isVisible())
+                    floatAction = action;
+            QVERIFY(floatAction); floatAction->trigger();
+            QTRY_VERIFY(window.isSessionFloating(0));
+        }
+        QCOMPARE(hub.links["COM118"]->opens, 1);
+        QCOMPARE(hub.links["COM118"]->closes, 0);
+        QCOMPARE(window.sessionView(0), view);
+    }
     void nativeWindowMoveDropsIntoEmptyWorkbench() {
         Hub hub; Workbench window(catalog, nullptr, hub.factory()); window.show();
         auto *floating = window.sessionWindow(0); QVERIFY(floating);

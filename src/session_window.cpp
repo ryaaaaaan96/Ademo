@@ -1,7 +1,6 @@
 #include "session_window.h"
 #include <QAction>
 #include <QCloseEvent>
-#include <QMenuBar>
 #include <QPointer>
 #include <QScreen>
 #include <QTimer>
@@ -28,6 +27,22 @@ void SessionWindow::closeEvent(QCloseEvent *event)
 bool SessionWindow::nativeEvent(const QByteArray &type, void *message, qintptr *result)
 {
     const auto *msg = static_cast<MSG *>(message);
+    constexpr UINT dockCommand = 0x1f10; // 自定义系统菜单命令，避开 Windows 保留范围。
+    if (isWindow() && requestDock) {
+        if (msg->message == WM_INITMENU) {
+            const auto menu = GetSystemMenu(msg->hwnd, FALSE);
+            if (menu && reinterpret_cast<HMENU>(msg->wParam) == menu
+                && GetMenuState(menu, dockCommand, MF_BYCOMMAND) == UINT(-1)) {
+                AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+                AppendMenuW(menu, MF_STRING, dockCommand, L"停靠到工作台");
+            }
+        }
+        if (msg->message == WM_SYSCOMMAND && (msg->wParam & 0xfff0) == dockCommand) {
+            // 先退出原生菜单回调，再改变 QWidget 的窗口类型及父对象。
+            QTimer::singleShot(0, this, [this] { if (isWindow() && requestDock) requestDock(); });
+            *result = 0; return true;
+        }
+    }
     if (isWindow() && dockDrag) {
         if (msg->message == WM_ENTERSIZEMOVE) { captionMoving_ = false; dragStartGeometry_ = frameGeometry(); }
         if (msg->message == WM_MOVING) {
@@ -57,10 +72,15 @@ SessionDock::SessionDock(QWidget *content, const QString &title, QMainWindow *ow
     setAllowedAreas(Qt::AllDockWidgetAreas);
     setFeatures(DockWidgetClosable | DockWidgetMovable | DockWidgetFloatable);
     window_->requestClose = [this] { const auto close = requestClose; return close && close(); };
-    auto *floatAction = window_->menuBar()->addAction(QStringLiteral("浮动"));
+    auto *floatAction = new QAction(QStringLiteral("浮动"), this);
+    floatAction->setObjectName("floatSessionAction");
+    addAction(floatAction); setContextMenuPolicy(Qt::ActionsContextMenu);
     connect(floatAction, &QAction::triggered, this, [this] { detach(); centerFloating(); });
-    auto *dockAction = window_->menuBar()->addAction(QStringLiteral("停靠到工作台"));
-    connect(dockAction, &QAction::triggered, this, [this] { attach(); });
+    dockAction_ = new QAction(QStringLiteral("停靠到工作台"), this);
+    dockAction_->setObjectName("dockSessionAction"); dockAction_->setVisible(false);
+    window_->addAction(dockAction_); window_->setContextMenuPolicy(Qt::ActionsContextMenu);
+    connect(dockAction_, &QAction::triggered, this, [this] { attach(); });
+    window_->requestDock = [this] { attach(); };
     connect(this, &QDockWidget::topLevelChanged, this, [this](bool floating) {
         if (floating && !changing_) QTimer::singleShot(0, this, [this] { if (isFloating()) detach(); });
     });
@@ -98,7 +118,7 @@ void SessionDock::detach()
     changing_ = true; setFloating(false);
     layout_->removeWidget(window_);
     window_->setParent(owner_, Qt::Window | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
-    detached_ = true; hide();
+    detached_ = true; dockAction_->setVisible(true); hide();
     if (open_ && owner_->isVisible()) { window_->show(); centerFloating(); }
     changing_ = false;
     if (presentationChanged) presentationChanged();
@@ -108,7 +128,7 @@ void SessionDock::attach()
     if (!detached_) return;
     window_->setWindowState(Qt::WindowNoState); window_->hide();
     window_->setParent(container_, Qt::Widget); layout_->addWidget(window_);
-    detached_ = false;
+    detached_ = false; dockAction_->setVisible(false);
     if (open_) { window_->show(); show(); raise(); }
     if (presentationChanged) presentationChanged();
 }

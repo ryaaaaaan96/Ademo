@@ -25,7 +25,7 @@ template<class T> T *accessible(QWidget &root, const QString &name) {
 QPushButton *button(QWidget &root, const QString &text) {
     if (text == QStringLiteral("添加参数") || text == QStringLiteral("加载并应用到设备"))
         for (auto *toggle : root.findChildren<QPushButton *>())
-            if (toggle->text() == QStringLiteral("参数来源与地址调试") && !toggle->isChecked()) toggle->click();
+            if (toggle->text() == QStringLiteral("配置…")) toggle->click();
     for (auto *widget : root.findChildren<QPushButton *>())
         if (widget->text() == text && widget->isVisibleTo(&root)) return widget;
     return nullptr;
@@ -229,7 +229,7 @@ private slots:
         workbench.resize(1300, 850); workbench.show();
         QPointer<ParameterView> view = workbench.parameterView(0); QVERIFY(view);
         auto *session = workbench.session(0); const auto original = session->config().protocol;
-        auto *toggle = button(*view, QStringLiteral("参数来源与地址调试")); QVERIFY(toggle); toggle->setChecked(true);
+        auto *configure = button(*view, QStringLiteral("配置…")); QVERIFY(configure); configure->click();
         const auto operation = workbench.openWorkspace(path); QVERIFY(operation); QCOMPARE(jobs.size(), 1);
         bool pickerShown = false;
         QTimer timer; timer.setInterval(5);

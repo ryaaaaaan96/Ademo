@@ -1,0 +1,10 @@
+********* Start testing of RecoveryTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : RecoveryTests::initTestCase()
+FAIL!  : RecoveryTests::nativeWindowMoveDropsIntoEmptyWorkbench() '!window.isSessionFloating(0)' returned FALSE. (原生窗口移动完成后应按预览停靠到空工作台)
+C:/Users/81966/Documents/Ademo/tests/session_recovery_tests.cpp(294) : failure location
+FAIL!  : RecoveryTests::nativeMoveCanTileOnEverySideOfAnotherSession() '!window.isSessionFloating(1)' returned FALSE. ()
+C:/Users/81966/Documents/Ademo/tests/session_recovery_tests.cpp(331) : failure location
+PASS   : RecoveryTests::cleanupTestCase()
+Totals: 2 passed, 2 failed, 0 skipped, 0 blacklisted, 645ms
+********* Finished testing of RecoveryTests *********

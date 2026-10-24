@@ -123,6 +123,8 @@ public:
     virtual QList<ParameterDevice> devices() const = 0;
     virtual QString selectedDevice() const = 0;
     virtual bool selectDevice(const QString &) = 0;
+    // 可选会话控制槽，必须属于本视图并带有布局；宿主在销毁视图前收回控件。
+    virtual QWidget *sessionControlsHost() const { return nullptr; }
 };
 struct ReceiveChunk {
     QByteArray bytes;
@@ -181,7 +183,7 @@ public:
     virtual QJsonObject relocateConfiguration(QJsonObject config, const QString &, const QString &) const { return config; }
 };
 }
-#define DebuggerProtocolIid "org.ademo.debugger.Protocol/12.0"
-#define DebuggerTransportIid "org.ademo.debugger.Transport/12.0"
+#define DebuggerProtocolIid "org.ademo.debugger.Protocol/13.0"
+#define DebuggerTransportIid "org.ademo.debugger.Transport/13.0"
 Q_DECLARE_INTERFACE(debugger::ProtocolPlugin, DebuggerProtocolIid)
 Q_DECLARE_INTERFACE(debugger::TransportPlugin, DebuggerTransportIid)

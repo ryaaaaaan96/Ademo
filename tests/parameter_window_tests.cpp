@@ -2,6 +2,7 @@
 #include <QApplication>
 #include <QComboBox>
 #include <QDir>
+#include <QDialog>
 #include <QLabel>
 #include <QPlainTextEdit>
 #include <QPushButton>
@@ -57,6 +58,8 @@ private slots:
         Wire wire;
         Workbench window(catalog, nullptr, wire.factory());
         window.resize(1100, 850); window.show();
+        auto *configure = button(window, QStringLiteral("配置…")); QVERIFY(configure);
+        QTest::mouseClick(configure, Qt::LeftButton);
         auto *add = button(window, QStringLiteral("添加参数"));
         QVERIFY2(add, "新窗口应提供参数行入口");
         auto *unit = accessible<QSpinBox>(window, QStringLiteral("设备地址"));
@@ -66,6 +69,7 @@ private slots:
         QTest::mouseClick(add, Qt::LeftButton);
         unit->setValue(17); address->setValue(107);
         QTest::mouseClick(add, Qt::LeftButton);
+        accessible<QDialog>(window, QStringLiteral("参数配置窗口"))->close();
         auto *table = accessible<QTableWidget>(window, QStringLiteral("参数表"));
         QVERIFY(table);
         QCOMPARE(table->rowCount(), 1);

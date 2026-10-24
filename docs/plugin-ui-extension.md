@@ -1,8 +1,12 @@
 # 配套插件的参数界面与文件编辑扩展
 
-当前配套契约为 SDK12、产品0.2；宿主、协议／传输 DLL、Qt、编译器、架构和 Debug/Release 必须一起配套构建。`DebuggerProtocolIid` / `DebuggerTransportIid` 与 `buildKey()` 都参与兼容检查。插件只在启动时发现，替换 DLL 后重启；未知或不兼容插件保留错误提示和工作区身份，不建立热加载承诺。
+当前配套契约为 SDK13、产品0.2；宿主、协议／传输 DLL、Qt、编译器、架构和 Debug/Release 必须一起配套构建。`DebuggerProtocolIid` / `DebuggerTransportIid` 与 `buildKey()` 都参与兼容检查。插件只在启动时发现，替换 DLL 后重启；未知或不兼容插件保留错误提示和工作区身份，不建立热加载承诺。
 
 ## 可复用边界
+
+SDK13 新增可选 `ParameterView::sessionControlsHost()`：返回本视图内部带布局的 QWidget 作为宿主会话控制的插槽，默认空指针则沿用宿主原入口。Modbus 主站借此把会话控制与插件参数操作放在同一个可折叠左侧栏，右侧集中显示参数。宿主负责在重建／销毁插件页前收回控制组件，插件不接管端口或生命周期。该虚表变化要求更新协议／传输 IID 和构建指纹，所有 DLL 配套重编；旧 SDK12 不混载。
+
+插件弹窗和绘图窗口必须通过 QWidget 父子关系归属于创建它的视图或工作台。主工作台关闭时，先完成各会话的修改保护，再关闭自己拥有的派生窗口并停止会话；取消修改确认时保留原窗口和通信。不使用应用全局 `closeAllWindows()`，以免关闭无关工作台。
 
 - `ProtocolPlugin::createSession` 承担组帧、请求校验、应答及超时。通过 `ProtocolServices` 使用共享传输和记录；专用控件不直接打开端点。
 - `createParameterView` 返回 `ParameterView`。插件提供 `devices()`、`selectedDevice()` 和可取消的 `selectDevice()`；宿主据此生成会话→设备导航，不识别插件字段。
@@ -16,7 +20,7 @@
 
 `registerViewState(owner, state, resolve)` 只登记本视图的修改，不覆盖其他视图或协议模拟值守卫。选择设备应先处理旧草稿；失败保持旧目标和旧内容。后台文件任务仅传值，经 `access.background` 执行并在 GUI 回调检查视图，不能自行捕获裸 QWidget 到工作线程。
 
-宿主对每个 QPluginLoader 显式取得 load 引用后才获取 instance，确保目录租约交叠时其中一个目录释放不销毁另一个仍使用的根对象。最后视图调用栈仍通过 SDK12 延迟租约退出 DLL；这不允许任意线程执行插件，也不意味着运行中允许换 DLL。
+宿主对每个 QPluginLoader 显式取得 load 引用后才获取 instance，确保目录租约交叠时其中一个目录释放不销毁另一个仍使用的根对象。最后视图调用栈仍通过 SDK13 延迟租约退出 DLL；这不允许任意线程执行插件，也不意味着运行中允许换 DLL。
 
 ## 独立 DLL 示例与验证
 

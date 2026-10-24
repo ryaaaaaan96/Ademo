@@ -37,6 +37,122 @@ template <class T> T *accessible(QWidget &root, const QString &name) {
 class UiAcceptanceTests : public QObject {
     Q_OBJECT
   private slots:
+    void configurationWindowKeepsMainPageCompactWithoutImplicitActions() {
+        auto catalog = std::make_shared<PluginCatalog>();
+        catalog->discover(QCoreApplication::applicationDirPath() + "/plugins");
+        Workbench window(catalog); window.resize(1200, 820); window.show();
+        auto *view = window.parameterView(0); QVERIFY(view);
+        auto *address = accessible<QSpinBox>(*view, QStringLiteral("参数 PDU 地址"));
+        auto *interval = accessible<QSpinBox>(*view, QStringLiteral("轮询周期"));
+        auto *configuration = accessible<QDialog>(*view, QStringLiteral("参数配置窗口"));
+        QVERIFY(address && interval && configuration);
+        QVERIFY(!configuration->isVisible()); QVERIFY(!address->isVisible());
+        const auto original = window.session(0)->config().protocol;
+        const auto traces = window.session(0)->traces().size();
+        for (const auto &text : {QStringLiteral("配置…"), QStringLiteral("读取选中项"),
+                QStringLiteral("绘制选中参数"), QStringLiteral("开始轮询"), QStringLiteral("停止会话轮询")})
+            QVERIFY(button(*view, text)->isVisible());
+        button(*view, QStringLiteral("配置…"))->click();
+        QTRY_VERIFY(configuration->isVisible()); QVERIFY(address->isVisible());
+        address->setValue(120); interval->setValue(250);
+        button(*view, QStringLiteral("配置…"))->click();
+        QCOMPARE(accessible<QDialog>(*view, QStringLiteral("参数配置窗口")), configuration);
+        QTest::keyClick(configuration, Qt::Key_Escape);
+        QTRY_VERIFY(!configuration->isVisible());
+        QCOMPARE(window.session(0)->config().protocol, original);
+        QCOMPARE(window.session(0)->traces().size(), traces);
+        QCOMPARE(window.session(0)->state(), SessionState::Stopped);
+        button(*view, QStringLiteral("配置…"))->click();
+        QCOMPARE(address->value(), 120); QCOMPARE(interval->value(), 250);
+        button(*view, QStringLiteral("添加参数"))->click();
+        QTRY_COMPARE(accessible<QTableWidget>(*view, QStringLiteral("参数表"))->rowCount(), 1);
+        QCOMPARE(window.session(0)->traces().size(), traces);
+        const auto output = qEnvironmentVariable("DEBUGGER_EVIDENCE_DIR");
+        if (!output.isEmpty()) {
+            QDir().mkpath(output); QTest::qWait(100);
+            QVERIFY(configuration->grab().save(output + "/parameter-configuration.png"));
+        }
+        configuration->close();
+        QTRY_VERIFY(!configuration->isVisible());
+        auto *parameterTable = accessible<QTableWidget>(*view, QStringLiteral("参数表"));
+        auto *sidebar = accessible<QScrollArea>(*view, QStringLiteral("会话操作栏"));
+        QVERIFY(sidebar && sidebar->isVisible());
+        auto *start = button(*window.sessionView(0), QStringLiteral("启动会话"));
+        QVERIFY(start && sidebar->isAncestorOf(start));
+        const int tableWidth = parameterTable->width();
+        accessible<QPushButton>(*view, QStringLiteral("收起操作栏"))->click();
+        QTRY_VERIFY(!sidebar->isVisible()); QVERIFY(!start->isVisible());
+        QTRY_VERIFY(parameterTable->width() > tableWidth);
+        QVERIFY(parameterTable->isVisible());
+        if (!output.isEmpty()) {
+            QTest::qWait(100);
+            QVERIFY(view->grab().save(output + "/parameters-focused.png"));
+        }
+        accessible<QPushButton>(*view, QStringLiteral("展开操作栏"))->click();
+        QTRY_VERIFY(sidebar->isVisible()); QVERIFY(start->isVisible());
+        window.dockSession(0);
+        if (!output.isEmpty()) {
+            QTest::qWait(100);
+            QVERIFY(window.grab().save(output + "/compact-parameter-workbench.png"));
+        }
+        QVERIFY(window.closeSession(0));
+        QVERIFY(!window.isSessionOpen(0));
+        QVERIFY(!configuration->isVisible());
+    }
+    void mainCloseCancelsSafelyThenClosesAllOwnedWindows() {
+        auto catalog = std::make_shared<PluginCatalog>();
+        catalog->discover(QCoreApplication::applicationDirPath() + "/plugins");
+        int closes = 0;
+        class Port final : public Endpoint {
+        public:
+            EndpointEvents events;
+            int *closes;
+            void open() override { events.opened(true, {}); }
+            void close() override { ++*closes; }
+            bool send(quint64, const QByteArray &) override { return true; }
+        };
+        Workbench window(catalog, nullptr, [&](const QJsonObject &, EndpointEvents events) {
+            auto port = std::make_unique<Port>(); port->events = std::move(events); port->closes = &closes;
+            return port;
+        });
+        QWidget unrelated; unrelated.show();
+        auto config = window.sessionConfiguration(0);
+        config.protocol["parameterRows"] = QJsonArray{QJsonObject{{"unit", 17}, {"area", "holding"}, {"address", 0}}};
+        const int index = window.addSession(config, QStringLiteral("关闭流程验收"));
+        window.show(); window.floatSession(index);
+        auto *view = window.parameterView(index);
+        auto *table = accessible<QTableWidget>(*view, QStringLiteral("参数表")); table->selectAll();
+        for (const auto &text : {QStringLiteral("配置…"), QStringLiteral("读取重试配置…"),
+                QStringLiteral("按功能码操作…"), QStringLiteral("绘制选中参数")})
+            button(*view, text)->click();
+        button(*window.sessionView(index), QStringLiteral("连接配置…"))->click();
+        QList<QPointer<QWidget>> ownedWindows;
+        for (auto *child : window.findChildren<QWidget *>())
+            if (child->isWindow() && child->isVisible()) ownedWindows.append(child);
+        QVERIFY(ownedWindows.size() >= 6);
+        QVERIFY(window.session(index)->start(config));
+        QTRY_COMPARE(window.session(index)->state(), SessionState::Running);
+        auto *pages = accessible<QTabWidget>(*view, QStringLiteral("参数页面")); pages->setCurrentIndex(1);
+        auto *fileTable = accessible<QTableWidget>(*view, QStringLiteral("参数文件内容"));
+        QVERIFY(fileTable && fileTable->rowCount()); fileTable->item(0, 0)->setText(QStringLiteral("未保存名称"));
+        QVERIFY(window.session(index)->hasUnsavedOrBusy());
+        QMessageBox::StandardButton answer = QMessageBox::Cancel;
+        QTimer timer; timer.setInterval(5);
+        connect(&timer, &QTimer::timeout, &timer, [&] {
+            if (auto *box = qobject_cast<QMessageBox *>(QApplication::activeModalWidget()))
+                if (auto *choice = box->button(answer)) choice->click();
+        }); timer.start();
+        QVERIFY(!window.close()); QVERIFY(window.isVisible());
+        QCOMPARE(window.session(index)->state(), SessionState::Running); QCOMPARE(closes, 0);
+        for (const auto &child : ownedWindows) QVERIFY(child && child->isVisible());
+        QCOMPARE(fileTable->item(0, 0)->text(), QStringLiteral("未保存名称"));
+        answer = QMessageBox::Discard;
+        QVERIFY(window.close()); timer.stop();
+        QTRY_VERIFY(!window.isVisible()); QCOMPARE(closes, 1);
+        QCOMPARE(window.session(index)->state(), SessionState::Stopped);
+        for (const auto &child : ownedWindows) QTRY_VERIFY(!child || !child->isVisible());
+        QVERIFY(unrelated.isVisible());
+    }
     void formalWorkbenchCombinesReadFileTrendsAndWorkspace() {
         auto catalog = std::make_shared<PluginCatalog>();
         catalog->discover(QCoreApplication::applicationDirPath() + "/plugins");
@@ -131,6 +247,7 @@ class UiAcceptanceTests : public QObject {
         QVERIFY(qml);
         QTRY_COMPARE(qml->status(), QQuickWidget::Ready);
         QVERIFY(writes.isEmpty());
+        QTRY_VERIFY(button(*view, QStringLiteral("读取当前组"))->isEnabled());
         button(*view, QStringLiteral("读取当前组"))->click();
         QTRY_COMPARE(table->item(0, 3)->text(), QString("555"));
         QTRY_COMPARE(table->item(1, 3)->text(), QString("556"));

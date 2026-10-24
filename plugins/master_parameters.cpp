@@ -24,6 +24,10 @@
 #include <QTabWidget>
 #include <QPlainTextEdit>
 #include <QDialog>
+#include <QDialogButtonBox>
+#include <QGroupBox>
+#include <QScrollArea>
+#include <QSplitter>
 
 namespace debugger {
 namespace {
@@ -45,14 +49,53 @@ struct Row {
 class MasterParameters final : public ParameterView {
 public:
     MasterParameters(SessionAccess access, QWidget *parent) : ParameterView(parent), access_(std::move(access)) {
-        auto *outer = new QVBoxLayout(this);
+        auto *outer = new QHBoxLayout(this); outer->setContentsMargins(0, 0, 0, 0);
+        auto *collapse = new QPushButton(QStringLiteral("‹"), this);
+        collapse->setObjectName("sidebarToggle"); collapse->setToolTip(QStringLiteral("收起／展开操作栏"));
+        collapse->setAccessibleName(QStringLiteral("收起操作栏")); collapse->setFixedWidth(24);
+        outer->addWidget(collapse, 0, Qt::AlignTop);
+        auto *splitter = new QSplitter(this); outer->addWidget(splitter, 1);
+        auto *sidebar = new QScrollArea(splitter); sidebar->setWidgetResizable(true);
+        sidebar->setObjectName("sessionSidebar"); sidebar->setFrameShape(QFrame::NoFrame);
+        sidebar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        sidebar->setAccessibleName(QStringLiteral("会话操作栏")); sidebar->setMinimumWidth(170);
+        auto *sidebarBody = new QWidget(sidebar); auto *sidebarLayout = new QVBoxLayout(sidebarBody);
+        sidebarBody->setObjectName("sessionSidebarBody");
+        sidebarLayout->setContentsMargins(0, 0, 4, 0); sidebarLayout->setSpacing(8); sidebar->setWidget(sidebarBody);
+        auto section = [sidebarBody, sidebarLayout](const QString &title) {
+            auto *card = new QFrame(sidebarBody); card->setObjectName("sidebarSection");
+            auto *body = new QVBoxLayout(card); body->setContentsMargins(8, 6, 8, 8); body->setSpacing(4);
+            auto *heading = new QLabel(title, card); heading->setObjectName("sidebarHeading");
+            body->addWidget(heading); sidebarLayout->addWidget(card); return body;
+        };
+        auto *connectionSection = section(QStringLiteral("会话连接"));
+        sessionControlsHost_ = new QWidget(sidebarBody);
+        auto *sessionControlsLayout = new QVBoxLayout(sessionControlsHost_);
+        sessionControlsLayout->setContentsMargins(0, 0, 0, 0); connectionSection->addWidget(sessionControlsHost_);
         auto *pages = new QTabWidget(this); pages->setAccessibleName(QStringLiteral("参数页面"));
         auto *operations = new QWidget(pages);
         auto *layout = new QVBoxLayout(operations);
-        pages->addTab(operations, QStringLiteral("参数操作")); outer->addWidget(pages);
-        auto *settings = new QPushButton(QStringLiteral("读取重试配置…"), this);
+        pages->addTab(operations, QStringLiteral("参数操作")); splitter->addWidget(pages);
+        splitter->setStretchFactor(0, 0); splitter->setStretchFactor(1, 1);
+        splitter->setCollapsible(0, false); splitter->setCollapsible(1, false);
+        splitter->setSizes({210, 900});
+        connect(collapse, &QPushButton::clicked, this, [sidebar, collapse] {
+            const bool expanded = !sidebar->isHidden(); sidebar->setVisible(!expanded);
+            collapse->setText(expanded ? QStringLiteral("›") : QStringLiteral("‹"));
+            collapse->setAccessibleName(expanded ? QStringLiteral("展开操作栏") : QStringLiteral("收起操作栏"));
+        });
+        auto *configuration = new QDialog(this);
+        configuration->setWindowTitle(QStringLiteral("Modbus 参数与通信配置"));
+        configuration->setAccessibleName(QStringLiteral("参数配置窗口"));
+        configuration->resize(640, 620);
+        auto *configurationLayout = new QVBoxLayout(configuration);
+        auto *scroll = new QScrollArea(configuration); scroll->setWidgetResizable(true);
+        auto *configurationBody = new QWidget(scroll);
+        auto *configurationForm = new QVBoxLayout(configurationBody);
+        scroll->setWidget(configurationBody); configurationLayout->addWidget(scroll);
+        auto *settings = new QPushButton(QStringLiteral("读取重试配置…"), configurationBody);
         auto *tools = new QHBoxLayout; tools->addWidget(settings);
-        auto *advanced = new QPushButton(QStringLiteral("按功能码操作…"), this); tools->addWidget(advanced); layout->addLayout(tools);
+        auto *advanced = new QPushButton(QStringLiteral("按功能码操作…"), configurationBody); tools->addWidget(advanced);
         connect(advanced, &QPushButton::clicked, this, [this] {
             if (advanced_) { advanced_->show(); advanced_->raise(); return; }
             auto *dialog = new QDialog(this); advanced_ = dialog;
@@ -64,20 +107,29 @@ public:
         connect(settings, &QPushButton::clicked, this, [this] { showReadSettings(access_, this); });
         auto *form = new QFormLayout;
         device_ = new QComboBox(this); device_->setAccessibleName(QStringLiteral("当前设备"));
-        auto *selection = new QWidget(this); auto *selectionLine = new QHBoxLayout(selection);
-        selectionLine->setContentsMargins(0, 0, 0, 0); selectionLine->addWidget(device_, 1);
         group_ = new QComboBox(this); group_->setAccessibleName(QStringLiteral("参数分组"));
-        selectionLine->addWidget(new QLabel(QStringLiteral("分组"), this)); selectionLine->addWidget(group_, 1);
-        form->addRow(QStringLiteral("当前设备"), selection);
-        layout->addLayout(form);
-        auto *sourceToggle = new QPushButton(QStringLiteral("参数来源与地址调试"), this);
-        sourceToggle->setCheckable(true); tools->addWidget(sourceToggle);
-        auto *source = new QWidget(this); auto *sourceForm = new QFormLayout(source);
-        sourceForm->setContentsMargins(0, 0, 0, 0); sourceForm->setRowWrapPolicy(QFormLayout::WrapLongRows);
-        layout->addWidget(source);
-        connect(sourceToggle, &QPushButton::toggled, source, &QWidget::setVisible);
-        auto *entry = new QWidget(this);
-        auto *line = new QHBoxLayout(entry); line->setContentsMargins(0, 0, 0, 0);
+        auto *configure = new QPushButton(QStringLiteral("配置…"), this);
+        connect(configure, &QPushButton::clicked, this, [configuration] {
+            configuration->show(); configuration->raise(); configuration->activateWindow();
+        });
+        form->setRowWrapPolicy(QFormLayout::DontWrapRows);
+        form->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
+        for (auto *selector : {device_, group_}) {
+            selector->setMinimumContentsLength(4);
+            selector->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+            selector->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        }
+        form->addRow(QStringLiteral("当前设备"), device_);
+        form->addRow(QStringLiteral("分组"), group_);
+        auto *deviceSection = section(QStringLiteral("设备与参数"));
+        form->setVerticalSpacing(5);
+        deviceSection->addLayout(form); deviceSection->addWidget(configure);
+        configure->setToolTip(QStringLiteral("参数来源、地址调试、轮询范围与读取重试设置"));
+        auto *source = new QGroupBox(QStringLiteral("参数来源与地址调试"), configurationBody);
+        auto *sourceForm = new QFormLayout(source);
+        sourceForm->setRowWrapPolicy(QFormLayout::WrapLongRows);
+        configurationForm->addWidget(source);
+        auto *entry = source;
         unit_ = new QSpinBox(entry); unit_->setRange(1, 247); unit_->setAccessibleName(QStringLiteral("设备地址"));
         area_ = new QComboBox(entry); area_->setAccessibleName(QStringLiteral("参数数据区"));
         area_->addItems({QStringLiteral("线圈"), QStringLiteral("离散输入"), QStringLiteral("保持寄存器"), QStringLiteral("输入寄存器")});
@@ -85,18 +137,20 @@ public:
         address_ = new QSpinBox(entry); address_->setRange(0, 65535); address_->setAccessibleName(QStringLiteral("参数 PDU 地址"));
         count_ = new QSpinBox(entry); count_->setRange(1, maximumDeviceParameters); count_->setAccessibleName(QStringLiteral("参数数量"));
         add_ = new QPushButton(QStringLiteral("添加参数"), entry);
-        line->addWidget(new QLabel(QStringLiteral("设备地址"), entry)); line->addWidget(unit_);
-        line->addWidget(area_); line->addWidget(new QLabel(QStringLiteral("PDU 地址"), entry)); line->addWidget(address_);
-        line->addWidget(new QLabel(QStringLiteral("数量"), entry)); line->addWidget(count_); line->addWidget(add_);
-        sourceForm->addRow(QStringLiteral("地址调试"), entry);
+        sourceForm->addRow(QStringLiteral("目标设备地址"), unit_);
+        sourceForm->addRow(QStringLiteral("数据区"), area_);
+        sourceForm->addRow(QStringLiteral("PDU 地址"), address_);
+        sourceForm->addRow(QStringLiteral("数量"), count_);
+        sourceForm->addRow(add_);
         auto *fileEntry = new QWidget(this); auto *fileLine = new QHBoxLayout(fileEntry);
         fileLine->setContentsMargins(0, 0, 0, 0);
         path_ = new QLineEdit(fileEntry); path_->setAccessibleName(QStringLiteral("参数文件"));
         path_->setPlaceholderText(QStringLiteral("参数定义 JSON 路径；应用目标为上方设备地址"));
         auto *browse = new QPushButton(QStringLiteral("选择参数文件…"), fileEntry);
         load_ = new QPushButton(QStringLiteral("加载并应用到设备"), fileEntry);
-        fileLine->addWidget(path_, 1); fileLine->addWidget(browse); fileLine->addWidget(load_);
-        sourceForm->addRow(QStringLiteral("参数文件"), fileEntry);
+        sourceForm->addRow(QStringLiteral("参数文件"), path_);
+        fileLine->addWidget(browse); fileLine->addWidget(load_);
+        sourceForm->addRow(fileEntry);
 
         connect(browse, &QPushButton::clicked, this, [this] {
             const auto lifetime = access_.lifetime;
@@ -112,7 +166,7 @@ public:
             if (!path.isEmpty()) path_->setText(path);
         });
         connect(load_, &QPushButton::clicked, this, [this] { loadFile(); });
-        auto *readControls = new QHBoxLayout;
+        auto *readControls = section(QStringLiteral("数据操作"));
         readSelected_ = new QPushButton(QStringLiteral("读取选中项"), this);
         readGroup_ = new QPushButton(QStringLiteral("读取当前组"), this);
         readControls->addWidget(readSelected_); readControls->addWidget(readGroup_);
@@ -127,10 +181,10 @@ public:
             if (plots_.size() >= 8) { status_->setText(QStringLiteral("每个会话最多 8 个趋势窗口，请先关闭不再使用的窗口。")); return; }
             plots_.append(openParameterTrends(access_, parameters, this));
         });
-        layout->addLayout(readControls);
         connect(readSelected_, &QPushButton::clicked, this, [this] { readScope(true); });
         connect(readGroup_, &QPushButton::clicked, this, [this] { readScope(false); });
-        auto *pollControls = new QHBoxLayout;
+        auto *pollConfiguration = new QGroupBox(QStringLiteral("轮询配置"), configurationBody);
+        auto *pollControls = new QFormLayout(pollConfiguration);
         pollScope_ = new QComboBox(this); pollScope_->setAccessibleName(QStringLiteral("轮询范围"));
         pollScope_->addItems({QStringLiteral("选中项"), QStringLiteral("当前组")});
         pollInterval_ = new QSpinBox(this); pollInterval_->setRange(10, 3600000); pollInterval_->setValue(1000);
@@ -138,22 +192,40 @@ public:
         startPoll_ = new QPushButton(QStringLiteral("开始轮询"), this);
         stopPoll_ = new QPushButton(QStringLiteral("停止会话轮询"), this);
         startPoll_->setToolTip(QStringLiteral("更新当前设备当前组的范围和周期；保留其他设备和组的轮询。总线忙时保留原配置并提示重试。"));
-        pollControls->addWidget(new QLabel(QStringLiteral("轮询范围"), this)); pollControls->addWidget(pollScope_);
-        pollControls->addWidget(pollInterval_); pollControls->addWidget(startPoll_); pollControls->addWidget(stopPoll_);
-        layout->addLayout(pollControls);
+        pollControls->addRow(QStringLiteral("轮询范围"), pollScope_);
+        pollControls->addRow(QStringLiteral("轮询周期"), pollInterval_);
+        auto *pollSection = section(QStringLiteral("自动轮询"));
+        pollSection->addWidget(startPoll_); pollSection->addWidget(stopPoll_);
         polls_ = new QPlainTextEdit(this); polls_->setAccessibleName(QStringLiteral("轮询任务"));
-        polls_->setReadOnly(true); polls_->setFixedHeight(42);
+        polls_->setReadOnly(true); polls_->setMinimumHeight(70); polls_->setMaximumHeight(110);
         polls_->setPlaceholderText(QStringLiteral("尚无轮询配置；开始后范围固定，切换设备、分组或页面不改变采集目标。"));
-        layout->addWidget(polls_);
-        pollStatus_ = new QLabel(this); pollStatus_->setWordWrap(true); layout->addWidget(pollStatus_);
+        pollControls->addRow(QStringLiteral("会话任务"), polls_);
+        auto *pollHint = new QLabel(QStringLiteral("返回参数页点击“开始轮询”后应用范围和周期；切换设备或分组不改变已启动的采集目标。"), pollConfiguration);
+        pollHint->setWordWrap(true); pollControls->addRow(pollHint);
+        configurationForm->addWidget(pollConfiguration);
+        configurationForm->addLayout(tools);
+        configurationStatus_ = new QLabel(configurationBody); configurationStatus_->setWordWrap(true);
+        configurationStatus_->setAccessibleName(QStringLiteral("配置操作结果"));
+        configurationForm->addWidget(configurationStatus_); configurationForm->addStretch();
+        auto *close = new QDialogButtonBox(QDialogButtonBox::Close, configuration);
+        close->button(QDialogButtonBox::Close)->setText(QStringLiteral("关闭"));
+        connect(close, &QDialogButtonBox::rejected, configuration, &QDialog::reject);
+        configurationLayout->addWidget(close);
+        pollSummary_ = new QLabel(this); pollSummary_->setAccessibleName(QStringLiteral("轮询摘要"));
+        pollSummary_->setObjectName("sidebarSummary");
+        pollSummary_->setWordWrap(true); pollSection->addWidget(pollSummary_);
+        pollStatus_ = new QLabel(this); pollStatus_->setWordWrap(true); pollSection->addWidget(pollStatus_);
+        sidebarLayout->addStretch();
         connect(startPoll_, &QPushButton::clicked, this, [this] { configurePolling(true); });
         connect(stopPoll_, &QPushButton::clicked, this, [this] { configurePolling(false); });
+        parameterContext_ = new QLabel(this); parameterContext_->setAccessibleName(QStringLiteral("参数目标"));
+        layout->addWidget(parameterContext_);
         table_ = new ParameterTable(this);
         table_->setColumns({{"name", QStringLiteral("名称")}, {"type", QStringLiteral("类型")},
             {"description", QStringLiteral("说明")}, {"value", QStringLiteral("值")}, {"unit", QStringLiteral("单位")},
             {"actions", QStringLiteral("操作")}, {"updated", QStringLiteral("更新时间")}});
         layout->addWidget(table_, 1);
-        status_ = new QLabel(QStringLiteral("添加设备参数后启动会话，点击行内读取。"), this);
+        status_ = new QLabel(QStringLiteral("点击“配置…”添加或导入设备参数，再启动会话读取。"), this);
         status_->setWordWrap(true); layout->addWidget(status_);
         const auto config = access_.config ? access_.config().protocol : QJsonObject{};
         for (const auto &value : config.value("parameterRows").toArray()) {
@@ -174,7 +246,6 @@ public:
             if (valid && unit >= 1 && unit <= 247 && device_->findData(QString::number(unit)) < 0)
                 device_->addItem(QStringLiteral("设备 %1").arg(unit), QString::number(unit));
         }
-        sourceToggle->setChecked(rows_.isEmpty()); source->setVisible(rows_.isEmpty());
         selectedDevice_ = selectedDevice();
         connect(device_, &QComboBox::currentIndexChanged, this, [this] {
             const auto next = selectedDevice();
@@ -255,6 +326,7 @@ public:
         return result;
     }
     QString selectedDevice() const override { return device_->currentData().toString(); }
+    QWidget *sessionControlsHost() const override { return sessionControlsHost_; }
     bool selectDevice(const QString &id) override {
         ++deviceSelectionRevision_; // 后续明确选择使旧的排队请求失效。
         const int index = device_->findData(id); if (index < 0) return false;
@@ -265,6 +337,7 @@ public:
         selectedDevice_ = id; rebuildGroups(); return true;
     }
 private:
+    QWidget *sessionControlsHost_ = nullptr;
     QList<QPointer<QWidget>> plots_;
     QPointer<QDialog> advanced_;
     bool bindEditor(const QString &id) {
@@ -467,6 +540,8 @@ private:
         table_->setRows(visible);
     }
     void refresh() {
+        parameterContext_->setText(QStringLiteral("%1 · %2").arg(device_->currentText(), group_->currentText()));
+        configurationStatus_->setText(status_->text());
         const bool configurable = !loading_ && (!access_.running || !access_.running());
         add_->setEnabled(configurable); load_->setEnabled(configurable);
         const bool running = access_.running && access_.running() && access_.config && access_.config().role == "master";
@@ -474,6 +549,10 @@ private:
         startPoll_->setEnabled(running);
         const auto configuredPolls = access_.config ? access_.config().protocol["polls"].toArray() : QJsonArray{};
         stopPoll_->setEnabled(running && !configuredPolls.isEmpty());
+        pollSummary_->setText(QStringLiteral("%1 · %4 个请求\n下次启动：%2 / %3 ms")
+            .arg(running && !configuredPolls.isEmpty() ? QStringLiteral("运行中") : QStringLiteral("未运行"))
+            .arg(pollScope_->currentText()).arg(pollInterval_->value()).arg(configuredPolls.size()));
+        pollSummary_->setToolTip(QStringLiteral("范围与周期用于下次点击“开始轮询”；现有任务详情见配置窗口。"));
         if (configuredPolls != shownPolls_) {
             shownPolls_ = configuredPolls;
             QStringList descriptions;
@@ -545,6 +624,9 @@ private:
     QPushButton *startPoll_, *stopPoll_;
     QPlainTextEdit *polls_;
     QLabel *pollStatus_;
+    QLabel *pollSummary_;
+    QLabel *configurationStatus_;
+    QLabel *parameterContext_;
     QJsonArray shownPolls_;
     ParameterTable *table_;
     QLabel *status_;

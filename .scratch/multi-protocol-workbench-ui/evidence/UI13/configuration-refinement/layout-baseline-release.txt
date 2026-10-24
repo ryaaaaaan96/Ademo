@@ -1,0 +1,9 @@
+********* Start testing of WorkspaceLayoutTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : WorkspaceLayoutTests::initTestCase()
+QWARN  : WorkspaceLayoutTests::unavailableScreenGeometryReturnsToVisibleDesktop() setGeometry: Unable to set geometry 1280x1100-40000-39942 (frame: 1306x1171-40013-40000) on QWidgetWindow/"QMainWindowClassWindow" on "\\.\DISPLAY1". Resulting geometry: 1280x1100-32755-32710 (frame: 1306x1171-32768-32768) margins: 13, 58, 13, 13 minimum size: 400x320 MINMAXINFO(maxSize=POINT(x=0, y=0), maxpos=POINT(x=0, y=0), maxtrack=POINT(x=0, y=0), mintrack=POINT(x=826, y=711)))
+FAIL!  : WorkspaceLayoutTests::unavailableScreenGeometryReturnsToVisibleDesktop() 'window->screen()->availableGeometry().contains(window->frameGeometry().topLeft())' returned FALSE. ()
+C:/Users/81966/Documents/Ademo/tests/workspace_layout_tests.cpp(239) : failure location
+PASS   : WorkspaceLayoutTests::cleanupTestCase()
+Totals: 2 passed, 1 failed, 0 skipped, 0 blacklisted, 334ms
+********* Finished testing of WorkspaceLayoutTests *********

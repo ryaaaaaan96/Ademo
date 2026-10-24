@@ -1,0 +1,58 @@
+Test project C:/Users/81966/Documents/Ademo/build/qt-llvm-debug
+      Start  1: rtu_ui_acceptance
+ 1/22 Test  #1: rtu_ui_acceptance ................***Failed   34.56 sec
+
+      Start  2: workspace_window_layout
+ 2/22 Test  #2: workspace_window_layout ..........***Failed    5.14 sec
+
+      Start  3: slave_parameter_workflow
+ 3/22 Test  #3: slave_parameter_workflow .........   Passed    3.69 sec
+      Start  4: plugin_ui_contract
+ 4/22 Test  #4: plugin_ui_contract ...............   Passed    4.71 sec
+      Start  5: parameter_qml_trends
+ 5/22 Test  #5: parameter_qml_trends .............   Passed   48.88 sec
+      Start  6: parameter_file_edit_save_apply
+ 6/22 Test  #6: parameter_file_edit_save_apply ...   Passed    4.46 sec
+      Start  7: parameter_group_polling
+ 7/22 Test  #7: parameter_group_polling ..........   Passed    3.41 sec
+      Start  8: window_trace_workflow
+ 8/22 Test  #8: window_trace_workflow ............   Passed    4.30 sec
+      Start  9: parameter_pending_write
+ 9/22 Test  #9: parameter_pending_write ..........   Passed    4.78 sec
+      Start 10: parameter_definition_read
+10/22 Test #10: parameter_definition_read ........   Passed    5.79 sec
+      Start 11: parameter_window_read
+11/22 Test #11: parameter_window_read ............   Passed    2.45 sec
+      Start 12: parallel_sessions_recovery
+12/22 Test #12: parallel_sessions_recovery .......***Failed    5.06 sec
+
+      Start 13: slave_edit_import_save
+13/22 Test #13: slave_edit_import_save ...........   Passed    3.83 sec
+      Start 14: session_lifecycle
+14/22 Test #14: session_lifecycle ................   Passed    3.44 sec
+      Start 15: rtu_first_read
+15/22 Test #15: rtu_first_read ...................   Passed    4.46 sec
+      Start 16: rtu_polling
+16/22 Test #16: rtu_polling ......................   Passed    3.58 sec
+      Start 17: rtu_explicit_write
+17/22 Test #17: rtu_explicit_write ...............   Passed    5.32 sec
+      Start 18: rtu_slave_json_read
+18/22 Test #18: rtu_slave_json_read ..............   Passed    4.38 sec
+      Start 19: rtu_slave_write
+19/22 Test #19: rtu_slave_write ..................   Passed    3.56 sec
+      Start 20: trace_query_export
+20/22 Test #20: trace_query_export ...............   Passed    3.98 sec
+      Start 21: workspace_roundtrip
+21/22 Test #21: workspace_roundtrip ..............   Passed    5.85 sec
+      Start 22: bounded_disk_recording
+22/22 Test #22: bounded_disk_recording ...........   Passed    9.98 sec
+
+86% tests passed, 3 tests failed out of 22
+
+Total Test time (real) = 175.69 sec
+
+The following tests FAILED:
+	  1 - rtu_ui_acceptance (Failed)
+	  2 - workspace_window_layout (Failed)
+	 12 - parallel_sessions_recovery (Failed)
+Errors while running CTest

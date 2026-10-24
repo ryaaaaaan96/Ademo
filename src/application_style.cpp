@@ -23,6 +23,17 @@ QTreeWidget { background: #f5f8fb; border: none; }
 QTreeWidget::item { padding: 5px 3px; }
 QTreeWidget::item:selected { color: #096d66; background: #deefec; }
 QPlainTextEdit { background: white; color: #22344a; border: 1px solid #d7e1eb; }
+QScrollArea#sessionSidebar, QWidget#sessionSidebarBody { background: #edf2f6; border: none; }
+QFrame#sidebarSection { background: white; border: 1px solid #dce5ec; border-radius: 6px; }
+QLabel#sidebarHeading { color: #577087; font-size: 12px; font-weight: 600; padding-bottom: 2px; }
+QLabel#sidebarSummary { color: #64788c; font-size: 12px; padding-top: 3px; }
+QWidget#sessionSidebarBody QPushButton { padding: 3px 6px; font-size: 12px; }
+QWidget#sessionSidebarBody QPushButton#start:enabled { background: #087f75; color: white; border-color: #087f75; }
+QWidget#sessionSidebarBody QPushButton#start:hover:enabled { background: #066c64; }
+QWidget#sessionSidebarBody QLabel#status { color: #526b80; font-size: 12px; }
+QPushButton#sidebarToggle { background: #edf2f6; border: none; color: #577087; padding: 4px 0; }
+QPushButton#sidebarToggle:hover { background: #dcebe9; color: #087d73; }
+QSplitter::handle { background: #edf2f6; }
 )");
 }
 } // namespace debugger

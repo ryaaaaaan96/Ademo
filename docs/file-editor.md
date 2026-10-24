@@ -16,6 +16,6 @@ UI08 增加可选 `FileEditorPage::Options`：默认 `maximumBytes` 仍为 1 MiB
 
 需要确认框的插件可复用 `debugger/confirmation.h` 的 `showConfirmation`（链接 debugger_widgets）。调用方仍须先持有 lifetime、返回后检查自身存活，并注册适当 busy 状态；此函数不管理会话。Qt 下拉框信号可能继续访问 sender，应先退出信号发送栈再进入可能销毁整个视图的守卫。主站原生设备选择先恢复旧显示并排队选择；公开 `ParameterView::selectDevice` 仍同步执行守卫，成功后无信号更新下拉框，保留 bool 成功/取消契约。
 
-UI07 增加 SDK12 `SessionAccess.lifetime`，以不透明 `shared_ptr<void>` 保留插件目录。任何可能进入模态事件循环的插件回调应先复制该租约，再复制需要调用的插件闭包，并以 QPointer 检查 owner 是否存活。局部闭包先于租约析构；宿主将最后一次租约释放延后到下一事件回调，覆盖插件返回指令仍位于 DLL 的情况。后台任务继续使用原有任务租约。SDK、协议/传输 IID 与构建指纹均为 12，所有宿主和 DLL 须一起重编并重启。
+UI07 增加 SDK12 `SessionAccess.lifetime`，以不透明 `shared_ptr<void>` 保留插件目录。任何可能进入模态事件循环的插件回调应先复制该租约，再复制需要调用的插件闭包，并以 QPointer 检查 owner 是否存活。局部闭包先于租约析构；宿主将最后一次租约释放延后到下一事件回调，覆盖插件返回指令仍位于 DLL 的情况。后台任务继续使用原有任务租约。该能力在 SDK12 引入；当前配套 SDK13（含侧栏控制槽）的协议/传输 IID 与构建指纹统一升级，所有宿主和 DLL 须一起重编并重启。
 
 视图、SessionAccess 同步回调和 lifetime 的使用/释放均在 GUI 线程。延迟卸载只保护本线程的视图返回栈，不是任意工作线程执行插件代码的许可。后台作业必须通过 host background 的独立任务租约执行，继续遵守只传值、不访问 QWidget 的约定。
