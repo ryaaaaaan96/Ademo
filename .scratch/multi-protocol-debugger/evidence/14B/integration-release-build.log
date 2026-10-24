@@ -1,0 +1,50 @@
+[1/121] Automatic MOC for target can_transport
+[2/119] Automatic MOC for target debugger_host
+[3/117] Automatic MOC for target can_sample_source
+[4/116] Automatic MOC for target debugger_widgets
+[5/114] Automatic MOC for target serial_plugin
+[6/112] Automatic MOC for target trace_fixture_plugin
+[7/110] Automatic MOC for target can_observer_plugin
+[8/108] Automatic MOC for target ui_contract_stale_plugin
+[9/106] Automatic MOC for target incompatible_plugin
+[10/104] Automatic MOC for target can_plugin
+[11/102] C:\WINDOWS\system32\cmd.exe /C "cd /D C:\Users\81966\Documents\Ademo\build\qt-llvm-release && C:\Qt\Tools\CMake_64\bin\cmake.exe -E make_directory C:/Users/81966/Documents/Ademo/build/qt-llvm-release/bin/can-lifetime-fixtures && C:\Qt\Tools\CMake_64\bin\cmake.exe -E copy_if_different C:/Users/81966/Documents/Ademo/build/qt-llvm-release/bin/plugins/libcan_plugin.dll C:/Users/81966/Documents/Ademo/build/qt-llvm-release/bin/can-lifetime-fixtures/ && C:\Qt\Tools\CMake_64\bin\cmake.exe -E copy_if_different C:/Users/81966/Documents/Ademo/build/qt-llvm-release/bin/plugins/libcan_observer_plugin.dll C:/Users/81966/Documents/Ademo/build/qt-llvm-release/bin/can-lifetime-fixtures/"
+[12/102] Automatic MOC for target ui_contract_plugin
+[13/100] Automatic MOC for target modbus_plugin
+[14/98] Automatic MOC for target workspace_layout_tests
+[15/96] Automatic MOC for target ui_acceptance_tests
+[16/94] Automatic MOC for target parameter_poll_tests
+[17/92] Automatic MOC for target plugin_ui_contract_tests
+[18/90] Automatic MOC for target slave_parameter_tests
+[19/88] Automatic MOC for target trace_tests
+[20/86] Automatic MOC for target parameter_file_editor_tests
+[21/84] Automatic MOC for target parameter_trend_tests
+[22/82] Automatic MOC for target parameter_write_tests
+[23/80] Automatic MOC for target parameter_definition_tests
+[24/78] Automatic MOC for target parameter_window_tests
+[25/76] Automatic MOC for target upp_plugin
+[26/76] Automatic MOC for target session_recovery_tests
+[27/74] Building CXX object CMakeFiles/upp_plugin.dir/upp_plugin_autogen/mocs_compilation.cpp.obj
+[28/74] Automatic MOC for target slave_edit_tests
+[29/72] Automatic MOC for target window_trace_tests
+[30/70] Automatic MOC for target session_tests
+[31/68] Automatic MOC for target rtu_read_tests
+[32/66] Automatic MOC for target rtu_poll_tests
+[33/64] Automatic MOC for target rtu_write_tests
+[34/62] Automatic MOC for target rtu_slave_tests
+[35/60] Building CXX object CMakeFiles/can_sample_source.dir/tools/can_sample_source.cpp.obj
+[36/60] Automatic MOC for target rtu_slave_write_tests
+[37/58] Automatic MOC for target workspace_tests
+[38/56] Linking CXX executable bin\can_sample_source.exe
+[39/56] Automatic MOC for target recording_tests
+[40/54] Automatic MOC for target can_observation_tests
+[41/52] Building CXX object CMakeFiles/upp_plugin.dir/plugins/upp_pdu.cpp.obj
+[42/52] Building CXX object CMakeFiles/upp_plugin.dir/plugins/upp.cpp.obj
+[43/52] Building CXX object CMakeFiles/upp_plugin.dir/plugins/upp_session.cpp.obj
+[44/52] Building CXX object CMakeFiles/upp_plugin.dir/plugins/upp_view.cpp.obj
+[45/52] Linking CXX shared module bin\plugins\libupp_plugin.dll
+[46/52] Automatic MOC for target multi_protocol_debugger
+[47/50] Automatic MOC for target upp_receive_tests
+[48/50] Building CXX object CMakeFiles/upp_receive_tests.dir/upp_receive_tests_autogen/mocs_compilation.cpp.obj
+[49/50] Building CXX object CMakeFiles/upp_receive_tests.dir/tests/upp_receive_tests.cpp.obj
+[50/50] Linking CXX executable bin\upp_receive_tests.exe
