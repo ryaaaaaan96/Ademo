@@ -201,10 +201,25 @@ private slots:
         auto next=s.submit("upp.request",parameters(0x20));QCOMPARE(quint8(input.device->writes[0].payload()[3]),quint8(2));old.sent(next,true,{});events();QVERIFY(!s.operation(next).localSent);
         s.stop();QVERIFY(s.start(config()));QTRY_COMPARE(s.state(),SessionState::Running);s.submit("upp.request",parameters(0x20));QCOMPARE(quint8(input.device->writes[0].payload()[3]),quint8(1));
     }
+    void masterWorkspaceAndRtuRemainIndependent() {
+        auto catalog=std::make_shared<PluginCatalog>();catalog->discover(QCoreApplication::applicationDirPath()+"/plugins");
+        QTemporaryDir directory;QVERIFY(directory.isValid());Input viewInput;Workbench window(catalog,nullptr,viewInput.factory());QVERIFY(window.closeSession(0));
+        auto c=config();c.protocol["sendGapMs"]=30;c.protocol["responseTimeoutMs"]=1500;c.protocol["deviceRoutes"]=QJsonObject{{"5",QJsonObject{{"txId",321},{"rxId",456},{"extended",true}}}};
+        const int index=window.addSession(c);QCOMPARE(window.sessionConfiguration(index).protocol,c.protocol);auto path=directory.filePath("master.json");auto save=window.saveWorkspace(path);QTRY_COMPARE(window.workspaceOperation(save).state,QString("success"));
+        Input restoredInput;Workbench restored(catalog,nullptr,restoredInput.factory());auto load=restored.openWorkspace(path);QTRY_COMPARE(restored.workspaceOperation(load).state,QString("success"));
+        QCOMPARE(restored.sessionConfiguration(index).role,QString("master"));QCOMPARE(restored.sessionConfiguration(index).protocol,c.protocol);QCOMPARE(restored.sessionConfiguration(index).protocol.value("deviceRoutes"),c.protocol.value("deviceRoutes"));QCOMPARE(restored.session(index)->state(),SessionState::Stopped);QVERIFY(restoredInput.device.isNull());QVERIFY(restored.sessionWindow(index)->findChild<QPushButton *>("uppSend"));
+        EndpointEvents serialEvents;QList<QByteArray> writes;quint64 token=0;
+        class Serial : public Endpoint {public:EndpointEvents &e;QList<QByteArray> &w;quint64 &token;Serial(EndpointEvents &events,QList<QByteArray> &writes,quint64 &t):e(events),w(writes),token(t){}void open() override{e.opened(true,{});}void close() override{}bool send(quint64 t,const QByteArray &b)override{token=t;w<<b;return true;}};
+        qint64 clock=0;Input input;DebugSession upp(catalog,nullptr,input.factory(),[&]{return clock;});DebugSession rtu(catalog,nullptr,[&](const QJsonObject &,EndpointEvents e){serialEvents=e;return std::make_unique<Serial>(serialEvents,writes,token);},[&]{return clock;});
+        QVERIFY(upp.start(config()));QTRY_COMPARE(upp.state(),SessionState::Running);SessionConfig serial{"modbus.rtu","serial","master",{{"port","COM215"},{"baud","9600"},{"dataBits","8"},{"parity","even"},{"stopBits","1"}},{{"extraReadRetries",0}}};QVERIFY(rtu.start(serial));QTRY_COMPARE(rtu.state(),SessionState::Running);
+        auto canOp=upp.submit("upp.request",parameters(0x20));auto rtuOp=rtu.submit("read-holding",{{"unit",1},{"start",0},{"count",2}});clock=10000;rtu.poll();QTRY_COMPARE(writes.size(),1);QCOMPARE(writes.first().toHex(),QByteArray("010300000002c40b"));
+        serialEvents.sent(token,true,{});input.device->complete();events();input.adu(QByteArray::fromHex("05500f012032304141ffffffffb77a"));QTRY_COMPARE(upp.operation(canOp).update.state,QString("succeeded"));QVERIFY(!rtu.operation(rtuOp).finished);
+        serialEvents.received(ReceiveChunk(QByteArray::fromHex("010304000a0014da3e")));events();clock+=10000;rtu.poll();QTRY_COMPARE(rtu.operation(rtuOp).update.state,QString("success"));QVERIFY(rtu.operation(rtuOp).localSent);upp.stop();QCOMPARE(rtu.state(),SessionState::Running);
+    }
     void sequenceWrapIsBoundedAndPerDevice() {
         auto catalog=std::make_shared<PluginCatalog>();catalog->discover(QCoreApplication::applicationDirPath()+"/plugins");qint64 clock=0;Input input;DebugSession s(catalog,nullptr,input.factory(),[&]{return clock;});
         QVERIFY(s.start(config()));QTRY_COMPARE(s.state(),SessionState::Running);
-        for(int i=1;i<=256;++i) {auto op=s.submit("upp.request",parameters(0x20));QCOMPARE(quint8(input.device->writes.last().payload()[3]),quint8(i==256?1:i));clock+=1000001;s.poll();QVERIFY(s.operation(op).finished);}
+        for(int i=1;i<=256;++i) {auto op=s.submit("upp.request",parameters(0x20));QCOMPARE(quint8(input.device->writes.last().payload()[3]),quint8(i==256?1:i));input.device->complete();events();clock+=1000001;s.poll();QVERIFY(s.operation(op).finished);}
         auto p=parameters(0x20);p["deviceId"]=6;s.submit("upp.request",p);QCOMPARE(quint8(input.device->writes.last().payload()[3]),quint8(1));
     }
 };
