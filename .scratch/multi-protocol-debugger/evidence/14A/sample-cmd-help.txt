@@ -1,0 +1,2 @@
+Virtual CAN software sample only. Start the receiver on the same channel first.
+Sample finished with exit code -1.

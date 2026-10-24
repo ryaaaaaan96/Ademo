@@ -1,0 +1,6 @@
+[1/7] Automatic MOC for target can_observer_plugin
+[2/6] Building CXX object CMakeFiles/can_observer_plugin.dir/plugins/can_observer_view.cpp.obj
+[3/6] Linking CXX shared module bin\plugins\libcan_observer_plugin.dll
+[4/6] C:\WINDOWS\system32\cmd.exe /C "cd /D C:\Users\81966\Documents\Ademo\build\worktrees\can14a-observation\build\qt-llvm-debug-offscreen && C:\Qt\Tools\CMake_64\bin\cmake.exe -E make_directory C:/Users/81966/Documents/Ademo/build/worktrees/can14a-observation/build/qt-llvm-debug-offscreen/bin/can-lifetime-fixtures && C:\Qt\Tools\CMake_64\bin\cmake.exe -E copy_if_different C:/Users/81966/Documents/Ademo/build/worktrees/can14a-observation/build/qt-llvm-debug-offscreen/bin/plugins/libcan_plugin.dll C:/Users/81966/Documents/Ademo/build/worktrees/can14a-observation/build/qt-llvm-debug-offscreen/bin/can-lifetime-fixtures/ && C:\Qt\Tools\CMake_64\bin\cmake.exe -E copy_if_different C:/Users/81966/Documents/Ademo/build/worktrees/can14a-observation/build/qt-llvm-debug-offscreen/bin/plugins/libcan_observer_plugin.dll C:/Users/81966/Documents/Ademo/build/worktrees/can14a-observation/build/qt-llvm-debug-offscreen/bin/can-lifetime-fixtures/"
+[5/6] Building CXX object CMakeFiles/can_observation_tests.dir/tests/can_observation_tests.cpp.obj
+[6/6] Linking CXX executable bin\can_observation_tests.exe

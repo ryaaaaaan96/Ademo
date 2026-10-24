@@ -1,0 +1,48 @@
+[1/78] Automatic MOC for target trace_fixture_plugin
+[2/76] Automatic MOC for target ui_contract_stale_plugin
+[3/74] Automatic MOC for target ui_contract_plugin
+[4/72] Automatic MOC for target incompatible_plugin
+[5/70] Automatic MOC for target trace_tests
+[6/69] Automatic MOC for target ui_acceptance_tests
+[7/68] Linking CXX executable bin\trace_tests.exe
+[8/68] Automatic MOC for target workspace_layout_tests
+[9/67] Automatic MOC for target slave_parameter_tests
+[10/66] Automatic MOC for target plugin_ui_contract_tests
+[11/65] Automatic MOC for target parameter_trend_tests
+[12/64] Automatic MOC for target parameter_file_editor_tests
+[13/63] Automatic MOC for target parameter_poll_tests
+[14/62] Automatic MOC for target window_trace_tests
+[15/61] Automatic MOC for target parameter_write_tests
+[16/60] Automatic MOC for target parameter_definition_tests
+[17/59] Automatic MOC for target parameter_window_tests
+[18/58] Automatic MOC for target session_recovery_tests
+[19/57] Automatic MOC for target slave_edit_tests
+[20/56] Automatic MOC for target session_tests
+[21/55] Automatic MOC for target rtu_read_tests
+[22/54] Automatic MOC for target rtu_poll_tests
+[23/53] Automatic MOC for target rtu_write_tests
+[24/52] Automatic MOC for target rtu_slave_tests
+[25/51] Automatic MOC for target rtu_slave_write_tests
+[26/50] Automatic MOC for target workspace_tests
+[27/49] Linking CXX executable bin\ui_acceptance_tests.exe
+[28/49] Automatic MOC for target recording_tests
+[29/48] Linking CXX executable bin\workspace_layout_tests.exe
+[30/48] Linking CXX executable bin\slave_parameter_tests.exe
+[31/48] Linking CXX executable bin\parameter_trend_tests.exe
+[32/48] Linking CXX executable bin\parameter_file_editor_tests.exe
+[33/48] Linking CXX executable bin\plugin_ui_contract_tests.exe
+[34/48] Linking CXX executable bin\parameter_poll_tests.exe
+[35/48] Linking CXX executable bin\window_trace_tests.exe
+[36/48] Linking CXX executable bin\parameter_write_tests.exe
+[37/48] Linking CXX executable bin\parameter_definition_tests.exe
+[38/48] Linking CXX executable bin\parameter_window_tests.exe
+[39/48] Linking CXX executable bin\session_recovery_tests.exe
+[40/48] Linking CXX executable bin\slave_edit_tests.exe
+[41/48] Linking CXX executable bin\rtu_read_tests.exe
+[42/48] Linking CXX executable bin\rtu_poll_tests.exe
+[43/48] Linking CXX executable bin\session_tests.exe
+[44/48] Linking CXX executable bin\rtu_write_tests.exe
+[45/48] Linking CXX executable bin\rtu_slave_tests.exe
+[46/48] Linking CXX executable bin\rtu_slave_write_tests.exe
+[47/48] Linking CXX executable bin\workspace_tests.exe
+[48/48] Linking CXX executable bin\recording_tests.exe

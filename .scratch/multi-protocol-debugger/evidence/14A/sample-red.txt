@@ -1,0 +1,21 @@
+********* Start testing of CanObservationTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : CanObservationTests::initTestCase()
+PASS   : CanObservationTests::observerHasDedicatedFrameTable()
+PASS   : CanObservationTests::classicAndEmptyFramesUseSessionRecords()
+QWARN  : CanObservationTests::backendPreservesRemoteErrorAndUnsupportedFrames() qt.canbus: Can not disconnect an unconnected device.
+PASS   : CanObservationTests::backendPreservesRemoteErrorAndUnsupportedFrames()
+QWARN  : CanObservationTests::filteringAndExportKeepRawRecordsAndSessionSource() qt.canbus: Can not disconnect an unconnected device.
+PASS   : CanObservationTests::filteringAndExportKeepRawRecordsAndSessionSource()
+QWARN  : CanObservationTests::boundedFramesStopAndOldCallbacksCannotContaminateRestart() qt.canbus: Can not disconnect an unconnected device.
+QWARN  : CanObservationTests::boundedFramesStopAndOldCallbacksCannotContaminateRestart() qt.canbus: Can not disconnect an unconnected device.
+PASS   : CanObservationTests::boundedFramesStopAndOldCallbacksCannotContaminateRestart()
+QINFO  : CanObservationTests::independentVirtualSampleUsesFormalBackend() qt.canbus.plugins.virtualcan: Server [0x7ffe255dd1e0] started and listening on port 35468.
+QINFO  : CanObservationTests::independentVirtualSampleUsesFormalBackend() qt.canbus.plugins.virtualcan: Server [0x7ffe255dd1e0] client connected.
+QINFO  : CanObservationTests::independentVirtualSampleUsesFormalBackend() qt.canbus.plugins.virtualcan: Client [0x1916e875d50] socket connected.
+FAIL!  : CanObservationTests::independentVirtualSampleUsesFormalBackend() 'source.waitForStarted()' returned FALSE. ()
+C:/Users/81966/Documents/Ademo/build/worktrees/can14a-observation/tests/can_observation_tests.cpp(135) : failure location
+QWARN  : CanObservationTests::independentVirtualSampleUsesFormalBackend() qt.canbus: Can not disconnect an unconnected device.
+PASS   : CanObservationTests::cleanupTestCase()
+Totals: 7 passed, 1 failed, 0 skipped, 0 blacklisted, 381ms
+********* Finished testing of CanObservationTests *********

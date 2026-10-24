@@ -14,12 +14,15 @@ Windows Qt 工作台，当前正式流程覆盖 Modbus RTU 主站、从站及原
 .\run-debugger.cmd
 ```
 
-Debug 改用 `qt-llvm-debug`。原生测试串行运行，避免多个测试争抢窗口焦点：
+Debug 产品改用 `qt-llvm-debug`。不操作桌面的自动回归使用独立离屏预设，QtQuick 使用软件渲染：
 
 ```powershell
-$env:PATH = 'C:/Qt/6.12.0/llvm-mingw_64/bin;C:/Qt/Tools/llvm-mingw2217_64/bin;' + $env:PATH
-& C:/Qt/Tools/CMake_64/bin/ctest.exe --test-dir build/qt-llvm-debug --output-on-failure -j 1
+& C:/Qt/Tools/CMake_64/bin/cmake.exe --preset qt-llvm-debug-offscreen
+& C:/Qt/Tools/CMake_64/bin/cmake.exe --build --preset qt-llvm-debug-offscreen --parallel 3
+& C:/Qt/Tools/CMake_64/bin/ctest.exe --preset qt-llvm-debug-offscreen --parallel 1
 ```
+
+Release 回归替换为 `qt-llvm-release-offscreen`。离屏预设不显示桌面窗口或控制系统鼠标，4项Windows原生菜单/拖动用例明确跳过，不能算作通过。原有windows预设和原生断言保留；需要原生桌面行为验证时由使用者明确安排，离屏结果不替代原生标题栏、遮挡及拖动验收。
 
 [工具链核验记录](.scratch/multi-protocol-debugger/toolchain-environment.md)描述初始安装基线；当前产品构建、Qt/QML 与组合流程证据见 [UI13 验收](.scratch/multi-protocol-workbench-ui/evidence/UI13/acceptance.md)。Qt 自身是 release 库，产品与插件分别按同一 Debug/Release 配置配套编译。
 

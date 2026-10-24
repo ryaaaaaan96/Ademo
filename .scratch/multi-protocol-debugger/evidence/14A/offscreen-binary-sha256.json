@@ -1,0 +1,42 @@
+[
+  {
+    "configuration": "debug",
+    "file": "multi_protocol_debugger.exe",
+    "sha256": "9299B24230D396CE2BE27D5BDACA94DC0D3389315A54EF514D6AAA07057EED18"
+  },
+  {
+    "configuration": "debug",
+    "file": "can_sample_source.exe",
+    "sha256": "1D063DB2DC9599ADCE1F551CEF1ED1E3C23D97DC7CB70A606A77EA06F344A7DA"
+  },
+  {
+    "configuration": "debug",
+    "file": "plugins/libcan_plugin.dll",
+    "sha256": "1A7B9BD5D57D195FEF0C9184D9C1FC92869E945E91FFF71D1DBB282640AF276F"
+  },
+  {
+    "configuration": "debug",
+    "file": "plugins/libcan_observer_plugin.dll",
+    "sha256": "86136669B3CD4DBB4A72B4B5B00D38E1650857A39A1D4D974CCCE6DB8323B082"
+  },
+  {
+    "configuration": "release",
+    "file": "multi_protocol_debugger.exe",
+    "sha256": "91875F069555B0FE31075479CFC26B7813668296BF44CA804E6135D58157355F"
+  },
+  {
+    "configuration": "release",
+    "file": "can_sample_source.exe",
+    "sha256": "F56B04432EED3E9452E9F84A754EDF46CCD2D47A669A4DBAEEADB1E48B769639"
+  },
+  {
+    "configuration": "release",
+    "file": "plugins/libcan_plugin.dll",
+    "sha256": "CFAEF353EBE73776CDAF9D2821BDFDF4EC5E174061A00C375F9A1F1EFE04CEC2"
+  },
+  {
+    "configuration": "release",
+    "file": "plugins/libcan_observer_plugin.dll",
+    "sha256": "32C4ED5E3EEC0A97EF8790B214A7A8918031759F9437B0647A056C98CFEB4F62"
+  }
+]

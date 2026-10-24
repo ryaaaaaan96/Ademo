@@ -1,0 +1,416 @@
+[
+  {
+    "configuration": "debug",
+    "test": "can_raw_observation",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "rtu_ui_acceptance",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "workspace_window_layout",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "slave_parameter_workflow",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "plugin_ui_contract",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "parameter_qml_trends",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "parameter_file_edit_save_apply",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "parameter_group_polling",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "window_trace_workflow",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "parameter_pending_write",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "parameter_definition_read",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "parameter_window_read",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "parallel_sessions_recovery",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "slave_edit_import_save",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "session_lifecycle",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "rtu_first_read",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "rtu_polling",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "rtu_explicit_write",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "rtu_slave_json_read",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "rtu_slave_write",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "trace_query_export",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "workspace_roundtrip",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "debug",
+    "test": "bounded_disk_recording",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "can_raw_observation",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "rtu_ui_acceptance",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "workspace_window_layout",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "slave_parameter_workflow",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "plugin_ui_contract",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "parameter_qml_trends",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "parameter_file_edit_save_apply",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "parameter_group_polling",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "window_trace_workflow",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "parameter_pending_write",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "parameter_definition_read",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "parameter_window_read",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "parallel_sessions_recovery",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "slave_edit_import_save",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "session_lifecycle",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "rtu_first_read",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "rtu_polling",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "rtu_explicit_write",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "rtu_slave_json_read",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "rtu_slave_write",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "trace_query_export",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "workspace_roundtrip",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  },
+  {
+    "configuration": "release",
+    "test": "bounded_disk_recording",
+    "environment": [
+      "QT_QPA_PLATFORM=offscreen:configfile=offscreen-platform.json",
+      "QT_QUICK_BACKEND=software",
+      "QT_QPA_FONTDIR=C:/WINDOWS/Fonts"
+    ]
+  }
+]

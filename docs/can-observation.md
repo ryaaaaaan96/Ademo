@@ -28,3 +28,9 @@ $env:PATH = 'C:/Qt/6.12.0/llvm-mingw_64/bin;C:/Qt/Tools/llvm-mingw2217_64/bin;' 
 - `virtualcan` 使用Qt内部本地转发服务，不代表新增产品TCP协议功能。硬件CAN后端只使用本机已安装Qt插件与其默认配置；型号、驱动、总线速率、时序和静默模式均未做物理验收。“只观察”不保证电气层监听模式。
 
 依据：[Qt VirtualCAN](https://doc.qt.io/qt-6/qtserialbus-virtualcan-overview.html)、[QCanBusFrame](https://doc.qt.io/qt-6/qcanbusframe.html)。14B、旧15和TCP留待后续授权及资料条件。
+
+## 自动验收不操作桌面
+
+2026-10-24用户明确要求后续验收不操作其电脑桌面。Debug/Release使用独立`-offscreen`预设和QtQuick软件后端，正式virtualcan接收后再通过Qt控件筛选、导出并校验文件内容。离屏渲染图不是用户桌面截图。4项Windows原生菜单/拖动用例只在windows QPA执行，本轮离屏明确跳过；UI13此前的原生通过记录保持历史事实，不冒充本轮重跑。
+
+离屏预设使用 `tests/offscreen-platform.json` 的1920×1080虚拟屏及系统已有字体目录，避免默认800×800虚拟屏对窗口恢复/居中断言的夹取；不修改真实显示器分辨率。Windows原生菜单/拖动四项在离屏平台显式跳过，原断言保留。
