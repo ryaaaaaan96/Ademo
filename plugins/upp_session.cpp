@@ -48,6 +48,7 @@ class UppSession final : public ProtocolSession {
     void discard(const QString &status, const QString &detail) {
         if (!pending_.sources.isEmpty()) publish(pending_, status, detail);
         pending_ = {};
+        requests_.clear();
     }
     void prune() {
         for (auto it = requests_.begin(); it != requests_.end();) {
@@ -75,7 +76,10 @@ class UppSession final : public ProtocolSession {
         prune();
         if (direction == "auto") {
             if (request.valid != response.valid) direction = request.valid ? "request" : "response";
-            else if (request.valid && response.valid) { fields["direction"] = "ambiguous"; publish(p, "ambiguous-direction", QStringLiteral("请求/响应结构均合法，请配置报文方向"), fields); return; }
+            else if (request.valid && response.valid) {
+                if (requests_.contains(key)) requests_[key].ambiguous = true;
+                fields["direction"] = "ambiguous"; publish(p, "ambiguous-direction", QStringLiteral("请求/响应结构均合法，请配置报文方向"), fields); return;
+            }
         }
         fields["direction"] = direction;
         auto parsed = direction == "request" ? request : response;

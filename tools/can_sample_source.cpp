@@ -12,16 +12,17 @@ int main(int argc, char **argv) {
     QCommandLineParser parser; parser.setApplicationDescription(QStringLiteral("独立虚拟 CAN 样例源，仅软件测试，不连接物理设备")); parser.addHelpOption();
     parser.addOption({"interface", QStringLiteral("虚拟测试通道 can0..can9"), "channel", "can0"});
     parser.addOption({"count", QStringLiteral("发送帧数，1..100000"), "count", "20"});
-    parser.addOption({"interval", QStringLiteral("样例发送间隔毫秒，10..60000"), "ms", "500"});
+    parser.addOption({"interval", QStringLiteral("样例间隔10..60000ms；raw默认500，upp默认20"), "ms"});
     parser.addOption({"profile", QStringLiteral("样例类型 raw 或 upp；UPP是暂定规则软件向量"), "name", "raw"});
     parser.addOption({"can-id", QStringLiteral("UPP样例CAN ID，十六进制；默认5"), "id", "5"});
     parser.addOption({"extended", QStringLiteral("UPP样例使用扩展CAN帧")});
     // QCommandLineParser::process/showHelp 在无控制台的 Windows 上会弹窗；工具始终只写标准流。
     if (!parser.parse(app.arguments())) { fprintf(stderr, "%s\n", qPrintable(parser.errorText())); return 2; }
     if (parser.isSet("help") || app.arguments().contains("--help-all")) { const auto help = parser.helpText().toUtf8(); fwrite(help.constData(), 1, help.size(), stdout); return 0; }
-    bool countOk, intervalOk; const int count = parser.value("count").toInt(&countOk), interval = parser.value("interval").toInt(&intervalOk);
+    const auto profile = parser.value("profile");
+    bool countOk, intervalOk = true; const int count = parser.value("count").toInt(&countOk), interval = parser.isSet("interval") ? parser.value("interval").toInt(&intervalOk) : profile == "upp" ? 20 : 500;
     if (!countOk || !intervalOk || count < 1 || count > 100000 || interval < 10 || interval > 60000 || !QRegularExpression("^can[0-9]$").match(parser.value("interface")).hasMatch()) return 2;
-    const auto profile = parser.value("profile"); bool idOk;
+    bool idOk;
     const auto canId = parser.value("can-id").toUInt(&idOk, 16); const bool extended = parser.isSet("extended");
     if ((profile != "raw" && profile != "upp") || !idOk || canId > (extended ? 0x1fffffff : 0x7ff)) return 2;
     // 原文结构 + 独立计算的Modbus CRC；不是设备抓包或协议方黄金向量。

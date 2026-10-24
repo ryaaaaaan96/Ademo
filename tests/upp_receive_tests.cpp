@@ -13,6 +13,7 @@
 #include <QDir>
 #include <QJsonArray>
 #include <QTemporaryDir>
+#include <QComboBox>
 using namespace debugger;
 namespace {
 SessionConfig config(QString direction = "auto") { return {"upp", "can", "observer", {{"backend", "virtualcan"}, {"interface", "can0"}}, {{"direction", direction}}}; }
@@ -104,6 +105,8 @@ private slots:
         input.adu(edgeFrames["rightResponse"], 0x124); QCOMPARE(s.messages().last().fields.value("requestContext").toString(), QString("ambiguous"));
         input.adu(edgeFrames["ambiguous"], 0x123); input.adu(edgeFrames["wrongResponse"], 0x124);
         QCOMPARE(s.messages().last().status, QString("pdu-error"));
+        input.adu(edgeFrames["ambiguous"], 0x123); input.adu(edgeFrames["ambiguous"], 0x125);
+        input.adu(edgeFrames["rightResponse"], 0x124); QCOMPARE(s.messages().last().fields.value("requestContext").toString(), QString("ambiguous"));
         QVERIFY(s.queryTrace({}).operations.isEmpty());
         const auto operation = s.submit("write", {}); QCOMPARE(s.operation(operation).update.state, QString("rejected"));
     }
@@ -142,7 +145,7 @@ private slots:
     void independentVirtualCanReachesUppViewAndExport() {
         DebugSession s(catalog); auto c = config(); c.endpoint["interface"] = "can7";
         QVERIFY(s.start(c)); QTRY_COMPARE(s.state(), SessionState::Running);
-        QProcess source; source.start(QCoreApplication::applicationDirPath() + "/can_sample_source.exe", {"--profile", "upp", "--interface", "can7", "--count", "3", "--interval", "20", "--can-id", "321"});
+        QProcess source; source.start(QCoreApplication::applicationDirPath() + "/can_sample_source.exe", {"--profile", "upp", "--interface", "can7", "--count", "3", "--can-id", "321"});
         QVERIFY(source.waitForStarted()); QTRY_COMPARE(s.messages().size(), 2); QTRY_COMPARE(source.state(), QProcess::NotRunning); QCOMPARE(source.exitCode(), 0);
         QCOMPARE(s.messages().last().status, QString("decoded")); QCOMPARE(s.messages().last().sources.size(), 2);
         QCOMPARE(s.messages().last().fields.value("deviceId").toInt(), 5); QCOMPARE(s.messages().last().fields.value("sourceKind").toString(), QString("virtual-can-test"));
@@ -156,6 +159,42 @@ private slots:
         auto result = s.exportTrace({}, exportPath, "jsonl"); const auto exported = result.get(); QVERIFY2(exported.ok, qPrintable(exported.error));
         QFile file(exportPath); QVERIFY(file.open(QIODevice::ReadOnly)); const auto bytes = file.readAll(); QVERIFY(bytes.contains("32304141")); QVERIFY(bytes.contains("ruleProfile")); QVERIFY(bytes.contains("sourceRanges"));
         if (dir.isEmpty()) { file.close(); QVERIFY(QFile::remove(exportPath)); }
+    }
+    void boundedContextRecordsExpiryAndReconnect() {
+        qint64 clock = 0; Input input; DebugSession s(catalog, nullptr, input.factory(), [&]{ return clock; });
+        QVERIFY(s.configureTrace({8, 8, 8})); auto c = config("request"); QVERIFY(s.start(c)); QTRY_COMPARE(s.state(), SessionState::Running);
+        input.adu(QByteArray::fromHex("05500701204889")); input.device->inject(QByteArray::fromHex("05500f0120323041")); clock = 100000; s.poll(); QCOMPARE(s.snapshot().value("requestContexts").toInt(), 0);
+        for (int i = 0; i < 40; ++i) input.adu(QByteArray::fromHex("05500701204889"));
+        QCOMPARE(s.messages().size(), 8); QVERIFY(s.expiredTraceCount() >= 32); QVERIFY(s.snapshot().value("requestContexts").toInt() <= 256);
+        clock = 1100000; s.poll(); QCOMPARE(s.snapshot().value("requestContexts").toInt(), 0);
+        input.device->inject(QByteArray::fromHex("05500f0120323041")); const auto old = input.callbacks; old.failed("disconnect"); QTRY_COMPARE(s.state(), SessionState::Error);
+        QCOMPARE(s.messages().last().status, QString("incomplete")); QVERIFY(s.reconnect()); QTRY_COMPARE(s.state(), SessionState::Running);
+        const auto count = s.messages().size(); old.received(ReceiveChunk(QByteArray::fromHex("41ffffffffb77a"))); QTest::qWait(20); QCOMPARE(s.messages().size(), count);
+        input.adu(QByteArray::fromHex("05500701204889")); QCOMPARE(s.messages().last().status, QString("decoded"));
+    }
+    void malformedFragmentsStayRawAndDoNotCrossBoundaries() {
+        Input input; DebugSession s(catalog, nullptr, input.factory()); QVERIFY(s.start(config())); QTRY_COMPARE(s.state(), SessionState::Running);
+        input.device->inject(QByteArray::fromHex("05500f0120323041")); input.device->inject(QByteArray::fromHex("41ffffffffb77a00")); QCOMPARE(s.messages().last().status, QString("length-error"));
+        input.device->inject(QByteArray::fromHex("05500f0120323041")); input.device->inject(QByteArray::fromHex("05500f0120323041")); QCOMPARE(s.messages().last().status, QString("length-error"));
+        input.device->inject({}); QCOMPARE(s.messages().last().status, QString("invalid-header"));
+        input.adu(QByteArray::fromHex("05500701204889")); QCOMPARE(s.messages().last().status, QString("decoded"));
+        QCOMPARE(s.messages().last().sources.size(), 1);
+    }
+    void configurationWorkspaceAndOtherProtocolsRemainIsolated() {
+        Input invalidInput; DebugSession invalid(catalog, nullptr, invalidInput.factory()); auto bad = config(); bad.protocol["requestCanIds"] = "123"; bad.protocol["responseCanIds"] = "123";
+        QVERIFY(!invalid.start(bad)); QVERIFY(invalidInput.device.isNull());
+        QTemporaryDir directory; QVERIFY(directory.isValid()); Input input; Workbench window(catalog, nullptr, input.factory());
+        auto *protocol = window.sessionWindow(0)->findChild<QComboBox *>("protocol"); QVERIFY(protocol); protocol->setCurrentIndex(protocol->findData("upp"));
+        QVERIFY(window.sessionWindow(0)->findChild<QTableWidget *>("uppMessages"));
+        const auto path = directory.filePath("upp-workspace.json"); const auto save = window.saveWorkspace(path); QTRY_COMPARE(window.workspaceOperation(save).state, QString("success"));
+        Input restoredInput; Workbench restored(catalog, nullptr, restoredInput.factory()); const auto load = restored.openWorkspace(path); QTRY_COMPARE(restored.workspaceOperation(load).state, QString("success"));
+        QCOMPARE(restored.sessionWindow(0)->findChild<QComboBox *>("protocol")->currentData().toString(), QString("upp")); QCOMPARE(restored.session(0)->state(), SessionState::Stopped); QVERIFY(restoredInput.device.isNull());
+        Input uppInput, canInput, rtuInput; DebugSession upp(catalog, nullptr, uppInput.factory()), can(catalog, nullptr, canInput.factory()), rtu(catalog, nullptr, rtuInput.factory());
+        auto uppConfig = config(); uppConfig.endpoint["interface"] = "can2"; QVERIFY(upp.start(uppConfig)); QTRY_COMPARE(upp.state(), SessionState::Running);
+        auto raw = config(); raw.protocolId = "can.raw"; raw.endpoint["interface"] = "can3"; QVERIFY(can.start(raw)); QTRY_COMPARE(can.state(), SessionState::Running);
+        SessionConfig serial{"modbus.rtu", "serial", "master", {{"port", "COM210"}, {"baud", "9600"}, {"dataBits", "8"}, {"parity", "even"}, {"stopBits", "1"}}, {}};
+        QVERIFY(rtu.start(serial)); QTRY_COMPARE(rtu.state(), SessionState::Running);
+        uppInput.adu(QByteArray::fromHex("05500701204889")); QCOMPARE(upp.messages().size(), 1); QVERIFY(can.messages().isEmpty()); QVERIFY(rtu.messages().isEmpty()); upp.stop(); QCOMPARE(can.state(), SessionState::Running); QCOMPARE(rtu.state(), SessionState::Running);
     }
 };
 QTEST_MAIN(UppReceiveTests)
