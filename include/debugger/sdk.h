@@ -95,6 +95,7 @@ struct LocalState {
     bool busy = false;
     QStringList actions;
 };
+struct SendReceipt { bool accepted = false; quint64 recordId = 0; };
 struct ProtocolServices {
     std::function<qint64()> nowUs;
     std::function<bool(quint64, QByteArray)> send;
@@ -105,6 +106,8 @@ struct ProtocolServices {
     std::function<quint64(QByteArray)> sendPassive;
     // 后台任务仅处理值；完成回到会话上下文，并保留协议/DLL租约。
     std::function<bool(std::function<QJsonObject()>, std::function<void(QJsonObject)>)> background;
+    // 单个传输单元的显式元数据；原有字节流 send 保持可用。
+    std::function<SendReceipt(quint64, QByteArray, QJsonObject)> sendUnit;
 };
 struct SessionAccess {
     std::function<quint64(QString, QJsonObject)> submit;
@@ -155,6 +158,9 @@ public:
     virtual void open() = 0;
     virtual void close() = 0;
     virtual bool send(quint64 id, const QByteArray &) = 0; // id 为不透明发送令牌，不是逻辑操作 ID。
+    virtual bool sendUnit(quint64 id, const QByteArray &bytes, const QJsonObject &metadata) {
+        return metadata.isEmpty() && send(id, bytes);
+    }
 };
 class ProtocolSession {
 public:
@@ -193,7 +199,7 @@ public:
     virtual QJsonObject relocateConfiguration(QJsonObject config, const QString &, const QString &) const { return config; }
 };
 }
-#define DebuggerProtocolIid "org.ademo.debugger.Protocol/14.0"
-#define DebuggerTransportIid "org.ademo.debugger.Transport/14.0"
+#define DebuggerProtocolIid "org.ademo.debugger.Protocol/15.0"
+#define DebuggerTransportIid "org.ademo.debugger.Transport/15.0"
 Q_DECLARE_INTERFACE(debugger::ProtocolPlugin, DebuggerProtocolIid)
 Q_DECLARE_INTERFACE(debugger::TransportPlugin, DebuggerTransportIid)

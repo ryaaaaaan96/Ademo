@@ -10,6 +10,7 @@
 #include <QTreeWidget>
 #include <QVBoxLayout>
 using namespace debugger;
+QWidget *createUppControls(SessionAccess,QWidget *);
 namespace {
 void addJson(QTreeWidgetItem *parent, const QString &name, const QJsonValue &value) {
     auto *item = new QTreeWidgetItem(parent, {name});
@@ -71,9 +72,11 @@ class UppView final : public ParameterView {
 public:
     UppView(SessionAccess access, QWidget *parent) : ParameterView(parent), access_(std::move(access)) {
         auto *layout = new QHBoxLayout(this); auto *side = new QWidget(this); side->setFixedWidth(220); auto *left = new QVBoxLayout(side);
-        auto *title = new QLabel(QStringLiteral("UPP CAN 接收解析"), side); left->addWidget(title);
-        auto *note = new QLabel(QStringLiteral("暂定规则：0=256字节；异常码2字节；末片无填充。仅观察，不发送。未知类型保留原始字节。方向/超时在连接配置中设置。"), side); note->setWordWrap(true); left->addWidget(note);
+        const bool master=access_.config && access_.config().role=="master";
+        auto *title = new QLabel(master?QStringLiteral("UPP CAN 主动交互"):QStringLiteral("UPP CAN 接收解析"), side); left->addWidget(title);
+        auto *note = new QLabel(QStringLiteral("暂定规则：0=256字节；异常码2字节；末片无填充。")+(master?QStringLiteral("不自动重试。路由/超时在连接配置中设置。"):QStringLiteral("仅观察，不发送。方向/超时在连接配置中设置。"))+QStringLiteral("未知类型保留原始字节。"), side); note->setWordWrap(true); left->addWidget(note);
         left->addWidget(new QLabel(QStringLiteral("设备地址筛选（十进制，空为全部）"), side)); device_ = new QLineEdit(side); device_->setObjectName("uppDeviceFilter"); left->addWidget(device_);
+        if(access_.config && access_.config().role=="master") left->addWidget(createUppControls(access_,side));
         controls_ = new QWidget(side); controls_->setLayout(new QVBoxLayout); left->addWidget(controls_); left->addStretch(); layout->addWidget(side);
         auto *right = new QVBoxLayout; layout->addLayout(right); summary_ = new QLabel(this); summary_->setObjectName("uppSummary"); right->addWidget(summary_);
         auto *split = new QSplitter(Qt::Vertical, this); right->addWidget(split);

@@ -97,7 +97,7 @@ private:
                         std::optional<qint64> idleBeforeUs = {});
     void received(quint64 run, ReceiveChunk, qint64 observedUs);
     void sent(quint64 run, quint64 id, bool ok, const QString &, qint64 observedUs);
-    bool send(quint64 run, quint64 id, const QByteArray &);
+    bool send(quint64 run, quint64 id, const QByteArray &, QJsonObject metadata = {}, quint64 *recordId = nullptr);
     quint64 sendPassive(quint64 run, const QByteArray &);
     quint64 allocateSendToken() { return (quint64(1) << 63) | nextSendToken_++; }
     void publish(OperationUpdate);
@@ -144,7 +144,7 @@ private:
     quint64 expiredMessages_ = 0;
     quint64 expiredOperations_ = 0;
     TraceLimits traceLimits_;
-    struct SendAttempt { quint64 token = 0; int attempt = 0; bool completed = false; };
+    struct SendAttempt { quint64 token = 0; int attempt = 0; bool completed = false; QJsonObject metadata; };
     QMap<quint64, SendAttempt> sendAttempts_;
     quint64 nextSendToken_ = 1;
     QString sessionId_;
