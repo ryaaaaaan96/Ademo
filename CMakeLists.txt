@@ -49,6 +49,10 @@ enable_testing()
 add_executable(can_observation_tests tests/can_observation_tests.cpp)
 target_link_libraries(can_observation_tests PRIVATE debugger_host can_transport Qt6::Test)
 add_dependencies(can_observation_tests modbus_plugin serial_plugin can_plugin can_observer_plugin can_sample_source)
+add_custom_command(TARGET can_observation_tests POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/bin/can-lifetime-fixtures"
+  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:can_plugin> "${CMAKE_BINARY_DIR}/bin/can-lifetime-fixtures/"
+  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:can_observer_plugin> "${CMAKE_BINARY_DIR}/bin/can-lifetime-fixtures/")
 add_test(NAME can_raw_observation COMMAND can_observation_tests -o can-results.txt,txt)
 set_tests_properties(can_raw_observation PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=windows" TIMEOUT 60)
 add_executable(ui_acceptance_tests tests/ui_acceptance_tests.cpp)

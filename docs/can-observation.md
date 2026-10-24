@@ -6,7 +6,7 @@
 
 1. 按 README 构建并启动配套产品。在会话“连接配置…”选择“CAN 原始帧观察”，传输自动匹配“CAN（Qt SerialBus）”、角色 `observer`。
 2. 后端选 `virtualcan`，接口填 `can0`（可用 `can0` 至 `can9`），关闭配置窗后明确点击“启动会话”。
-3. 在另一个终端显式启动独立样例源；样例不会随产品或工作区自动启动：
+3. 双击根目录 `run-can-sample.cmd` 显式启动独立样例源（默认can0、200帧、间隔250ms）；它沿用本机Qt环境且不需要PowerShell脚本执行权限。也可在终端运行下列可执行文件；样例不会随产品或工作区自动启动：
 
 ```powershell
 $env:PATH = 'C:/Qt/6.12.0/llvm-mingw_64/bin;C:/Qt/Tools/llvm-mingw2217_64/bin;' + $env:PATH

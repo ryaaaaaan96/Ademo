@@ -167,6 +167,8 @@ SessionPane::SessionPane(std::shared_ptr<PluginCatalog> catalog, QWidget *parent
             for (const auto &r : p->describe().roles) role->addItem(r, r);
         }
         buildView();
+        // 角色列表在信号阻塞下重建；需在最终支持组合确定后刷新启动入口。
+        if (alive && refresh_) refresh_();
     };
     connect(role, &QComboBox::currentIndexChanged, this, [this, role, selectedRole, roleRevision, buildView] {
         const auto next = role->currentData().toString();

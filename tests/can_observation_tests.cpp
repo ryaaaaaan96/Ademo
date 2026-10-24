@@ -12,6 +12,7 @@
 #include <QDir>
 #include <QJsonDocument>
 #include <QProcess>
+#include <QDialogButtonBox>
 using namespace debugger;
 namespace {
 SessionConfig configuration(QString channel = "can0") { return {"can.raw", "can", "observer", {{"backend", "virtualcan"}, {"interface", channel}}, {}}; }
@@ -169,11 +170,36 @@ private slots:
         previous.received(ReceiveChunk(QByteArray("late"))); QTest::qWait(30); QCOMPARE(received(canSession).size(), 1);
         canSession.stop(); QCOMPARE(serialSession.state(), SessionState::Running);
     }
+    void switchingProtocolEnablesStartAfterCompatibleRoleSelection() {
+        CanInput input; Workbench window(catalog, nullptr, input.factory()); window.show();
+        auto *pane = window.sessionWindow(0);
+        QPushButton *configure = nullptr;
+        for (auto *button : pane->findChildren<QPushButton *>())
+            if (button->text() == QStringLiteral("连接配置…")) configure = button;
+        QVERIFY(configure); QTest::mouseClick(configure, Qt::LeftButton);
+        auto *protocol = pane->findChild<QComboBox *>("protocol");
+        auto *transport = pane->findChild<QComboBox *>("transport");
+        auto *role = pane->findChild<QComboBox *>("role");
+        auto *start = pane->findChild<QPushButton *>("start");
+        auto *status = pane->findChild<QLabel *>("status");
+        QVERIFY(protocol->isVisible());
+        protocol->setCurrentIndex(protocol->findData("can.raw"));
+        QCOMPARE(transport->currentData().toString(), QString("can"));
+        QCOMPARE(role->currentData().toString(), QString("observer"));
+        QVERIFY2(start->isEnabled(), "切换到兼容CAN/observer组合后，启动入口必须立即刷新");
+        QVERIFY(!status->text().contains(QStringLiteral("不可用")));
+        auto *buttons = protocol->window()->findChild<QDialogButtonBox *>(); QVERIFY(buttons);
+        QTest::mouseClick(buttons->button(QDialogButtonBox::Close), Qt::LeftButton);
+        QTest::mouseClick(start, Qt::LeftButton); QTRY_COMPARE(window.session(0)->state(), SessionState::Running);
+        QTest::mouseClick(pane->findChild<QPushButton *>("stop"), Qt::LeftButton);
+        QTRY_COMPARE(window.session(0)->state(), SessionState::Stopped);
+        protocol->setCurrentIndex(protocol->findData("modbus.rtu"));
+        QCOMPARE(transport->currentData().toString(), QString("serial"));
+        QCOMPARE(role->currentData().toString(), QString("master")); QVERIFY(start->isEnabled());
+    }
     void exportSurvivesViewSessionAndCatalogDestruction() {
         QTemporaryDir directory; const auto path = directory.filePath("detached.jsonl");
-        const auto pluginPath = directory.filePath("isolated-plugins"); QVERIFY(QDir().mkpath(pluginPath));
-        for (const auto &name : {"libcan_plugin.dll", "libcan_observer_plugin.dll"})
-            QVERIFY(QFile::copy(QCoreApplication::applicationDirPath() + "/plugins/" + name, pluginPath + "/" + name));
+        const auto pluginPath = QCoreApplication::applicationDirPath() + "/can-lifetime-fixtures";
         auto ownCatalog = std::make_shared<PluginCatalog>(); ownCatalog->discover(pluginPath);
         const std::weak_ptr<PluginCatalog> lease = ownCatalog;
         CanInput input; auto session = std::make_unique<DebugSession>(ownCatalog, nullptr, input.factory());
