@@ -1,0 +1,29 @@
+[1/29] Automatic MOC for target can_transport
+[2/29] Building CXX object CMakeFiles/can_transport.dir/can_transport_autogen/mocs_compilation.cpp.obj
+[3/29] Automatic MOC for target debugger_host
+[4/29] Building CXX object CMakeFiles/can_transport.dir/plugins/can_endpoint.cpp.obj
+[5/29] Linking CXX static library libcan_transport.a
+[6/29] Building CXX object CMakeFiles/debugger_host.dir/src/application_style.cpp.obj
+[7/29] Building CXX object CMakeFiles/debugger_host.dir/debugger_host_autogen/mocs_compilation.cpp.obj
+[8/29] Automatic MOC for target can_plugin
+[9/29] Building CXX object CMakeFiles/debugger_host.dir/src/session_recovery.cpp.obj
+[10/29] Building CXX object CMakeFiles/debugger_host.dir/src/workspace.cpp.obj
+[11/29] Building CXX object CMakeFiles/debugger_host.dir/src/host.cpp.obj
+[12/29] Building CXX object CMakeFiles/debugger_host.dir/src/session_window.cpp.obj
+[13/29] Building CXX object CMakeFiles/debugger_host.dir/src/workbench.cpp.obj
+[14/29] Building CXX object CMakeFiles/debugger_host.dir/src/trace_query.cpp.obj
+[15/29] Building CXX object CMakeFiles/debugger_host.dir/src/trace_panel.cpp.obj
+[16/29] Building CXX object CMakeFiles/debugger_host.dir/src/trace_codec.cpp.obj
+[17/29] Building CXX object CMakeFiles/debugger_host.dir/src/session_records.cpp.obj
+[18/29] Building CXX object CMakeFiles/debugger_host.dir/src/recording.cpp.obj
+[19/29] Building CXX object CMakeFiles/debugger_host.dir/src/archive_format.cpp.obj
+[20/29] Building CXX object CMakeFiles/can_plugin.dir/can_plugin_autogen/mocs_compilation.cpp.obj
+[21/29] Building CXX object CMakeFiles/debugger_host.dir/src/archive_query.cpp.obj
+[22/29] Building CXX object CMakeFiles/can_plugin.dir/plugins/can.cpp.obj
+[23/29] Linking CXX shared module bin\plugins\libcan_plugin.dll
+[24/29] Building CXX object CMakeFiles/debugger_host.dir/src/recording_panel.cpp.obj
+[25/29] Linking CXX static library libdebugger_host.a
+[26/29] Automatic MOC for target upp_receive_tests
+[27/29] Building CXX object CMakeFiles/upp_receive_tests.dir/upp_receive_tests_autogen/mocs_compilation.cpp.obj
+[28/29] Building CXX object CMakeFiles/upp_receive_tests.dir/tests/upp_receive_tests.cpp.obj
+[29/29] Linking CXX executable bin\upp_receive_tests.exe

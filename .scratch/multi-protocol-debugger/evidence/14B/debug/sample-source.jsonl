@@ -1,0 +1,3 @@
+{"canId":801,"extended":false,"index":1,"profile":"upp","qtFrameType":1,"qtPayloadHex":"05500701204889","source":"virtual-can-sample-only"}
+{"canId":801,"extended":false,"index":2,"profile":"upp","qtFrameType":1,"qtPayloadHex":"05500f0120323041","source":"virtual-can-sample-only"}
+{"canId":801,"extended":false,"index":3,"profile":"upp","qtFrameType":1,"qtPayloadHex":"41ffffffffb77a","source":"virtual-can-sample-only"}

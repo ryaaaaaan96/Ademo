@@ -1,0 +1,82 @@
+[
+  {
+    "configuration": "debug",
+    "file": "multi_protocol_debugger.exe",
+    "sha256": "DAA922735F0CD4737E3484490E5FEC07B9827F7DD8B102449308785FA4C3DB71"
+  },
+  {
+    "configuration": "debug",
+    "file": "can_sample_source.exe",
+    "sha256": "573AF10BE873A46D96201C30E5E4B469248421CF279E1EE334BF1E56E025991E"
+  },
+  {
+    "configuration": "debug",
+    "file": "plugins/libupp_plugin.dll",
+    "sha256": "B242395E29CD16FC33964E7433F115167CE3917879BEF8FAAE7110346834FC0B"
+  },
+  {
+    "configuration": "debug",
+    "file": "plugins/libcan_plugin.dll",
+    "sha256": "CCAE3D293A5A508F5109E3298CAD5FBFAFD794E0FD30E0E245B2CA538F4FB58C"
+  },
+  {
+    "configuration": "debug",
+    "file": "plugins/libcan_observer_plugin.dll",
+    "sha256": "CA5EF236553E86C870B46A286AC3E212E347472DEAE51FFB171C53F0EFBC9D43"
+  },
+  {
+    "configuration": "debug",
+    "file": "plugins/libmodbus_plugin.dll",
+    "sha256": "B4D4D05E41481F2211F9F80DF19054E08E98334EB95A40F7F47CCA237DC1AE95"
+  },
+  {
+    "configuration": "debug",
+    "file": "plugins/libserial_plugin.dll",
+    "sha256": "C4AC05A9C78B4C739D87615DC5C0AE4318B56CA8E501AD80AD8CCC079B2F3311"
+  },
+  {
+    "configuration": "debug",
+    "file": "upp_receive_tests.exe",
+    "sha256": "2CDA008558CDE3961D982D9AED844152BB2947ECCC7A56280B0AF07FCE30A972"
+  },
+  {
+    "configuration": "release",
+    "file": "multi_protocol_debugger.exe",
+    "sha256": "BE747D764662BC0E59AAA651BB30336E12D074F7BCF2B0301AD84D19A7850AFA"
+  },
+  {
+    "configuration": "release",
+    "file": "can_sample_source.exe",
+    "sha256": "8AF1757D246C2A71882C723ACF62A4BFAE1D610538B4B88F61F6593F9C26D6F4"
+  },
+  {
+    "configuration": "release",
+    "file": "plugins/libupp_plugin.dll",
+    "sha256": "FAE18B618841A6A60A6F263AB785B46D1D37A49B6B741E5AEC68809A04F516D6"
+  },
+  {
+    "configuration": "release",
+    "file": "plugins/libcan_plugin.dll",
+    "sha256": "E49363EE1C86B6023F876B12466E31C2F116F9FB2A2B8F264BEA94CCFDD5FFC8"
+  },
+  {
+    "configuration": "release",
+    "file": "plugins/libcan_observer_plugin.dll",
+    "sha256": "2A3F9F26E4DB467BE80186A24C00AED2D1BDC36FFE299BAD1773879F89E40E54"
+  },
+  {
+    "configuration": "release",
+    "file": "plugins/libmodbus_plugin.dll",
+    "sha256": "DB6D4A6D39DD5443F0DC2B691BEC9513C0D74AEB101CB85D2131134B44D320FD"
+  },
+  {
+    "configuration": "release",
+    "file": "plugins/libserial_plugin.dll",
+    "sha256": "7B1CCB09C4C515C32E0ECF7244BDDAE46245403DC4F1F04BA26EFD5EBFCC9937"
+  },
+  {
+    "configuration": "release",
+    "file": "upp_receive_tests.exe",
+    "sha256": "F5E7D201DC86F3E1DFA01FF2C88119FEBB94BD69110BCC174ADAC181D3AC3BF4"
+  }
+]

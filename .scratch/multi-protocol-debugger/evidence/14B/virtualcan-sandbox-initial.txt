@@ -1,0 +1,41 @@
+********* Start testing of UppReceiveTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : UppReceiveTests::initTestCase()
+PASS   : UppReceiveTests::handshakeIsDecodedThroughSession()
+PASS   : UppReceiveTests::completeHandshakeAndCorruptedCrcHaveExactSources()
+PASS   : UppReceiveTests::fragmentsAndReplyAreDecodedWithAllSources()
+PASS   : UppReceiveTests::everyCanFunction(20-request)
+PASS   : UppReceiveTests::everyCanFunction(20-response)
+PASS   : UppReceiveTests::everyCanFunction(21-request)
+PASS   : UppReceiveTests::everyCanFunction(21-response)
+PASS   : UppReceiveTests::everyCanFunction(22-request)
+PASS   : UppReceiveTests::everyCanFunction(22-response)
+PASS   : UppReceiveTests::everyCanFunction(23-request)
+PASS   : UppReceiveTests::everyCanFunction(23-response)
+PASS   : UppReceiveTests::everyCanFunction(26-request)
+PASS   : UppReceiveTests::everyCanFunction(26-response)
+PASS   : UppReceiveTests::everyCanFunction(27-request)
+PASS   : UppReceiveTests::everyCanFunction(27-response)
+PASS   : UppReceiveTests::everyCanFunction(28-request)
+PASS   : UppReceiveTests::everyCanFunction(28-response)
+PASS   : UppReceiveTests::everyCanFunction(a0-response)
+PASS   : UppReceiveTests::everyCanFunction(a1-response)
+PASS   : UppReceiveTests::everyCanFunction(a2-response)
+PASS   : UppReceiveTests::everyCanFunction(a3-response)
+PASS   : UppReceiveTests::everyCanFunction(a6-response)
+PASS   : UppReceiveTests::everyCanFunction(a7-response)
+PASS   : UppReceiveTests::everyCanFunction(a8-response)
+PASS   : UppReceiveTests::limitsMalformedAndCrcAcrossFrameBoundary()
+PASS   : UppReceiveTests::directionAndUniqueContextNeverInventAddresses()
+PASS   : UppReceiveTests::timeoutInterleavingStopAndOldCallbacks()
+QWARN  : UppReceiveTests::dedicatedViewShowsMessagesFieldsAndSources() This plugin does not support propagateSizeHints()
+PASS   : UppReceiveTests::dedicatedViewShowsMessagesFieldsAndSources()
+PASS   : UppReceiveTests::soeOnlyDecodesExplicitlyTypedModels()
+QINFO  : UppReceiveTests::independentVirtualCanReachesUppViewAndExport() qt.canbus.plugins.virtualcan: Server [0x7ffe5726d1e0] started and listening on port 35468.
+FAIL!  : UppReceiveTests::independentVirtualCanReachesUppViewAndExport() Compared values are not the same
+   Actual   (s.state())            : 1
+   Expected (SessionState::Running): 2
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(143) : failure location
+PASS   : UppReceiveTests::cleanupTestCase()
+Totals: 31 passed, 1 failed, 0 skipped, 0 blacklisted, 20020ms
+********* Finished testing of UppReceiveTests *********

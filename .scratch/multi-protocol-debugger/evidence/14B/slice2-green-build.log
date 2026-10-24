@@ -1,0 +1,3 @@
+[1/4] Automatic MOC for target upp_plugin
+[2/3] Building CXX object CMakeFiles/upp_plugin.dir/plugins/upp_session.cpp.obj
+[3/3] Linking CXX shared module bin\plugins\libupp_plugin.dll

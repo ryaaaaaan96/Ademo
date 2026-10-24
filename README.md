@@ -72,8 +72,12 @@ Release 回归替换为 `qt-llvm-release-offscreen`。离屏预设不显示桌�
 
 ## 插件和验证边界
 
-UPP/CAN 的协议资料见 [UPP 报文格式与 CAN 调试说明](docs/protocols/upp-can-format.md)，包含完整帧、CAN 拆帧、功能码、原文示例和待确认项；资料整理不代表插件已经实现或通过物理验收。
+UPP/CAN 的协议资料见 [UPP 报文格式与 CAN 调试说明](docs/protocols/upp-can-format.md)，包含完整帧、CAN 拆帧、功能码、原文示例和待确认项；14B暂定软件版已接入，资料中的设备规则冲突和物理验收仍保留待办。
 
 SDK14 插件位于 `bin/plugins`，匹配 SDK、产品、Qt 完整版本、编译器、架构和构建配置。会话、界面、模态回调与后台作业持有 DLL 生命周期租约；更新后需重启，不支持热替换或崩溃隔离。宿主优先使用可选 `createParameterView`，未提供时仍回退 `createView`；Modbus 新流程不再展示临时兼容页。契约、降级与扩展测试见 [插件 UI 契约](docs/plugin-ui-extension.md)。
 
 [综合实施索引](.scratch/multi-protocol-workbench-ui/implementation-plan.md)与各任务证据记录软件进度。用户已确认当前正式界面设计；UI13 窗口恢复与双配置回归已完成。旧13 真实硬件联调后置；当前软件阶段仅推进旧14内的 14A 原始经典 CAN 帧观察，14B、旧15及 TCP 尚未实施。
+
+## UPP CAN 接收解析（14B暂定软件版）
+
+新增UPP接收插件，支持全部CAN适用功能的重组、Modbus CRC、字段/异常解析及原始分片回溯；采用用户授权的暂定规则，未验证真实设备。详见[接收说明](docs/upp-receive.md)。用户可手动运行run-upp-sample.cmd向同通道提供独立virtualcan样例；产品不发送UPP，旧15与TCP未启动。后台测试仍使用offscreen预设，不操作桌面。

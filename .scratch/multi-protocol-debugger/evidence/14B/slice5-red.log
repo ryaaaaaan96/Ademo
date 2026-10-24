@@ -1,0 +1,14 @@
+Test project C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-debug-offscreen
+    Start 1: upp_receive
+1/1 Test #1: upp_receive ......................Exit code 0xc0000602
+***Exception:   3.57 sec
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   3.58 sec
+
+The following tests FAILED:
+	  1 - upp_receive (Exit code 0xc0000602
+)
+Errors while running CTest

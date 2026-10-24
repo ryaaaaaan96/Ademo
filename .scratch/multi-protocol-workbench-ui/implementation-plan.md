@@ -31,7 +31,7 @@ Status: ready-for-agent
 | [UI13](issues/13-rtu-ui-acceptance-migration.md) | 验收 RTU 新界面完整流程并完成旧入口迁移 | ready-for-agent | UI09、UI10、UI11、UI12 | 用户已确认正式界面；配置／侧栏／标题菜单增量已归档于 87126a3，屏幕外窗口恢复已修复并完成双配置软件回归，见[收尾证据](../window-screen-recovery/evidence/acceptance.md)。最终整体两轴审查随14A集成收尾记录 |
 | [旧13](../multi-protocol-debugger/issues/13-rtu-phase-acceptance.md) | 验收 RTU 第一阶段的真实互通与负载 | needs-info | UI13、旧10/12（已完成）；硬件/对端 | 用户要求物理验收后置；未完成，不阻塞后续软件开发 |
 | [旧14A](../multi-protocol-debugger/issues/14-upp-can-receive.md) | 原始经典CAN帧观察、筛选与导出 | ready-for-agent | UI13软件收尾 | 软件完成；虚拟CAN正式接收链与离屏Qt筛选导出已验收，见[14A证据](../multi-protocol-debugger/evidence/14A/acceptance.md)；无UPP解析/发送，物理后置 |
-| [旧14B](../multi-protocol-debugger/issues/14-upp-can-receive.md) | UPP接收重组、校验、解析与来源回溯 | needs-info | 旧14A；相关协议缺口确认 | 文档已收到，缺口见整理文档第8节；旧14整体尚未完成，物理验收后置 |
+| [旧14B](../multi-protocol-debugger/issues/14-upp-can-receive.md) | UPP接收重组、校验、解析与来源回溯 | ready-for-agent | 旧14A已完成；用户授权暂定规则 | 暂定软件版完成（双配置各24/24；403通过、4原生跳过），见[14B证据](../multi-protocol-debugger/evidence/14B/acceptance.md)；设备规则待核验，旧14整体与物理验收未全部完成 |
 | [旧15](../multi-protocol-debugger/issues/15-upp-can-exchange.md) | 完成真实 UPP/CAN 发送交互并与 RTU 并行 | needs-info | 旧14B软件部分；交互规则与样例 | 原始帧观察通过不足以解锁；发送元数据契约待演进，物理验收后置 |
 | [旧16](../multi-protocol-debugger/issues/16-tcp-first-register-read.md) | 完成一次 Modbus TCP 主站读取 | ready-for-agent | 旧15软件部分 | 未启动 |
 | [旧17](../multi-protocol-debugger/issues/17-tcp-master-operations.md) | TCP 主站多设备读写、轮询与恢复 | ready-for-agent | 旧16 | 未启动 |
@@ -74,3 +74,7 @@ UI02–UI13 软件切片均已按依赖合入。整体 Standards 初审两项生
 用户依次确认：Q1先做原始CAN帧观察、筛选及导出；Q2采用虚拟CAN样例源经正式接收后端进入现有会话界面，无硬件验收，不增加文件导入/定时回放；Q3采用经典CAN标准/扩展格式，远程帧与错误帧按后端实际信息保留，CAN FD后置。沿用已确认界面和物理验收后置安排。
 
 据此将旧14内部明确为14A（原始帧观察，范围ready-for-agent，仍依赖UI13软件收尾）与14B（UPP接收重组解析，needs-info）；旧15仅在14B及交互资料到位后推进。旧14完整目标与后续编号不变。已收到UPP原文并整理，不再把缺口表述为整份协议未提供。更新规格、索引与验收边界；本次没有实施产品代码或执行CAN测试。
+
+### 2026-10-24：14B暂定软件版
+
+用户授权按建议先实现后修改，全部CAN适用功能纳入接收重组、CRC、字段/异常解析和来源回溯，沿用工作台与白底插件视图。实现1c3f328、审查修复ea245f2；[证据](../multi-protocol-debugger/evidence/14B/acceptance.md)区分暂定规则、离屏软件回归和未做的物理验收。旧15、TCP未启动。

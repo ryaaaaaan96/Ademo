@@ -1,0 +1,24 @@
+[1/4] Automatic MOC for target upp_receive_tests
+FAILED: upp_receive_tests_autogen/timestamp upp_receive_tests_autogen/mocs_compilation.cpp C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-debug-offscreen/upp_receive_tests_autogen/timestamp C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-debug-offscreen/upp_receive_tests_autogen/mocs_compilation.cpp 
+C:\WINDOWS\system32\cmd.exe /C "cd /D C:\Users\81966\Documents\Ademo\build\worktrees\upp14b-receive\build\qt-llvm-debug-offscreen && C:\Qt\Tools\CMake_64\bin\cmake.exe -E cmake_autogen C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-debug-offscreen/CMakeFiles/upp_receive_tests_autogen.dir/AutogenInfo.json Debug && C:\Qt\Tools\CMake_64\bin\cmake.exe -E touch C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-debug-offscreen/upp_receive_tests_autogen/timestamp && C:\Qt\Tools\CMake_64\bin\cmake.exe -E cmake_transform_depfile Ninja gccdepfile C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-debug-offscreen C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-debug-offscreen C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-debug-offscreen/upp_receive_tests_autogen/deps C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-debug-offscreen/CMakeFiles/d/914e1d1fa9722b818044bb1bc2ed1e00e838994a58933d9840ca05c12a009a38.d"
+
+AutoMoc subprocess error
+------------------------
+The moc process failed to compile
+  "SRC:/tests/upp_receive_tests.cpp"
+into
+  "SRC:/build/qt-llvm-debug-offscreen/upp_receive_tests_autogen/include/upp_receive_tests.moc"
+included by
+  "SRC:/tests/upp_receive_tests.cpp"
+Process failed with return value 1
+
+Command
+-------
+C:/Qt/6.12.0/llvm-mingw_64/bin/moc.exe "-DDEBUGGER_BUILD_KEY=\"sdk14-product0.2-qt6.12.0-Clang22.1.7-AMD64-Debug\"" -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_SERIALBUS_LIB -DQT_SERIALPORT_LIB "-DQT_TESTCASE_BUILDDIR=\"C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-debug-offscreen\"" "-DQT_TESTCASE_SOURCEDIR=\"C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive\"" -DQT_TESTLIB_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -DWINVER=0x0A00 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN32_WINNT=0x0A00 -D_WIN64 -IC:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/include -IC:/Qt/6.12.0/llvm-mingw_64/include/QtWidgets -IC:/Qt/6.12.0/llvm-mingw_64/include -IC:/Qt/6.12.0/llvm-mingw_64/include/QtCore -IC:/Qt/6.12.0/llvm-mingw_64/mkspecs/win32-clang-g++ -IC:/Qt/6.12.0/llvm-mingw_64/include/QtGui -IC:/Qt/6.12.0/llvm-mingw_64/include/QtSerialBus -IC:/Qt/6.12.0/llvm-mingw_64/include/QtNetwork -IC:/Qt/6.12.0/llvm-mingw_64/include/QtSerialPort -IC:/Qt/6.12.0/llvm-mingw_64/include/QtTest -IC:/Qt/Tools/llvm-mingw2217_64/include/c++/v1 -IC:/Qt/Tools/llvm-mingw2217_64/lib/clang/22/include -IC:/Qt/Tools/llvm-mingw2217_64/include --include C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-debug-offscreen/upp_receive_tests_autogen/moc_predefs.h --output-dep-file -o C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/build/qt-llvm-debug-offscreen/upp_receive_tests_autogen/include/upp_receive_tests.moc C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp
+
+Output
+------
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp:87:1: error: Parse error at "}"
+
+
+ninja: build stopped: subcommand failed.

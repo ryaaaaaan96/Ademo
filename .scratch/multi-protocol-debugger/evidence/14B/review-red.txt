@@ -1,0 +1,58 @@
+********* Start testing of UppReceiveTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : UppReceiveTests::initTestCase()
+PASS   : UppReceiveTests::handshakeIsDecodedThroughSession()
+PASS   : UppReceiveTests::completeHandshakeAndCorruptedCrcHaveExactSources()
+PASS   : UppReceiveTests::fragmentsAndReplyAreDecodedWithAllSources()
+PASS   : UppReceiveTests::everyCanFunction(20-request)
+PASS   : UppReceiveTests::everyCanFunction(20-response)
+PASS   : UppReceiveTests::everyCanFunction(21-request)
+PASS   : UppReceiveTests::everyCanFunction(21-response)
+PASS   : UppReceiveTests::everyCanFunction(22-request)
+PASS   : UppReceiveTests::everyCanFunction(22-response)
+PASS   : UppReceiveTests::everyCanFunction(23-request)
+PASS   : UppReceiveTests::everyCanFunction(23-response)
+PASS   : UppReceiveTests::everyCanFunction(26-request)
+PASS   : UppReceiveTests::everyCanFunction(26-response)
+PASS   : UppReceiveTests::everyCanFunction(27-request)
+PASS   : UppReceiveTests::everyCanFunction(27-response)
+PASS   : UppReceiveTests::everyCanFunction(28-request)
+PASS   : UppReceiveTests::everyCanFunction(28-response)
+PASS   : UppReceiveTests::everyCanFunction(a0-response)
+PASS   : UppReceiveTests::everyCanFunction(a1-response)
+PASS   : UppReceiveTests::everyCanFunction(a2-response)
+PASS   : UppReceiveTests::everyCanFunction(a3-response)
+PASS   : UppReceiveTests::everyCanFunction(a6-response)
+PASS   : UppReceiveTests::everyCanFunction(a7-response)
+PASS   : UppReceiveTests::everyCanFunction(a8-response)
+PASS   : UppReceiveTests::limitsMalformedAndCrcAcrossFrameBoundary()
+FAIL!  : UppReceiveTests::directionAndUniqueContextNeverInventAddresses() Compared values are not the same
+   Actual   (s.messages().last().fields.value("requestContext").toString()): "matched"
+   Expected (QString("ambiguous"))                                         : "ambiguous"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(109) : failure location
+PASS   : UppReceiveTests::timeoutInterleavingStopAndOldCallbacks()
+QWARN  : UppReceiveTests::dedicatedViewShowsMessagesFieldsAndSources() This plugin does not support propagateSizeHints()
+PASS   : UppReceiveTests::dedicatedViewShowsMessagesFieldsAndSources()
+PASS   : UppReceiveTests::soeOnlyDecodesExplicitlyTypedModels()
+QINFO  : UppReceiveTests::independentVirtualCanReachesUppViewAndExport() qt.canbus.plugins.virtualcan: Server [0x7ffe24ced1e0] started and listening on port 35468.
+QINFO  : UppReceiveTests::independentVirtualCanReachesUppViewAndExport() qt.canbus.plugins.virtualcan: Client [0x1d4790e8c60] socket connected.
+QINFO  : UppReceiveTests::independentVirtualCanReachesUppViewAndExport() qt.canbus.plugins.virtualcan: Server [0x7ffe24ced1e0] client connected.
+QINFO  : UppReceiveTests::independentVirtualCanReachesUppViewAndExport() qt.canbus.plugins.virtualcan: Server [0x7ffe24ced1e0] client connected.
+QINFO  : UppReceiveTests::independentVirtualCanReachesUppViewAndExport() qt.canbus.plugins.virtualcan: Server [0x7ffe24ced1e0] client disconnected.
+FAIL!  : UppReceiveTests::independentVirtualCanReachesUppViewAndExport() Compared values are not the same
+   Actual   (s.messages().last().status): "invalid-header"
+   Expected (QString("decoded"))        : "decoded"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(150) : failure location
+QINFO  : UppReceiveTests::boundedContextRecordsExpiryAndReconnect() qt.canbus.plugins.virtualcan: Server [0x7ffe24ced1e0] client disconnected.
+FAIL!  : UppReceiveTests::boundedContextRecordsExpiryAndReconnect() Compared values are not the same
+   Actual   (s.snapshot().value("requestContexts").toInt()): 1
+   Expected (0)                                            : 0
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(166) : failure location
+PASS   : UppReceiveTests::malformedFragmentsStayRawAndDoNotCrossBoundaries()
+FAIL!  : UppReceiveTests::configurationWorkspaceAndOtherProtocolsRemainIsolated() Compared values are not the same
+   Actual   (restored.session(0)->config().protocolId): ""
+   Expected (QString("upp"))                          : "upp"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(191) : failure location
+PASS   : UppReceiveTests::cleanupTestCase()
+Totals: 31 passed, 4 failed, 0 skipped, 0 blacklisted, 9775ms
+********* Finished testing of UppReceiveTests *********

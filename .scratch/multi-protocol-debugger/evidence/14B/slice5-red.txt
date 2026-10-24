@@ -1,0 +1,36 @@
+********* Start testing of UppReceiveTests *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by Clang 22.1.7 (https://github.com/llvm/llvm-project.git a255c1ed36a1d06f79bd2633ba9f8d900153007c)), windows 11
+PASS   : UppReceiveTests::initTestCase()
+PASS   : UppReceiveTests::handshakeIsDecodedThroughSession()
+PASS   : UppReceiveTests::completeHandshakeAndCorruptedCrcHaveExactSources()
+PASS   : UppReceiveTests::fragmentsAndReplyAreDecodedWithAllSources()
+PASS   : UppReceiveTests::everyCanFunction(20-request)
+PASS   : UppReceiveTests::everyCanFunction(20-response)
+PASS   : UppReceiveTests::everyCanFunction(21-request)
+PASS   : UppReceiveTests::everyCanFunction(21-response)
+PASS   : UppReceiveTests::everyCanFunction(22-request)
+PASS   : UppReceiveTests::everyCanFunction(22-response)
+PASS   : UppReceiveTests::everyCanFunction(23-request)
+PASS   : UppReceiveTests::everyCanFunction(23-response)
+PASS   : UppReceiveTests::everyCanFunction(26-request)
+PASS   : UppReceiveTests::everyCanFunction(26-response)
+PASS   : UppReceiveTests::everyCanFunction(27-request)
+PASS   : UppReceiveTests::everyCanFunction(27-response)
+PASS   : UppReceiveTests::everyCanFunction(28-request)
+PASS   : UppReceiveTests::everyCanFunction(28-response)
+PASS   : UppReceiveTests::everyCanFunction(a0-response)
+PASS   : UppReceiveTests::everyCanFunction(a1-response)
+PASS   : UppReceiveTests::everyCanFunction(a2-response)
+PASS   : UppReceiveTests::everyCanFunction(a3-response)
+PASS   : UppReceiveTests::everyCanFunction(a6-response)
+PASS   : UppReceiveTests::everyCanFunction(a7-response)
+PASS   : UppReceiveTests::everyCanFunction(a8-response)
+FAIL!  : UppReceiveTests::limitsMalformedAndCrcAcrossFrameBoundary() Compared values are not the same
+   Actual   (s.messages().last().status): "protocol-exception"
+   Expected (QString("pdu-error"))      : "pdu-error"
+C:/Users/81966/Documents/Ademo/build/worktrees/upp14b-receive/tests/upp_receive_tests.cpp(90) : failure location
+QFATAL : UppReceiveTests::directionAndUniqueContextNeverInventAddresses() ASSERT: "!isEmpty()" in file C:/Qt/6.12.0/llvm-mingw_64/include/QtCore/qlist.h, line 735
+FAIL!  : UppReceiveTests::directionAndUniqueContextNeverInventAddresses() Received a fatal error.
+C:/Qt/6.12.0/llvm-mingw_64/include/QtCore/qlist.h(735) : failure location
+Totals: 25 passed, 2 failed, 0 skipped, 0 blacklisted, 19ms
+********* Finished testing of UppReceiveTests *********
