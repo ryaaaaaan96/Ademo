@@ -14,7 +14,7 @@ Debug完整构建成功；`ctest --preset qt-llvm-debug-offscreen --output-on-fa
 
 Release完整构建成功；`ctest --preset qt-llvm-release-offscreen --output-on-failure` 25/25通过，119.02秒，QtTest同为435通过、0失败、4原生跳过，UPP专项32通过。见[Release日志](release-ctest.log)、[逐套结果](release/)、[汇总](release-summary.json)，以及[离屏截图](release/upp-exchange-view.png)、[JSONL](release/upp-exchange.jsonl)、[独立对端日志](release/peer-output.jsonl)。两配置串行运行软件对端，未并行争用virtualcan测试频道。
 
-`git diff --check`通过；92a9c95是最终运行测试源码，产品仍为fc61595。集成分支为本分支祖先，待主代理合入。[sha256清单](sha256.txt)覆盖本验收文件以外的日志、截图和导出，可核验证据文件一致性。
+`git diff --check`通过；92a9c95是最终运行测试源码，产品仍为fc61595。集成分支为本分支祖先，待主代理合入。[sha256清单](sha256.txt)覆盖本验收文件以外的日志、截图和导出，可核验证据文件一致性；PNG按原始字节，文本统一CRLF→LF后计算，避免Git检出换行转换导致误报。
 
 ## 软件覆盖
 
